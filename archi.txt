@@ -1,0 +1,15 @@
+├── diagrams/
+│   ├── use-case.md
+│   ├── class-diagram.md
+│   ├── sequence-diagram.md
+│   ├── activity-diagram.md
+│   ├── state-diagram.md
+│   ├── component-diagram.md
+│   ├── deployment-diagram.md
+│   ├── context-diagram.md
+│   └── data-flow.md
+├── docs/
+│   ├── api-architecture.md
+│   ├── database-schema.sql
+│   └── technical-specs.md
+└── README.md
