@@ -201,7 +201,6 @@ classDiagram
         REJETEE
     }
     
-    %% Relations
     User ||--o{ Souscription : souscrit
     User ||--o{ Avis : redige
     User ||--o{ PropositionAbonnement : propose
