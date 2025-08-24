@@ -1,3 +1,4 @@
+```mermaid
 classDiagram
     class User {
         +String id
@@ -14,7 +15,7 @@ classDiagram
         +modifierProfil()
         +reinitialiserMotDePasse()
     }
-    
+
     class Localisation {
         +String pays
         +String region
@@ -24,7 +25,7 @@ classDiagram
         +String adresseComplete
         +calculerDistance(Localisation autre)
     }
-    
+
     class Abonnement {
         +String id
         +String nom
@@ -41,7 +42,7 @@ classDiagram
         +consulterDetails()
         +modifierStatut()
     }
-    
+
     class Souscription {
         +String id
         +String userId
@@ -55,7 +56,7 @@ classDiagram
         +annuler()
         +renouveler()
     }
-    
+
     class Paiement {
         +String id
         +String souscriptionId
@@ -67,7 +68,7 @@ classDiagram
         +effectuerPaiement()
         +rembourser()
     }
-    
+
     class Avis {
         +String id
         +String userId
@@ -80,7 +81,7 @@ classDiagram
         +publier()
         +moderer()
     }
-    
+
     class PropositionAbonnement {
         +String id
         +String userId
@@ -96,7 +97,7 @@ classDiagram
         +valider()
         +rejeter()
     }
-    
+
     class Ticket {
         +String id
         +String souscriptionId
@@ -107,7 +108,7 @@ classDiagram
         +genererQR()
         +valider()
     }
-    
+
     class TicketSupport {
         +String id
         +String userId
@@ -121,7 +122,7 @@ classDiagram
         +traiter()
         +fermer()
     }
-    
+
     class Fournisseur {
         +String id
         +String nom
@@ -134,7 +135,7 @@ classDiagram
         +ajouterAbonnement()
         +gererCommandes()
     }
-    
+
     class Livraison {
         +String id
         +String souscriptionId
@@ -146,7 +147,7 @@ classDiagram
         +programmer()
         +effectuer()
     }
-    
+
     class Administrateur {
         +String id
         +String nom
@@ -157,7 +158,7 @@ classDiagram
         +validerPropositions()
         +consulterStatistiques()
     }
-    
+
     %% Énumérations
     class UserType {
         <<enumeration>>
@@ -165,27 +166,27 @@ classDiagram
         ENTREPRISE
         FOURNISSEUR
     }
-    
+
     class StatutAbonnement {
         <<enumeration>>
         ACTIF
         INACTIF
         SUSPENDU
     }
-    
+
     class ModeRecuperation {
         <<enumeration>>
         LIVRAISON
         RETRAIT
     }
-    
+
     class MethodePaiement {
         <<enumeration>>
         MOBILE_MONEY
         CARTE_BANCAIRE
         VIREMENT
     }
-    
+
     class StatutPaiement {
         <<enumeration>>
         EN_ATTENTE
@@ -193,34 +194,115 @@ classDiagram
         ECHEC
         REMBOURSE
     }
-    
+
     class StatutProposition {
         <<enumeration>>
         EN_ATTENTE
         VALIDEE
         REJETEE
     }
-    
+
+    class TypeNourriture {
+        <<enumeration>>
+        AFRICAINE
+        EUROPEENNE
+        ASIATIQUE
+        AMERICAINE
+        VEGETARIENNE
+        HALAL
+        AUTRE
+    }
+
+    class Duree {
+        <<enumeration>>
+        HEBDOMADAIRE
+        MENSUEL
+        TRIMESTRIEL
+        ANNUEL
+    }
+
+    class Frequence {
+        <<enumeration>>
+        QUOTIDIEN
+        PLUSIEURS_FOIS_SEMAINE
+        HEBDOMADAIRE
+        MENSUEL
+    }
+
+    class StatutSouscription {
+        <<enumeration>>
+        EN_ATTENTE
+        ACTIVE
+        SUSPENDUE
+        EXPIREE
+        ANNULEE
+    }
+
+    class StatutLivraison {
+        <<enumeration>>
+        PROGRAMMEE
+        EN_COURS
+        LIVREE
+        ECHEC
+    }
+
+    class TypeProbleme {
+        <<enumeration>>
+        TECHNIQUE
+        PAIEMENT
+        LIVRAISON
+        QUALITE
+        AUTRE
+    }
+
+    class StatutTicket {
+        <<enumeration>>
+        OUVERT
+        EN_COURS
+        RESOLU
+        FERME
+    }
+
+    class Role {
+        <<enumeration>>
+        SUPER_ADMIN
+        ADMIN
+        MODERATEUR
+    }
+
+    class Permission {
+        <<enumeration>>
+        LIRE_UTILISATEURS
+        MODIFIER_UTILISATEURS
+        SUPPRIMER_UTILISATEURS
+        VALIDER_PROPOSITIONS
+        MODERER_AVIS
+        GERER_PAIEMENTS
+        CONSULTER_STATS
+    }
+
+    %% Relations
     User ||--o{ Souscription : souscrit
     User ||--o{ Avis : redige
     User ||--o{ PropositionAbonnement : propose
     User ||--o{ TicketSupport : cree
     User ||--|| Localisation : habite
-    
+
     Abonnement ||--o{ Souscription : fait_objet
     Abonnement ||--o{ Avis : recoit
     Abonnement ||--|| Fournisseur : fourni_par
     Abonnement ||--|| Localisation : localise
-    
+
     Souscription ||--|| Paiement : genere
     Souscription ||--o| Ticket : genere
     Souscription ||--o| Livraison : necessite
-    
+
     PropositionAbonnement ||--|| User : proposee_par
     PropositionAbonnement ||--|| Localisation : localise
-    
+
     Fournisseur ||--o{ Abonnement : propose
     Fournisseur ||--|| Localisation : situe
-    
+
     Administrateur ||--o{ PropositionAbonnement : valide
     Administrateur ||--o{ TicketSupport : traite
+```
