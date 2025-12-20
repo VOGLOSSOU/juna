@@ -1,0 +1,96 @@
+// Order Status
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  IN_DELIVERY = 'IN_DELIVERY',
+  DELIVERED = 'DELIVERED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED',
+}
+
+// Payment Status
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  REFUNDED = 'REFUNDED',
+}
+
+// Proposal Status
+export enum ProposalStatus {
+  PENDING = 'PENDING',
+  REVIEWING = 'REVIEWING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+// Review Status
+export enum ReviewStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+// Provider Status
+export enum ProviderStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+// Ticket Status
+export enum TicketStatus {
+  OPEN = 'OPEN',
+  IN_PROGRESS = 'IN_PROGRESS',
+  RESOLVED = 'RESOLVED',
+  CLOSED = 'CLOSED',
+  ESCALATED = 'ESCALATED',
+}
+
+// Ticket Priority
+export enum TicketPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+// Ticket Category
+export enum TicketCategory {
+  PAYMENT = 'PAYMENT',
+  DELIVERY = 'DELIVERY',
+  QUALITY = 'QUALITY',
+  TECHNICAL = 'TECHNICAL',
+  ACCOUNT = 'ACCOUNT',
+  OTHER = 'OTHER',
+}
+
+// Notification Type
+export enum NotificationType {
+  ORDER_CONFIRMATION = 'ORDER_CONFIRMATION',
+  ORDER_PREPARING = 'ORDER_PREPARING',
+  ORDER_READY = 'ORDER_READY',
+  ORDER_DELIVERED = 'ORDER_DELIVERED',
+  PAYMENT_SUCCESS = 'PAYMENT_SUCCESS',
+  PAYMENT_FAILED = 'PAYMENT_FAILED',
+  PROPOSAL_VALIDATED = 'PROPOSAL_VALIDATED',
+  PROPOSAL_REJECTED = 'PROPOSAL_REJECTED',
+  REVIEW_PUBLISHED = 'REVIEW_PUBLISHED',
+  TICKET_RESPONSE = 'TICKET_RESPONSE',
+  SUBSCRIPTION_EXPIRING = 'SUBSCRIPTION_EXPIRING',
+  SUBSCRIPTION_RENEWED = 'SUBSCRIPTION_RENEWED',
+  REFERRAL_REWARD = 'REFERRAL_REWARD',
+  SYSTEM = 'SYSTEM',
+}
+
+// Referral Status
+export enum ReferralStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  EXPIRED = 'EXPIRED',
+}
