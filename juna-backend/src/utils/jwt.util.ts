@@ -13,7 +13,7 @@ export interface JwtPayload {
 export const generateAccessToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, env.jwtAccessSecret, {
     expiresIn: env.jwtAccessExpiry,
-  });
+  } as any);
 };
 
 /**
@@ -22,7 +22,7 @@ export const generateAccessToken = (payload: JwtPayload): string => {
 export const generateRefreshToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, env.jwtRefreshSecret, {
     expiresIn: env.jwtRefreshExpiry,
-  });
+  } as any);
 };
 
 /**

@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Charger les variables d'environnement
-dotenv.config({ path: path.join(__dirname, '../../.env') });
+// Charger les variables d'environnement depuis la racine du projet
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 interface EnvConfig {
   // Application

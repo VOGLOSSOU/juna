@@ -42,7 +42,7 @@ export const customLogger = (req: Request, res: Response, next: NextFunction): v
     url: req.originalUrl,
     ip: req.ip,
     userAgent: req.get('user-agent'),
-    userId: req.user?.id,
+    userId: (req as any).user?.id,
   });
 
   // Logger la réponse
@@ -54,7 +54,7 @@ export const customLogger = (req: Request, res: Response, next: NextFunction): v
       url: req.originalUrl,
       statusCode: res.statusCode,
       duration: `${duration}ms`,
-      userId: req.user?.id,
+      userId: (req as any).user?.id,
     };
 
     if (res.statusCode >= 500) {

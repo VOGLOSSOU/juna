@@ -1,9 +1,16 @@
+import { UserRole } from '@prisma/client';
+
+export { UserRole };
+
+// Supprime l'enum qu'on avait défini, on utilise celui de Prisma
+/*
 export enum UserRole {
   USER = 'USER',
   PROVIDER = 'PROVIDER',
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
 }
+*/
 
 export const ROLE_PERMISSIONS = {
   [UserRole.USER]: [

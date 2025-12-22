@@ -22,7 +22,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
     const payload = verifyAccessToken(token);
 
     // Ajouter l'utilisateur au request
-    req.user = {
+    (req as any).user = {
       id: payload.userId,
       email: payload.email,
       role: payload.role as UserRole,
@@ -46,11 +46,11 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 export const authorize = (allowedRoles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      if (!req.user) {
+      if (!(req as any).user) {
         throw new UnauthorizedError('Non authentifié');
       }
 
-      const userRole = req.user.role;
+      const userRole = (req as any).user.role;
 
       // Vérifier si l'utilisateur a un des rôles autorisés
       const hasRole = allowedRoles.some((role) => userRole === role);
@@ -72,11 +72,11 @@ export const authorize = (allowedRoles: UserRole[]) => {
 export const requireRole = (minimumRole: UserRole) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
-      if (!req.user) {
+      if (!(req as any).user) {
         throw new UnauthorizedError('Non authentifié');
       }
 
-      const userRole = req.user.role;
+      const userRole = (req as any).user.role;
 
       if (!isRoleAtLeast(userRole, minimumRole)) {
         throw new ForbiddenError('Permissions insuffisantes');
@@ -100,7 +100,7 @@ export const optionalAuth = (req: Request, res: Response, next: NextFunction): v
       const token = authHeader.split(' ')[1];
       const payload = verifyAccessToken(token);
 
-      req.user = {
+      (req as any).user = {
         id: payload.userId,
         email: payload.email,
         role: payload.role as UserRole,
