@@ -8,7 +8,11 @@ nathan-voglossou@nathanathan-voglossou@nathan-voglossou-Latitude-7280:~/juna/jun
     "email": "nathan@juna.app",
     "password": "Password123",
     "name": "Nathan Voglossou",
-    "phone": "+22997123456"
+    "phone": "+22997123456"Créer un document
+Galerie de modèles
+ 
+Documents récents
+
   }'
 {"success":true,"message":"Compte créé avec succès","data":{"user":{"id":"804afb88-1477-41cc-b4b8-ff4a97fc71d4","email":"nathan@juna.app","name":"Nathan Voglossou","phone":"+22997123456","role":"USER","isVerified":false,"isActive":true,"createdAt":"2025-12-22T06:11:42.518Z","updatedAt":"2025-12-22T06:11:42.518Z"},"tokens":{"accessToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4MDRhZmI4OC0xNDc3LTQxY2MtYjRiOC1mZjRhOTdmYzcxZDQiLCJlbWFpbCI6Im5hdGhhbkBqdW5hLmFwcCIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzY2MzgzOTAyLCJleHAiOjE3NjYzODQ4MDJ9.x03oBY8urhFbquJtuwpJFEtvgZblYQOVMMcdS8tw7Qk","refreshToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4MDRhZmI4OC0xNDc3LTQxY2MtYjRiOC1mZjRhOTdmYzcxZDQiLCJlbWFpbCI6Im5hdGhhbkBqdW5hLmFwcCIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzY2MzgzOTAyLCJleHAiOjE3NjY5ODg3MDJ9.pNB1e3P5Vz2LwLntb2Ig87PPOL-zSupCgbaCmVHgw84"}}}
 

@@ -1,4 +1,4 @@
-# 🗺️ Parcours Utilisateurs - Juna
+#  Parcours Utilisateurs - Juna
 
 ## 1. Utilisateur Standard (User)
 

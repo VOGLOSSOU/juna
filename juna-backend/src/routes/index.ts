@@ -1,17 +1,18 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
+import userRoutes from './user.routes';
 // Import des autres routes ici plus tard
-// import userRoutes from './user.routes';
 // import subscriptionRoutes from './subscription.routes';
+// import orderRoutes from './order.routes';
 // etc...
 
 const router = Router();
 
 // Monter les routes
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 
 // Plus tard, ajouter les autres routes
-// router.use('/users', userRoutes);
 // router.use('/subscriptions', subscriptionRoutes);
 // router.use('/orders', orderRoutes);
 // router.use('/proposals', proposalRoutes);

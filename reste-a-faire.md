@@ -1,8 +1,8 @@
-# 📋 ROADMAP COMPLÈTE JUNA - ÉTAT ACTUEL DÉTAILLÉ
+#  ROADMAP COMPLÈTE JUNA - ÉTAT ACTUEL DÉTAILLÉ
 
 ---
 
-## 🎯 **RÉSUMÉ DE L'ÉTAT ACTUEL**
+##  **RÉSUMÉ DE L'ÉTAT ACTUEL**
 
 **✅ TERMINÉ (Fonctionnel) :**
 - Module AUTH complet (register, login, refresh, logout)
@@ -19,7 +19,7 @@
 
 ---
 
-## 🚀 **GUIDE DE DÉVELOPPEMENT - ÉTAPES PRATIQUES**
+##  **GUIDE DE DÉVELOPPEMENT - ÉTAPES PRATIQUES**
 
 ### **Étape 1 : Tester AUTH (Déjà fait)**
 ```bash
@@ -63,7 +63,7 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
 
 ---
 
-## 📝 **MÉTHODOLOGIE RECOMMANDÉE**
+##  **MÉTHODOLOGIE RECOMMANDÉE**
 
 ### **Pour chaque module, suivre cet ordre :**
 1. **Repository** : Méthodes Prisma (CRUD + queries spécifiques)
