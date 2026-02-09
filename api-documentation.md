@@ -413,3 +413,156 @@ curl -X GET http://localhost:5000/api/v1/providers/me \
   -H "Authorization: Bearer <TOKEN>"
 ```
 
+---
+
+## ADMIN - Administration
+
+**Headers requis pour tous les endpoints ADMIN:**
+```
+Authorization: Bearer <ACCESS_TOKEN> (doit être ADMIN ou SUPER_ADMIN)
+```
+
+---
+
+### GET /admin/providers/pending - Lister les demandes en attente
+
+```bash
+curl -X GET http://localhost:5000/api/v1/admin/providers/pending \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Fournisseurs en attente",
+  "data": [
+    {
+      "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
+      "businessName": "Restaurant Le Bon Goût",
+      "description": "Spécialités africaines",
+      "businessAddress": "Cotonou, Benin",
+      "status": "PENDING",
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-02-09T18:42:30.832Z"
+    }
+  ]
+}
+```
+
+---
+
+### PUT /admin/providers/:id/approve - Approuver un fournisseur
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/admin/providers/702a3a2d-05cc-448a-a0ba-49ceee1fc616/approve \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Bienvenue sur JUNA!"}'
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Fournisseur approuve avec succes",
+  "data": {
+    "success": true,
+    "message": "Fournisseur approuve avec succes",
+    "provider": {
+      "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
+      "businessName": "Restaurant Le Bon Goût",
+      "status": "APPROVED"
+    }
+  }
+}
+```
+
+---
+
+### PUT /admin/providers/:id/reject - Rejeter un fournisseur
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/admin/providers/702a3a2d-05cc-448a-a0ba-49ceee1fc616/reject \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Documents incomplets, registre de commerce manquant"}'
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Fournisseur rejete",
+  "data": {
+    "success": true,
+    "message": "Fournisseur rejete",
+    "provider": {
+      "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
+      "businessName": "Restaurant Le Bon Goût",
+      "status": "REJECTED"
+    }
+  }
+}
+```
+
+---
+
+### GET /admin/dashboard - Statistiques du dashboard
+
+```bash
+curl -X GET http://localhost:5000/api/v1/admin/dashboard \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "overview": {
+      "totalUsers": 150,
+      "totalProviders": 25,
+      "pendingProviders": 5,
+      "totalOrders": 1200,
+      "completedOrders": 1100,
+      "pendingOrders": 50,
+      "totalRevenue": 1500000
+    }
+  }
+}
+```
+
+---
+
+### GET /admin/users - Lister les utilisateurs
+
+```bash
+curl -X GET "http://localhost:5000/api/v1/admin/users?role=USER&isActive=true" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+---
+
+## Testing Admin
+
+```bash
+# Créer un admin (seeding requis)
+# Note: Seul SUPER_ADMIN peut créer des admins
+
+# Lister les fournisseurs en attente:
+curl -X GET http://localhost:5000/api/v1/admin/providers/pending \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+
+# Approuver un fournisseur:
+curl -X PUT http://localhost:5000/api/v1/admin/providers/<ID>/approve \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+
+# Voir le dashboard:
+curl -X GET http://localhost:5000/api/v1/admin/dashboard \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+**Note:** Pour tester, vous devez d'abord créer un utilisateur avec le rôle ADMIN dans la base de données.
+
