@@ -13,6 +13,12 @@ export const ERROR_CODES = {
   USER_NOT_FOUND: 'USER_NOT_FOUND',
   INVALID_PASSWORD: 'INVALID_PASSWORD',
 
+  // Provider errors
+  PROVIDER_NOT_FOUND: 'PROVIDER_NOT_FOUND',
+  PROVIDER_EXISTS: 'PROVIDER_EXISTS',
+  PROVIDER_NOT_APPROVED: 'PROVIDER_NOT_APPROVED',
+  PROVIDER_ALREADY_PROCESSED: 'PROVIDER_ALREADY_PROCESSED',
+
   // Resource errors
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
   SUBSCRIPTION_NOT_FOUND: 'SUBSCRIPTION_NOT_FOUND',
@@ -67,6 +73,12 @@ export const ERROR_MESSAGES = {
   // User
   [ERROR_CODES.USER_NOT_FOUND]: 'Utilisateur introuvable',
   [ERROR_CODES.INVALID_PASSWORD]: 'Mot de passe incorrect',
+
+  // Provider
+  [ERROR_CODES.PROVIDER_NOT_FOUND]: 'Fournisseur introuvable',
+  [ERROR_CODES.PROVIDER_EXISTS]: 'Vous etes deja enregistre comme fournisseur',
+  [ERROR_CODES.PROVIDER_NOT_APPROVED]: 'Vous devez etre approuve pour acceder a cette ressource',
+  [ERROR_CODES.PROVIDER_ALREADY_PROCESSED]: 'Cette demande a deja ete traitee',
 
   // Resources
   [ERROR_CODES.RESOURCE_NOT_FOUND]: 'Ressource introuvable',
