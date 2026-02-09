@@ -424,6 +424,26 @@ Authorization: Bearer <ACCESS_TOKEN> (doit être ADMIN ou SUPER_ADMIN)
 
 ---
 
+### ⚠️ COMPTE ADMIN CRÉÉ !
+
+Un compte administrateur a été créé et est prêt à être utilisé :
+
+```
+📧 Email: admin@juna.app
+🔐 Mot de passe: ChangeMe123!
+```
+
+**Pour se connecter en tant qu'admin :**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@juna.app","password":"ChangeMe123!"}'
+```
+
+**⚠️ IMPORTANT :** Changez le mot de passe après la première connexion !
+
+---
+
 ### GET /admin/providers/pending - Lister les demandes en attente
 
 ```bash
@@ -564,5 +584,139 @@ curl -X GET http://localhost:5000/api/v1/admin/dashboard \
   -H "Authorization: Bearer <ADMIN_TOKEN>"
 ```
 
-**Note:** Pour tester, vous devez d'abord créer un utilisateur avec le rôle ADMIN dans la base de données.
+**Note:** Pour tester les endpoints admin, suivez les instructions ci-dessous pour créer un compte admin.
+
+---
+
+## 🛠️ GUIDE DE CONFIGURATION - CRÉER UN ADMIN
+
+### Méthode 1 : Via le seed (recommandé)
+
+**Étape 1 : Configurer le fichier .env**
+```bash
+cd juna-backend
+
+# Éditer .env et ajouter/mettre à jour :
+ADMIN_EMAIL=admin@votre-email.com
+ADMIN_PASSWORD=VotreMotDePasseSécurisé123!
+```
+
+**Étape 2 : Exécuter le seed**
+```bash
+npx ts-node -r tsconfig-paths/register prisma/seed.ts
+```
+
+**Résultat attendu :**
+```
+🌱 Starting seed...
+✅ Admin created successfully!
+   Email: admin@votre-email.com
+   Role: ADMIN
+```
+
+**Étape 3 : Se connecter avec l'admin**
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@votre-email.com","password":"VotreMotDePasseSécurisé123!"}'
+```
+
+---
+
+### Méthode 2 : Via Prisma Studio (manuel)
+
+```bash
+npx prisma studio
+```
+
+Dans l'interface :
+1. Cliquer sur "users"
+2. Cliquer sur "Add record"
+3. Remplir les champs :
+   - email: admin@votre-email.com
+   - password: (mot de passe hashé bcrypt)
+   - name: Administrateur
+   - role: ADMIN
+   - isVerified: true
+   - isActive: true
+4. Cliquer sur "Save 1 Record"
+
+---
+
+## 🔄 WORKFLOW COMPLET - APPROBATION D'UN FOURNISSEUR
+
+### Étape 1 : Un utilisateur s'inscrit comme fournisseur
+
+```bash
+curl -X POST http://localhost:5000/api/v1/providers/register \
+  -H "Authorization: Bearer <USER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessName": "Restaurant Le Bon Goût",
+    "description": "Spécialités africaines",
+    "businessAddress": "Cotonou, Benin"
+  }'
+```
+
+**Résultat :** Le provider est créé avec `status: "PENDING"`
+
+---
+
+### Étape 2 : L'admin liste les demandes en attente
+
+```bash
+curl -X GET http://localhost:5000/api/v1/admin/providers/pending \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+**Résultat :** Liste des providers en attente d'approbation
+
+---
+
+### Étape 3 : L'admin approuve le fournisseur
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/admin/providers/<PROVIDER_ID>/approve \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Bienvenue sur JUNA!"}'
+```
+
+**Ce qui se passe en backend :**
+1. Le status du provider passe de `PENDING` à `APPROVED`
+2. Le role de l'utilisateur passe de `USER` à `PROVIDER`
+3. Le fournisseur peut maintenant créer des abonnements
+
+---
+
+### Étape 4 : (Optionnel) L'admin rejette le fournisseur
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/admin/providers/<PROVIDER_ID>/reject \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"reason": "Documents incomplets"}'
+```
+
+**Ce qui se passe :**
+- Le status du provider passe à `REJECTED`
+- L'utilisateur garde son role `USER`
+
+---
+
+## 📋 RÉSUMÉ DES ENDPOINTS ADMIN
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/admin/providers/pending` | Lister les demandes en attente |
+| GET | `/admin/providers` | Lister tous les fournisseurs |
+| GET | `/admin/providers/:id` | Détails d'un fournisseur |
+| PUT | `/admin/providers/:id/approve` | Approuver un fournisseur |
+| PUT | `/admin/providers/:id/reject` | Rejeter un fournisseur |
+| PUT | `/admin/providers/:id/suspend` | Suspendre un fournisseur |
+| GET | `/admin/users` | Lister les utilisateurs |
+| GET | `/admin/users/:id` | Détails d'un utilisateur |
+| PUT | `/admin/users/:id/suspend` | Suspendre un utilisateur |
+| PUT | `/admin/users/:id/activate` | Réactiver un utilisateur |
+| GET | `/admin/dashboard` | Statistiques du dashboard |
 
