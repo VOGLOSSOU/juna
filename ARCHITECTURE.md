@@ -623,7 +623,8 @@ npm test
 |--------|--------|
 | AUTH | ✅ Termine |
 | USER | ✅ Termine |
-| PROVIDER | A faire |
+| PROVIDER | ✅ Termine | TESTÉ ✅
 | SUBSCRIPTION | A faire |
 | ORDER | A faire |
 | PAYMENT | A faire |
+| ADMIN | Prochaine etape |

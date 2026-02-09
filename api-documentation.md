@@ -327,3 +327,89 @@ curl -X PUT http://localhost:5000/api/v1/users/me/preferences \
   -d '{"notifications": {"email": true}}'
 ```
 
+---
+
+## PROVIDER - Gestion des Fournisseurs
+
+**Headers requis pour tous les endpoints PROVIDER:**
+```
+Authorization: Bearer <ACCESS_TOKEN>
+```
+
+---
+
+### POST /providers/register - S'inscrire comme fournisseur
+
+```bash
+curl -X POST http://localhost:5000/api/v1/providers/register \
+  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessName": "Restaurant Le Bon Goût",
+    "description": "Spécialités africaines",
+    "businessAddress": "Cotonou, Benin"
+  }'
+```
+
+**Response (201):**
+```json
+{
+  "success": true,
+  "message": "Demande soumise, en attente de validation",
+  "data": {
+    "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
+    "businessName": "Restaurant Le Bon Goût",
+    "description": "Spécialités africaines",
+    "businessAddress": "Cotonou, Benin",
+    "status": "PENDING",
+    "createdAt": "2026-02-09T18:42:30.832Z"
+  }
+}
+```
+
+---
+
+### GET /providers/me - Obtenir mon profil fournisseur
+
+```bash
+curl -X GET http://localhost:5000/api/v1/providers/me \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Profil fournisseur recupere avec succes",
+  "data": {
+    "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
+    "businessName": "Restaurant Le Bon Goût",
+    "description": "Spécialités africaines",
+    "businessAddress": "Cotonou, Benin",
+    "status": "PENDING",
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-02-09T18:42:30.832Z",
+    "subscriptions": []
+  }
+}
+```
+
+**Note:** Le status `PENDING` signifie en attente d'approbation par l'admin.
+
+---
+
+## Testing Providers
+
+```bash
+# S'inscrire comme fournisseur:
+curl -X POST http://localhost:5000/api/v1/providers/register \
+  -H "Authorization: Bearer <TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"businessName":"Mon Restaurant","description":"Bon","businessAddress":"Cotonou"}'
+
+# Voir mon profil fournisseur:
+curl -X GET http://localhost:5000/api/v1/providers/me \
+  -H "Authorization: Bearer <TOKEN>"
+```
+
