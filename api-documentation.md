@@ -326,3 +326,4 @@ curl -X PUT http://localhost:5000/api/v1/users/me/preferences \
   -H "Content-Type: application/json" \
   -d '{"notifications": {"email": true}}'
 ```
+

@@ -4,10 +4,10 @@ import { z } from 'zod';
  * Schéma pour l'inscription d'un fournisseur
  */
 export const registerProviderSchema = z.object({
-  businessName: z.string().min(2, 'Le nom de l\'entreprise doit contenir au moins 2 caractères'),
+  businessName: z.string().trim().min(2, 'Le nom doit contenir au moins 2 caracteres'),
   description: z.string().optional(),
-  businessAddress: z.string().min(5, 'L\'adresse doit contenir au moins 5 caractères'),
-  documentUrl: z.string().url('URL du document invalide').optional(),
+  businessAddress: z.string().trim().min(3, 'L\'adresse doit contenir au moins 3 caracteres'),
+  documentUrl: z.string().optional(),
 });
 
 export type RegisterProviderDTO = z.infer<typeof registerProviderSchema>;
@@ -16,10 +16,10 @@ export type RegisterProviderDTO = z.infer<typeof registerProviderSchema>;
  * Schéma pour la mise à jour du profil fournisseur
  */
 export const updateProviderSchema = z.object({
-  businessName: z.string().min(2).optional(),
+  businessName: z.string().trim().min(2).optional(),
   description: z.string().optional(),
-  businessAddress: z.string().min(5).optional(),
-  documentUrl: z.string().url().optional(),
+  businessAddress: z.string().trim().min(3).optional(),
+  documentUrl: z.string().optional(),
 });
 
 export type UpdateProviderDTO = z.infer<typeof updateProviderSchema>;

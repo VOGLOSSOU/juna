@@ -8,24 +8,18 @@ import { ValidationError } from '@/utils/errors.util';
 export const validate = (schema: ZodSchema) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Valider le body, query, et params
-      await schema.parseAsync({
-        body: req.body,
-        query: req.query,
-        params: req.params,
-      });
-
+      // Valider uniquement le body
+      await schema.parseAsync(req.body);
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        // Formater les erreurs Zod
         const errors = error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
         }));
 
         next(
-          new ValidationError('Erreur de validation', 'VALIDATION_ERROR')
+          new ValidationError(`Validation failed: ${JSON.stringify(errors)}`, 'VALIDATION_ERROR')
         );
       } else {
         next(error);
