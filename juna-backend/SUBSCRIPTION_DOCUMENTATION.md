@@ -1,6 +1,6 @@
 # Module Abonnement JUNA - Architecture Définitive
 
-> **Version** : 3.0
+> **Version** : 3.0.0
 > **Date** : 2025-01-11
 > **Status** : VALIDÉ
 
