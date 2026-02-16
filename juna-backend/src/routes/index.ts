@@ -3,10 +3,15 @@ import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
 import providerRoutes from './provider.routes';
 import adminRoutes from './admin.routes';
+import mealRoutes from './meal.routes';
+import subscriptionRoutes from './subscription.routes';
 // Import des autres routes ici plus tard
-// import subscriptionRoutes from './subscription.routes';
 // import orderRoutes from './order.routes';
-// etc...
+// import proposalRoutes from './proposal.routes';
+// import reviewRoutes from './review.routes';
+// import ticketRoutes from './ticket.routes';
+// import notificationRoutes from './notification.routes';
+// import referralRoutes from './referral.routes';
 
 const router = Router();
 
@@ -15,9 +20,10 @@ router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/providers', providerRoutes);
 router.use('/admin', adminRoutes);
+router.use('/meals', mealRoutes);
+router.use('/subscriptions', subscriptionRoutes);
 
 // Plus tard, ajouter les autres routes
-// router.use('/subscriptions', subscriptionRoutes);
 // router.use('/orders', orderRoutes);
 // router.use('/proposals', proposalRoutes);
 // router.use('/reviews', reviewRoutes);

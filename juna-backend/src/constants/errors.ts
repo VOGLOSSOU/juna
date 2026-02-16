@@ -21,7 +21,12 @@ export const ERROR_CODES = {
 
   // Resource errors
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  MEAL_NOT_FOUND: 'MEAL_NOT_FOUND',
+  MEAL_ALREADY_EXISTS: 'MEAL_ALREADY_EXISTS',
+  MEAL_IN_USE: 'MEAL_IN_USE',
   SUBSCRIPTION_NOT_FOUND: 'SUBSCRIPTION_NOT_FOUND',
+  SUBSCRIPTION_ALREADY_EXISTS: 'SUBSCRIPTION_ALREADY_EXISTS',
+  SUBSCRIPTION_IN_USE: 'SUBSCRIPTION_IN_USE',
   ORDER_NOT_FOUND: 'ORDER_NOT_FOUND',
   PROPOSAL_NOT_FOUND: 'PROPOSAL_NOT_FOUND',
   REVIEW_NOT_FOUND: 'REVIEW_NOT_FOUND',
@@ -82,7 +87,12 @@ export const ERROR_MESSAGES = {
 
   // Resources
   [ERROR_CODES.RESOURCE_NOT_FOUND]: 'Ressource introuvable',
+  [ERROR_CODES.MEAL_NOT_FOUND]: 'Repas introuvable',
+  [ERROR_CODES.MEAL_ALREADY_EXISTS]: 'Un repas avec ce nom existe déjà',
+  [ERROR_CODES.MEAL_IN_USE]: 'Ce repas est utilisé dans des abonnements',
   [ERROR_CODES.SUBSCRIPTION_NOT_FOUND]: 'Abonnement introuvable',
+  [ERROR_CODES.SUBSCRIPTION_ALREADY_EXISTS]: 'Un abonnement avec ce nom existe déjà',
+  [ERROR_CODES.SUBSCRIPTION_IN_USE]: 'Cet abonnement a des abonnés actifs',
   [ERROR_CODES.ORDER_NOT_FOUND]: 'Commande introuvable',
   [ERROR_CODES.PROPOSAL_NOT_FOUND]: 'Proposition introuvable',
   [ERROR_CODES.REVIEW_NOT_FOUND]: 'Avis introuvable',

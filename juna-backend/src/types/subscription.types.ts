@@ -1,44 +1,41 @@
-import {
-  SubscriptionCategory,
-  SubscriptionFrequency,
-  MealType,
-} from '@prisma/client';
+import { SubscriptionCategory, SubscriptionFrequency, SubscriptionType } from '@prisma/client';
 
 export interface CreateSubscriptionDTO {
   name: string;
   description: string;
-  category: SubscriptionCategory;
-  cuisine?: string;
   price: number;
+  type: SubscriptionType;
+  category: SubscriptionCategory;
   frequency: SubscriptionFrequency;
-  mealType: MealType;
   deliveryZones?: any;
   pickupLocations?: any;
   imageUrl?: string;
   isPublic?: boolean;
+  mealIds?: string[];
 }
 
 export interface UpdateSubscriptionDTO {
   name?: string;
   description?: string;
-  category?: SubscriptionCategory;
-  cuisine?: string;
   price?: number;
+  type?: SubscriptionType;
+  category?: SubscriptionCategory;
   frequency?: SubscriptionFrequency;
-  mealType?: MealType;
   deliveryZones?: any;
   pickupLocations?: any;
   imageUrl?: string;
   isActive?: boolean;
+  isPublic?: boolean;
+  mealIds?: string[];
 }
 
 export interface SubscriptionFilters {
+  type?: SubscriptionType;
   category?: SubscriptionCategory;
-  mealType?: MealType;
+  frequency?: SubscriptionFrequency;
   minPrice?: number;
   maxPrice?: number;
-  city?: string;
-  country?: string;
+  providerId?: string;
   search?: string;
   isActive?: boolean;
   isPublic?: boolean;
@@ -47,4 +44,38 @@ export interface SubscriptionFilters {
 export interface SubscriptionSortOptions {
   sortBy?: 'price' | 'rating' | 'createdAt' | 'subscriberCount';
   order?: 'asc' | 'desc';
+}
+
+// Type pour la réponse avec les repas
+export interface SubscriptionWithMeals {
+  id: string;
+  providerId: string;
+  name: string;
+  description: string;
+  price: number;
+  type: SubscriptionType;
+  category: SubscriptionCategory;
+  frequency: SubscriptionFrequency;
+  isActive: boolean;
+  isPublic: boolean;
+  deliveryZones: any;
+  pickupLocations: any;
+  imageUrl: string | null;
+  subscriberCount: number;
+  rating: number;
+  createdAt: Date;
+  updatedAt: Date;
+  provider: {
+    id: string;
+    businessName: string;
+  };
+  meals: Array<{
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    imageUrl: string | null;
+    mealType: string;
+    quantity: number;
+  }>;
 }

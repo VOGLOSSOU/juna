@@ -18,6 +18,17 @@ export const SUCCESS_MESSAGES = {
   SUBSCRIPTION_CREATED: 'Abonnement créé avec succès',
   SUBSCRIPTION_UPDATED: 'Abonnement mis à jour avec succès',
   SUBSCRIPTION_DELETED: 'Abonnement supprimé avec succès',
+  SUBSCRIPTION_FETCHED: 'Abonnement récupéré avec succès',
+  SUBSCRIPTIONS_FETCHED: 'Abonnements récupérés avec succès',
+  SUBSCRIPTION_TOGGLED: 'Statut de l\'abonnement mis à jour',
+
+  // Meal
+  MEAL_CREATED: 'Repas créé avec succès',
+  MEAL_UPDATED: 'Repas mis à jour avec succès',
+  MEAL_DELETED: 'Repas supprimé avec succès',
+  MEAL_FETCHED: 'Repas récupéré avec succès',
+  MEALS_FETCHED: 'Repas récupérés avec succès',
+  MEAL_TOGGLED: 'Statut du repas mis à jour',
 
   // Order
   ORDER_CREATED: 'Commande créée avec succès',
