@@ -57,7 +57,9 @@ JUNA est une plateforme food delivery pour l'Afrique avec une architecture **Nod
 | **users** | Tous les utilisateurs (role: USER, PROVIDER, ADMIN) |
 | **user_profiles** | Infos supplementaires (adresse, preferences) |
 | **providers** | Infos business des fournisseurs |
+| **meals** | Repas individuels proposes par les fournisseurs |
 | **subscriptions** | Abonnements repas |
+| **subscription_meals** | Liaison abonnement-repas (many-to-many) |
 | **orders** | Commandes |
 | **payments** | Transactions |
 | **reviews** | Avis |
@@ -84,6 +86,9 @@ users (1)──────(1) user_profiles
    └──(1)──────(N) notifications
 
 providers (1)──────(N) subscriptions
+providers (1)──────(N) meals
+
+meals (N)◄────►(N) subscriptions (via subscription_meals)
 
 subscriptions (1)──────(N) orders
                      (N) reviews
@@ -289,6 +294,10 @@ providers
 ├── rating: Float (note moyenne)
 └── createdAt, updatedAt: DateTime
 
+Relations:
+- 1 provider → N subscriptions (abonnements proposés)
+- 1 provider → N meals (repas proposés)
+
 Workflow:
 1. USER fait POST /providers/register
 2. Provider cree avec status = PENDING
@@ -304,14 +313,39 @@ subscriptions
 ├── providerId: UUID
 ├── name: String
 ├── description: Text
-├── category: AFRICAN | EUROPEAN | ASIAN...
-├── cuisine: String
 ├── price: Float
-├── frequency: DAILY | WEEKLY | MONTHLY...
-├── mealType: BREAKFAST | LUNCH | DINNER
+├── type: BREAKFAST | LUNCH | DINNER | SNACK | BREAKFAST_LUNCH | BREAKFAST_DINNER | LUNCH_DINNER | FULL_DAY | CUSTOM
+├── category: AFRICAN | EUROPEAN | ASIAN...
+├── frequency: DAILY | THREE_PER_WEEK | WEEKLY | BIWEEKLY | MONTHLY
 ├── isActive: Boolean
 ├── isPublic: Boolean
-└── deliveryZones, pickupLocations: JSON
+├── deliveryZones, pickupLocations: JSON
+└── subscriberCount, rating: Int/Float
+```
+
+### MEAL (Repas)
+
+```
+meals
+├── id: UUID
+├── providerId: UUID (lien vers providers)
+├── name: String
+├── description: Text
+├── price: Float
+├── imageUrl: String
+├── mealType: BREAKFAST | LUNCH | DINNER | SNACK
+├── isActive: Boolean
+└── createdAt, updatedAt: DateTime
+```
+
+### SUBSCRIPTION_MEAL (Liaison Abonnement-Repas)
+
+```
+subscription_meals (table de jonction)
+├── id: UUID
+├── subscriptionId: UUID (lien vers subscriptions)
+├── mealId: UUID (lien vers meals)
+└── quantity: Int
 ```
 
 ### ORDER (Commande)

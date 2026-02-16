@@ -10,13 +10,15 @@
 - Module ADMIN complet (approbation fournisseurs) - TESTÉ ✅
 - Infrastructure technique (Prisma, Redis, middlewares, utils)
 - Architecture Controllers → Services → Repositories
+- **Database SCHEMA (PHASE 1) : Meal, SubscriptionMeal, SubscriptionType** ✅
 
 **🔄 PROCHAINES ÉTAPES CRITIQUES :**
-1. **Module SUBSCRIPTION** (abonnements) - Cœur du business
-2. **Module ORDER** (souscription) - Revenue stream
-3. **Module PAYMENT** (paiements)
+1. **Module MEAL** (repas) - À faire avant SUBSCRIPTION
+2. **Module SUBSCRIPTION** (abonnements) - Cœur du business
+3. **Module ORDER** (souscription) - Revenue stream
+4. **Module PAYMENT** (paiements)
 
-**📊 Progression :** ~20% terminé, AUTH + PROVIDER + ADMIN testés ✅
+**📊 Progression :** ~25% terminé, AUTH + PROVIDER + ADMIN testés ✅, Database SCHEMA créé
 
 ---
 
@@ -160,8 +162,18 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
 ---
 
 #### **3. Module SUBSCRIPTION** 📦 (Priorité Élevée - Cœur du Business)
+
+> **NOUVEAU MODÈLE DE DONNÉES (Décembre 2025)** :
+> - `Subscription.type` utilise maintenant `SubscriptionType` (BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, FULL_DAY, CUSTOM)
+> - `Subscription.mealType` supprimé, remplacé par `type`
+> - `Subscription.cuisine` supprimé (remplacé par `category`)
+> - Nouvelle table `meals` pour les repas individuels
+> - Nouvelle table `subscription_meals` pour la liaison many-to-many
+
 **État actuel :**
-- ✅ `src/types/subscription.types.ts` - **EXISTE**
+- ✅ `prisma/schema.prisma` - **MISE À JOUR** (Meal, SubscriptionMeal, SubscriptionType)
+- ✅ Base de données - **MISE À JOUR** avec `prisma db push --force-reset`
+- ✅ `src/types/subscription.types.ts` - **EXISTE** (à mettre à jour avec SubscriptionType)
 - ✅ `src/validators/subscription.validator.ts` - **EXISTE** mais à compléter
 - ❌ `src/repositories/subscription.repository.ts` - **VIDE** (0 lignes)
 - ❌ `src/services/subscription.service.ts` - **VIDE** (0 lignes)
@@ -176,6 +188,23 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
 - `PUT /providers/me/subscriptions/:id/toggle` - Activer/Désactiver
 
 **Priorité :** Élevée (cœur du business)
+
+---
+
+#### **3.1. Module MEAL** 🍽️ (Repas - NOUVEAU)
+**Fichiers à créer :**
+- `src/repositories/meal.repository.ts`
+- `src/services/meal.service.ts`
+- `src/controllers/meal.controller.ts`
+- `src/routes/meal.routes.ts`
+
+**Endpoints à implémenter :**
+- `POST /providers/me/meals` - Créer un repas (PROVIDER uniquement)
+- `GET /providers/me/meals` - Lister mes repas
+- `GET /meals/:id` - Détails d'un repas
+- `PUT /providers/me/meals/:id` - Modifier un repas
+- `DELETE /providers/me/meals/:id` - Supprimer un repas
+- `PUT /providers/me/meals/:id/toggle` - Activer/Désactiver
 
 ---
 

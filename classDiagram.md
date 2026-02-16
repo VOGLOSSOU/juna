@@ -45,16 +45,28 @@ classDiagram
         +DateTime updatedAt
     }
 
+    class Meal {
+        +String id
+        +String providerId
+        +String name
+        +String description
+        +Float price
+        +String imageUrl
+        +String mealType
+        +Boolean isActive
+        +DateTime createdAt
+        +DateTime updatedAt
+    }
+
     class Subscription {
         +String id
         +String providerId
         +String name
         +String description
-        +String category
-        +String cuisine
         +Float price
+        +String type
+        +String category
         +String frequency
-        +String mealType
         +Boolean isActive
         +Boolean isPublic
         +Json deliveryZones
@@ -64,6 +76,13 @@ classDiagram
         +Float rating
         +DateTime createdAt
         +DateTime updatedAt
+    }
+
+    class SubscriptionMeal {
+        +String id
+        +String subscriptionId
+        +String mealId
+        +Int quantity
     }
 
     class Order {
@@ -210,6 +229,10 @@ classDiagram
     User "1" -- "*" Referral : refers/referred
 
     Provider "1" -- "*" Subscription : creates
+    Provider "1" -- "*" Meal : offers
+    Meal "*" -- "*" Subscription : linked via
+    SubscriptionMeal "*" -- "1" Subscription : belongs to
+    SubscriptionMeal "*" -- "1" Meal : contains
     Subscription "1" -- "*" Order : generates
     Subscription "1" -- "*" Review : receives
     Subscription "1" -- "0..1" CustomProposal : fulfills
@@ -295,7 +318,18 @@ enum MealType {
   LUNCH
   DINNER
   SNACK
+}
+
+enum SubscriptionType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  BREAKFAST_LUNCH
+  BREAKFAST_DINNER
+  LUNCH_DINNER
   FULL_DAY
+  CUSTOM
 }
 
 enum SubscriptionCategory {
@@ -438,7 +472,7 @@ model Provider {
   businessName    String
   description     String?         @db.Text
   businessAddress String
-  documentUrl     String?         // Justificatif légal (registre de commerce, etc.)
+  documentUrl     String?
   status          ProviderStatus  @default(PENDING)
   rating          Float           @default(0)
   totalReviews    Int             @default(0)
@@ -448,42 +482,80 @@ model Provider {
   // Relations
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscriptions   Subscription[]
+  meals           Meal[]
 
   @@index([status])
   @@map("providers")
 }
 
+model Meal {
+  id          String    @id @default(uuid())
+  providerId  String
+  name        String
+  description String    @db.Text
+  price       Float
+  imageUrl    String?
+  mealType    MealType
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  provider    Provider              @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  mealsInSubscriptions SubscriptionMeal[]
+
+  @@index([providerId])
+  @@index([mealType])
+  @@map("meals")
+}
+
 model Subscription {
-  id               String                  @id @default(uuid())
+  id               String             @id @default(uuid())
   providerId       String
   name             String
-  description      String                  @db.Text
+  description      String             @db.Text
+  price           Float
+  type             SubscriptionType
   category         SubscriptionCategory
-  cuisine          String?                 // Ex: "Sénégalaise", "Italienne", etc.
-  price            Float
   frequency        SubscriptionFrequency
-  mealType         MealType
-  isActive         Boolean                 @default(true)
-  isPublic         Boolean                 @default(true)
-  deliveryZones    Json?                   // JSON: [{ city: "Cotonou", zones: ["Akpakpa", "Cadjehoun"] }]
-  pickupLocations  Json?                   // JSON: [{ name: "Restaurant Principal", address: "...", lat: ..., lng: ... }]
+  isActive         Boolean            @default(true)
+  isPublic         Boolean            @default(true)
+  deliveryZones    Json?
+  pickupLocations  Json?
   imageUrl         String?
-  subscriberCount  Int                     @default(0)
-  rating           Float                   @default(0)
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
+  subscriberCount  Int                @default(0)
+  rating           Float              @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   // Relations
   provider         Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
   orders           Order[]
   reviews          Review[]
   proposals        CustomProposal[]
+  mealsInSubscriptions SubscriptionMeal[]
 
   @@index([providerId])
+  @@index([type])
   @@index([category])
+  @@index([frequency])
   @@index([isActive])
   @@index([isPublic])
   @@map("subscriptions")
+}
+
+model SubscriptionMeal {
+  id             String      @id @default(uuid())
+  subscriptionId String
+  mealId         String
+  quantity       Int         @default(1)
+
+  // Relations
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  meal           Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, mealId])
+  @@map("subscription_meals")
 }
 
 model Order {

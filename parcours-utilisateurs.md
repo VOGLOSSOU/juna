@@ -442,32 +442,47 @@ graph TD
 
 ```mermaid
 graph TD
-    A[Dashboard fournisseur] --> B[Gérer mes abonnements]
+    A[Dashboard fournisseur] --> B[Gérer mes repas]
     
-    B --> C[Créer nouvel abonnement]
+    B --> C[Créer un repas]
     C --> D[Remplir les détails]
-    D --> E[Contenu du menu]
-    E --> F[Prix & durée]
-    F --> G[Zone de livraison/retrait]
-    G --> H[Ajouter photos]
-    H --> I[Soumettre pour validation Juna]
+    D --> E[Nom et description]
+    E --> F[Prix]
+    F --> G[Type de repas]
+    G --> H[BREAKFAST | LUNCH | DINNER | SNACK]
+    H --> I[Ajouter photo]
+    I --> J[Soumettre]
+    J --> K[Repas créé]
     
-    I --> J{Validation Juna?}
-    J -->|Approuvé| K[Abonnement publié]
-    J -->|Rejeté| L[Modifications demandées]
+    B --> L[Gérer mes abonnements]
     
-    L --> D
+    L --> M[Créer nouvel abonnement]
+    M --> N[Remplir les détails]
+    N --> O[Sélectionner les repas]
+    O --> P[Type d'abonnement]
+    P --> Q[BREAKFAST | LUNCH | DINNER | FULL_DAY | ...]
+    Q --> R[Prix & durée]
+    R --> S[Zone de livraison/retrait]
+    S --> T[Soumettre pour validation Juna]
     
-    B --> M[Modifier abonnement existant]
-    M --> N[Mettre à jour informations]
-    N --> I
+    T --> U{Validation Juna?}
+    U -->|Approuvé| V[Abonnement publié]
+    U -->|Rejeté| W[Modifications demandées]
     
-    B --> O[Suspendre/Désactiver abonnement]
+    W --> N
     
-    K --> P[Recevoir des souscriptions]
-    P --> Q[Notifications de nouvelles commandes]
-    Q --> R[Gérer les commandes]
+    L --> X[Modifier abonnement existant]
+    X --> Y[Mettre à jour informations]
+    Y --> T
+    
+    L --> Z[Suspendre/Désactiver abonnement]
+    
+    V --> AA[Recevoir des souscriptions]
+    AA --> BB[Notifications de nouvelles commandes]
+    BB --> CC[Gérer les commandes]
 ```
+
+> **Note** : Dans le nouveau modèle, un fournisseur doit d'abord créer des **Repas (Meal)** individuels, puis créer des **Abonnements (Subscription)** en sélectionnant les repas qui composeront l'abonnement.
 
 ### 2.3. Parcours : Gestion des Commandes (Fournisseur)
 
