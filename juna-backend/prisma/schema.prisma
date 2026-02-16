@@ -67,7 +67,18 @@ enum MealType {
   LUNCH
   DINNER
   SNACK
+}
+
+enum SubscriptionType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  BREAKFAST_LUNCH
+  BREAKFAST_DINNER
+  LUNCH_DINNER
   FULL_DAY
+  CUSTOM
 }
 
 enum SubscriptionCategory {
@@ -154,7 +165,7 @@ enum ReferralStatus {
 // ============================================
 
 model User {
-  id            String        @id @default(uuid())
+  id            String        @id @default(uuid()) @db.Uuid
   email         String        @unique
   password      String
   name          String
@@ -186,15 +197,15 @@ model User {
 }
 
 model UserProfile {
-  id          String    @id @default(uuid())
-  userId      String    @unique
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @unique @db.Uuid
   avatar      String?
   address     String?
   latitude    Float?
   longitude   Float?
   city        String?
   country     String?
-  preferences Json?     // JSON: { dietaryRestrictions: [], favoriteCategories: [], ... }
+  preferences Json?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -205,12 +216,12 @@ model UserProfile {
 }
 
 model Provider {
-  id              String          @id @default(uuid())
-  userId          String          @unique
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @unique @db.Uuid
   businessName    String
   description     String?         @db.Text
   businessAddress String
-  documentUrl     String?         // Justificatif légal (registre de commerce, etc.)
+  documentUrl     String?
   status          ProviderStatus  @default(PENDING)
   rating          Float           @default(0)
   totalReviews    Int             @default(0)
@@ -220,58 +231,96 @@ model Provider {
   // Relations
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscriptions   Subscription[]
+  meals           Meal[]
 
   @@index([status])
   @@map("providers")
 }
 
+model Meal {
+  id          String    @id @default(uuid()) @db.Uuid
+  providerId  String    @db.Uuid
+  name        String
+  description String    @db.Text
+  price       Float
+  imageUrl    String?
+  mealType    MealType
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  provider    Provider              @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  mealsInSubscriptions SubscriptionMeal[]
+
+  @@index([providerId])
+  @@index([mealType])
+  @@map("meals")
+}
+
 model Subscription {
-  id               String                  @id @default(uuid())
-  providerId       String
+  id               String             @id @default(uuid()) @db.Uuid
+  providerId       String             @db.Uuid
   name             String
-  description      String                  @db.Text
+  description      String             @db.Text
+  price           Float
+  type             SubscriptionType
   category         SubscriptionCategory
-  cuisine          String?                 // Ex: "Sénégalaise", "Italienne", etc.
-  price            Float
   frequency        SubscriptionFrequency
-  mealType         MealType
-  isActive         Boolean                 @default(true)
-  isPublic         Boolean                 @default(true)
-  deliveryZones    Json?                   // JSON: [{ city: "Cotonou", zones: ["Akpakpa", "Cadjehoun"] }]
-  pickupLocations  Json?                   // JSON: [{ name: "Restaurant Principal", address: "...", lat: ..., lng: ... }]
+  isActive         Boolean            @default(true)
+  isPublic         Boolean            @default(true)
+  deliveryZones    Json?
+  pickupLocations  Json?
   imageUrl         String?
-  subscriberCount  Int                     @default(0)
-  rating           Float                   @default(0)
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
+  subscriberCount  Int                @default(0)
+  rating           Float              @default(0)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
 
   // Relations
   provider         Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
   orders           Order[]
   reviews          Review[]
   proposals        CustomProposal[]
+  mealsInSubscriptions SubscriptionMeal[]
 
   @@index([providerId])
+  @@index([type])
   @@index([category])
+  @@index([frequency])
   @@index([isActive])
   @@index([isPublic])
   @@map("subscriptions")
 }
 
+model SubscriptionMeal {
+  id             String      @id @default(uuid()) @db.Uuid
+  subscriptionId String      @db.Uuid
+  mealId         String      @db.Uuid
+  quantity       Int         @default(1)
+
+  // Relations
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  meal           Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, mealId])
+  @@map("subscription_meals")
+}
+
 model Order {
-  id              String          @id @default(uuid())
-  userId          String
-  subscriptionId  String
-  orderNumber     String          @unique  // Ex: "ORD-2025-001234"
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid
+  subscriptionId  String          @db.Uuid
+  orderNumber     String          @unique
   amount          Float
   status          OrderStatus     @default(PENDING)
   deliveryMethod  DeliveryMethod
-  deliveryAddress String?         // Si delivery
-  pickupLocation  String?         // Si pickup (JSON stringified)
-  scheduledFor    DateTime?       // Date/heure prévue
+  deliveryAddress String?
+  pickupLocation  String?
+  scheduledFor    DateTime?
   completedAt     DateTime?
-  qrCode          String?         @unique  // Pour le retrait
-  metadata        Json?           // Infos supplémentaires
+  qrCode          String?         @unique
+  metadata        Json?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
@@ -290,15 +339,15 @@ model Order {
 }
 
 model Payment {
-  id              String        @id @default(uuid())
-  orderId         String        @unique
-  userId          String
+  id              String        @id @default(uuid()) @db.Uuid
+  orderId         String        @unique @db.Uuid
+  userId          String        @db.Uuid
   amount          Float
-  currency        String        @default("XOF")  // Franc CFA
+  currency        String        @default("XOF")
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
-  transactionId   String?       @unique  // ID de la transaction externe
-  gatewayResponse Json?         // Réponse complète du gateway
+  transactionId   String?       @unique
+  gatewayResponse Json?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -314,20 +363,20 @@ model Payment {
 }
 
 model CustomProposal {
-  id                    String         @id @default(uuid())
-  userId                String
-  foodType              String         // Ex: "Africaine", "Européenne"
-  frequency             String         // Ex: "Quotidien", "3x/semaine"
+  id                    String         @id @default(uuid()) @db.Uuid
+  userId                String         @db.Uuid
+  foodType              String
+  frequency             String
   mealType              MealType
   budget                Float
-  zone                  String         // Zone géographique
+  zone                  String
   city                  String
   country               String
-  details               String?        @db.Text  // Détails supplémentaires
+  details               String?        @db.Text
   isPublic              Boolean        @default(false)
   status                ProposalStatus @default(PENDING)
   rejectionReason       String?        @db.Text
-  assignedSubscriptionId String?       @unique  // Si validé et abonnement créé
+  assignedSubscriptionId String?       @unique @db.Uuid
   validatedAt           DateTime?
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @updatedAt
@@ -342,15 +391,15 @@ model CustomProposal {
 }
 
 model Review {
-  id              String       @id @default(uuid())
-  userId          String
-  subscriptionId  String
-  orderId         String       @unique
-  rating          Int          // 1 à 5
+  id              String       @id @default(uuid()) @db.Uuid
+  userId          String       @db.Uuid
+  subscriptionId  String       @db.Uuid
+  orderId         String       @unique @db.Uuid
+  rating          Int
   comment         String?      @db.Text
   status          ReviewStatus @default(PENDING)
   moderatedAt     DateTime?
-  moderatedBy     String?      // userId de l'admin
+  moderatedBy     String?      @db.Uuid
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -366,15 +415,15 @@ model Review {
 }
 
 model SupportTicket {
-  id          String          @id @default(uuid())
-  userId      String
-  orderId     String?         // Optionnel si lié à une commande
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @db.Uuid
+  orderId     String?         @db.Uuid
   category    TicketCategory
   subject     String
   description String          @db.Text
   status      TicketStatus    @default(OPEN)
   priority    TicketPriority  @default(MEDIUM)
-  assignedTo  String?         // userId de l'admin assigné
+  assignedTo  String?         @db.Uuid
   resolvedAt  DateTime?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
@@ -391,11 +440,11 @@ model SupportTicket {
 }
 
 model TicketMessage {
-  id          String        @id @default(uuid())
-  ticketId    String
-  senderId    String        // userId (peut être user ou admin)
+  id          String        @id @default(uuid()) @db.Uuid
+  ticketId    String        @db.Uuid
+  senderId    String        @db.Uuid
   message     String        @db.Text
-  attachments Json?         // URLs de fichiers joints
+  attachments Json?
   createdAt   DateTime      @default(now())
 
   // Relations
@@ -407,12 +456,12 @@ model TicketMessage {
 }
 
 model Notification {
-  id        String           @id @default(uuid())
-  userId    String
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
   type      NotificationType
   title     String
   message   String           @db.Text
-  data      Json?            // Données supplémentaires (orderId, etc.)
+  data      Json?
   isRead    Boolean          @default(false)
   readAt    DateTime?
   createdAt DateTime         @default(now())
@@ -426,8 +475,8 @@ model Notification {
 }
 
 model RefreshToken {
-  id        String   @id @default(uuid())
-  userId    String
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
   token     String   @unique  @db.Text
   expiresAt DateTime
   isRevoked Boolean  @default(false)
@@ -442,9 +491,9 @@ model RefreshToken {
 }
 
 model Referral {
-  id            String         @id @default(uuid())
-  referrerId    String
-  refereeId     String?        // Null si le filleul ne s'est pas encore inscrit
+  id            String         @id @default(uuid()) @db.Uuid
+  referrerId    String         @db.Uuid
+  refereeId     String?        @db.Uuid
   code          String         @unique
   status        ReferralStatus @default(PENDING)
   rewardAmount  Float          @default(0)
@@ -461,10 +510,10 @@ model Referral {
 }
 
 model Admin {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  permissions Json?    // JSON: { canModerateReviews: true, canManageUsers: true, ... }
-  level       String   @default("ADMIN")  // "ADMIN" ou "SUPER_ADMIN"
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @db.Uuid
+  permissions Json?
+  level       String   @default("ADMIN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -480,10 +529,10 @@ model Admin {
 
 // Table pour logs d'activité admin
 model AdminLog {
-  id        String   @id @default(uuid())
-  adminId   String
-  action    String   // Ex: "USER_BANNED", "PROPOSAL_APPROVED"
-  targetId  String?  // ID de l'entité concernée
+  id        String   @id @default(uuid()) @db.Uuid
+  adminId   String   @db.Uuid
+  action    String
+  targetId  String?  @db.Uuid
   details   Json?
   createdAt DateTime @default(now())
 
@@ -494,9 +543,9 @@ model AdminLog {
 
 // Table pour analytics
 model Analytics {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid()) @db.Uuid
   date      DateTime
-  metric    String   // Ex: "NEW_USERS", "TOTAL_ORDERS", "REVENUE"
+  metric    String
   value     Float
   metadata  Json?
   createdAt DateTime @default(now())
