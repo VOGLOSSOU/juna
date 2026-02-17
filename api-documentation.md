@@ -9,40 +9,115 @@ http://localhost:5000/api/v1
 
 ## AUTH - Authentication
 
-### POST /auth/register - Creer un compte
+### POST /auth/register - Créer un compte
 
 ```bash
 curl -X POST http://localhost:5000/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "nathan@juna.app",
+    "email": "john.doe@example.com",
     "password": "Password123",
-    "name": "Nathan Voglossou",
-    "phone": "+22997123456"
+    "name": "John Doe",
+    "phone": "+22961234567"
   }'
 ```
 
-**Response (201):**
+**Response (201) - ✅ TEST 1.1:**
 ```json
 {
   "success": true,
-  "message": "Compte cree avec succes",
+  "message": "Compte créé avec succès",
   "data": {
     "user": {
-      "id": "804afb88-1477-41cc-b4b8-ff4a97fc71d4",
-      "email": "nathan@juna.app",
-      "name": "Nathan Voglossou",
-      "phone": "+22997123456",
+      "id": "a647c4fd-5659-4955-87f0-038f99366bd0",
+      "email": "john.doe@example.com",
+      "name": "John Doe",
+      "phone": "+22961234567",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "2025-12-22T06:11:42.518Z",
-      "updatedAt": "2025-12-22T06:11:42.518Z"
+      "createdAt": "2026-02-17T17:46:04.751Z",
+      "updatedAt": "2026-02-17T17:46:04.751Z"
     },
     "tokens": {
-      "accessToken": "eyJhbG...",
-      "refreshToken": "eyJhbG..."
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzEzNTAzNjQsImV4cCI6MTc3MTM1MTI2NH0.zOJ3gAYxzbYDPExLc88qqMj1jZTHyTT_KcO1EdhuFY4",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzEzNTAzNjQsImV4cCI6MTc3MTk1NTE2NH0.YNpDeh9xj2ihG5zA4dyZqK88lPa9Amc8uElFQ3kCyj0"
     }
+  }
+}
+```
+
+---
+
+### POST /auth/register - Erreur: Email déjà utilisé (409)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "Password999",
+    "name": "Duplicate User"
+  }'
+```
+
+**Response (409) - ✅ TEST 1.3:**
+```json
+{
+  "success": false,
+  "message": "Cet email est déjà utilisé",
+  "error": {
+    "code": "EMAIL_ALREADY_EXISTS"
+  }
+}
+```
+
+---
+
+### POST /auth/register - Erreur: Email invalide (400)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "not-an-email",
+    "password": "Password123",
+    "name": "Invalid Email"
+  }'
+```
+
+**Response (400) - ✅ TEST 1.4:**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"email\",\"message\":\"Email invalide\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+---
+
+### POST /auth/register - Erreur: Password faible (400)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "weak@example.com",
+    "password": "123",
+    "name": "Weak Password"
+  }'
+```
+
+**Response (400) - ✅ TEST 1.5:**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"password\",\"message\":\"Minimum 8 caractères\"},{\"field\":\"password\",\"message\":\"Le mot de passe doit contenir au moins une majuscule\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
   }
 }
 ```
