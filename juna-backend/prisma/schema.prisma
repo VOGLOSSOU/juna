@@ -274,6 +274,7 @@ model Subscription {
   imageUrl         String?
   subscriberCount  Int                @default(0)
   rating           Float              @default(0)
+  totalReviews     Int                @default(0)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
 

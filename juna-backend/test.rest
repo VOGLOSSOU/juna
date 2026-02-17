@@ -1,0 +1,399 @@
+# ============================================
+# BASE URL
+# ============================================
+@baseUrl = http://localhost:5000
+@apiUrl = {{baseUrl}}/api/v1
+
+# ============================================
+# VARIABLES POUR STOCKER LES DONNÉES
+# ============================================
+@user1Token = 
+@user2Token = 
+@adminToken = 
+@providerToken = 
+@user1Id = 
+@user2Id = 
+@providerId = 
+@mealId = 
+
+# ============================================
+# ============================================
+# PARTIE 1 : TESTS AUTH - CRÉATION USERS
+# ============================================
+# ============================================
+
+###
+# TEST 1.1 : Créer User 1 (succès)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "john.doe@example.com",
+    "password": "Password123",
+    "name": "John Doe",
+    "phone": "+22961234567"
+}
+
+###
+# TEST 1.2 : Créer User 2 (succès)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "jane.smith@example.com",
+    "password": "Password456",
+    "name": "Jane Smith",
+    "phone": "+22961234568"
+}
+
+###
+# TEST 1.3 : Créer User avec email dupliqué (ERREUR)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "john.doe@example.com",
+    "password": "Password999",
+    "name": "Duplicate User"
+}
+
+###
+# TEST 1.4 : Créer User avec email invalide (ERREUR)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "not-an-email",
+    "password": "Password123",
+    "name": "Invalid Email"
+}
+
+###
+# TEST 1.5 : Créer User avec password faible (ERREUR)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "weak@example.com",
+    "password": "123",
+    "name": "Weak Password"
+}
+
+###
+# TEST 1.6 : Login User 1 (succès) - Pour récupérer le token
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "john.doe@example.com",
+    "password": "Password123"
+}
+
+###
+# TEST 1.7 : Login avec mauvais password (ERREUR)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "john.doe@example.com",
+    "password": "WrongPassword"
+}
+
+###
+# TEST 1.8 : Login avec email inexistant (ERREUR)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "nonexistent@example.com",
+    "password": "Password123"
+}
+
+
+# ============================================
+# ============================================
+# PARTIE 2 : CRÉATION ADMIN
+# ============================================
+# ============================================
+
+###
+# NOTE: L'admin doit être créé via seed ou directement dans la DB
+# Pour tester, vous pouvez exécuter:
+# npx prisma studio
+# ou
+# INSERT INTO users (id, email, password, name, role, "isVerified", "isActive", "createdAt", "updatedAt")
+# VALUES (gen_random_uuid(), 'admin@juna.app', '$2b$10$...', 'Admin User', 'ADMIN', true, true, NOW(), NOW());
+
+# Après création admin, test login:
+###
+# TEST 2.1 : Login Admin
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "admin@juna.app",
+    "password": "Admin123!"
+}
+
+
+# ============================================
+# ============================================
+# PARTIE 3 : TESTS PROVIDER
+# ============================================
+# ============================================
+
+###
+# TEST 3.1 : User 1 devient Provider (succès)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+    "businessName": "John's Kitchen",
+    "businessAddress": "Rue de la Paix, Cotonou",
+    "description": "Restaurant spécialités africaines et internationales"
+}
+
+###
+# TEST 3.2 : User déjà provider tente de s'inscrire (ERREUR)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+    "businessName": "Another Business",
+    "businessAddress": "Another Address"
+}
+
+###
+# TEST 3.3 : User non-connecté tente de s'inscrire (ERREUR)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+
+{
+    "businessName": "No Auth Business",
+    "businessAddress": "Some Address"
+}
+
+###
+# TEST 3.4 : Admin approuve le provider
+PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+
+# ============================================
+# ============================================
+# PARTIE 4 : TESTS MEAL
+# ============================================
+# ============================================
+
+###
+# TEST 4.1 : Provider crée un meal (succès)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Poulet Rôti",
+    "description": "Poulet rôti aux épices africaines",
+    "price": 2500,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/poulet.jpg"
+}
+
+###
+# TEST 4.2 : Provider crée un 2ème meal (succès)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Salade Composée",
+    "description": "Salade fraîche avec légumes de saison",
+    "price": 1500,
+    "mealType": "LUNCH"
+}
+
+###
+# TEST 4.3 : Provider crée un 3ème meal (snack)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Beignet",
+    "description": "Beignets traditionnels",
+    "price": 500,
+    "mealType": "SNACK"
+}
+
+###
+# TEST 4.4 : User non-provider tente de créer un meal (ERREUR)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+    "name": "Unauthorized Meal",
+    "description": "This should fail",
+    "price": 1000,
+    "mealType": "LUNCH"
+}
+
+###
+# TEST 4.5 : Créer meal avec nom dupliqué (ERREUR)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Poulet Rôti",
+    "description": "Duplicate name test",
+    "price": 2000,
+    "mealType": "DINNER"
+}
+
+###
+# TEST 4.6 : Provider liste ses meals
+GET {{apiUrl}}/meals/me
+Authorization: Bearer {{providerToken}}
+
+###
+# TEST 4.7 : Liste meals publics
+GET {{apiUrl}}/meals
+
+###
+# TEST 4.8 : Modifier un meal
+PUT {{apiUrl}}/meals/{{mealId}}
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Poulet Rôti Updated",
+    "price": 2800
+}
+
+###
+# TEST 4.9 : Toggle meal (activer/désactiver)
+PUT {{apiUrl}}/meals/{{mealId}}/toggle
+Authorization: Bearer {{providerToken}}
+
+###
+# TEST 4.10 : Supprimer un meal (sans订单)
+DELETE {{apiUrl}}/meals/{{mealId}}
+Authorization: Bearer {{providerToken}}
+
+
+# ============================================
+# ============================================
+# PARTIE 5 : TESTS SUBSCRIPTION
+# ============================================
+# ============================================
+
+###
+# TEST 5.1 : Provider crée un abonnement (succès)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Menu Lunch Standard",
+    "description": "Un lunch complet avec entrée, plat et dessert",
+    "price": 3500,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "frequency": "DAILY",
+    "isPublic": true,
+    "mealIds": ["{{mealId}}"]
+}
+
+###
+# TEST 5.2 : Créer abonnement avec meal inexistant (ERREUR)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Invalid Meal Subscription",
+    "description": "Test with invalid meal",
+    "price": 3000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "frequency": "DAILY",
+    "mealIds": ["invalid-uuid-here"]
+}
+
+###
+# TEST 5.3 : Liste abonnements publics
+GET {{apiUrl}}/subscriptions
+
+###
+# TEST 5.4 : Provider liste ses abonnements
+GET {{apiUrl}}/subscriptions/me
+Authorization: Bearer {{providerToken}}
+
+###
+# TEST 5.5 : Détails abonnement
+GET {{apiUrl}}/subscriptions/{{subscriptionId}}
+
+###
+# TEST 5.6 : Modifier abonnement
+PUT {{apiUrl}}/subscriptions/{{subscriptionId}}
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Menu Lunch Premium",
+    "price": 4000
+}
+
+###
+# TEST 5.7 : Toggle abonnement (publier/dé-publier)
+PUT {{apiUrl}}/subscriptions/{{subscriptionId}}/public
+Authorization: Bearer {{providerToken}}
+
+###
+# TEST 5.8 : Supprimer abonnement
+DELETE {{apiUrl}}/subscriptions/{{subscriptionId}}
+Authorization: Bearer {{providerToken}}
+
+
+# ============================================
+# ============================================
+# PARTIE 6 : TESTS USER PROFILE
+# ============================================
+# ============================================
+
+###
+# TEST 6.1 : Get mon profil
+GET {{apiUrl}}/users/me
+Authorization: Bearer {{user1Token}}
+
+###
+# TEST 6.2 : Update profil
+PUT {{apiUrl}}/users/me
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+    "name": "John Doe Updated",
+    "address": "Nouvelle adresse",
+    "city": "Cotonou"
+}
+
+
+# ============================================
+# ============================================
+# COMMANDES CURL POUR TEST RAPIDE
+# ============================================
+
+# Créer user 1
+# curl -X POST http://localhost:5000/api/v1/auth/register \
+#   -H "Content-Type: application/json" \
+#   -d '{"email":"john.doe@example.com","password":"Password123","name":"John Doe","phone":"+22961234567"}'
+
+# Login
+# curl -X POST http://localhost:5000/api/v1/auth/login \
+#   -H "Content-Type: application/json" \
+#   -d '{"email":"john.doe@example.com","password":"Password123"}'
