@@ -130,32 +130,80 @@ curl -X POST http://localhost:5000/api/v1/auth/register \
 curl -X POST http://localhost:5000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "nathan@juna.app",
+    "email": "john.doe@example.com",
     "password": "Password123"
   }'
 ```
 
-**Response (200):**
+**Response (200) - ✅ TEST 1.6:**
 ```json
 {
   "success": true,
-  "message": "Connexion reussie",
+  "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "804afb88-1477-41cc-b4b8-ff4a97fc71d4",
-      "email": "nathan@juna.app",
-      "name": "Nathan V.",
-      "phone": "+22997654321",
+      "id": "a647c4fd-5659-4955-87f0-038f99366bd0",
+      "email": "john.doe@example.com",
+      "name": "John Doe",
+      "phone": "+22961234567",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "2025-12-22T06:11:42.518Z",
-      "updatedAt": "2025-12-22T06:11:42.518Z"
+      "createdAt": "2026-02-17T17:46:04.751Z",
+      "updatedAt": "2026-02-17T17:46:04.751Z"
     },
     "tokens": {
-      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzEzNTEyMDYsImV4cCI6MTc3MTM1MjEwNn0.bdsSFDhuY8rfRqzdgDej86QcFeL-9pbw4m57HhCQqHk",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzEzNTEyMDYsImV4cCI6MTc3MTk1NjAwNn0._dbEPFqUYsOanBOPqgBJLpZeexNkc6DPzhPLV-qQMLk"
     }
+  }
+}
+```
+
+---
+
+### POST /auth/login - Erreur: Mauvais mot de passe (401)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john.doe@example.com",
+    "password": "WrongPassword"
+  }'
+```
+
+**Response (401) - ✅ TEST 1.7:**
+```json
+{
+  "success": false,
+  "message": "Email ou mot de passe incorrect",
+  "error": {
+    "code": "INVALID_CREDENTIALS"
+  }
+}
+```
+
+---
+
+### POST /auth/login - Erreur: Email inexistant (401)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "nonexistent@example.com",
+    "password": "Password123"
+  }'
+```
+
+**Response (401) - ✅ TEST 1.8:**
+```json
+{
+  "success": false,
+  "message": "Email ou mot de passe incorrect",
+  "error": {
+    "code": "INVALID_CREDENTIALS"
   }
 }
 ```
@@ -504,15 +552,31 @@ Authorization: Bearer <ACCESS_TOKEN> (doit être ADMIN ou SUPER_ADMIN)
 Un compte administrateur a été créé et est prêt à être utilisé :
 
 ```
-📧 Email: admin@juna.app
-🔐 Mot de passe: ChangeMe123!
+📧 Email: superadmin@juna.app
+🔐 Mot de passe: Admin123!
+👤 ID: 4da90b25-ed3e-4d3e-8fe7-f87b21f71387
 ```
 
 **Pour se connecter en tant qu'admin :**
 ```bash
 curl -X POST http://localhost:5000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@juna.app","password":"ChangeMe123!"}'
+  -d '{"email":"superadmin@juna.app","password":"Admin123!"}'
+```
+
+---
+
+### Créer un admin via script
+
+Si tu as besoin de créer un nouvel admin, utilise le script :
+
+```bash
+# Dans le dossier juna-backend/
+node create-admin.js [email] [password] [name]
+
+# Exemples :
+node create-admin.js "admin2@juna.app" "Password123!" "Admin Secondaire"
+node create-admin.js  # Défaut: superadmin@juna.app / Admin123!
 ```
 
 **⚠️ IMPORTANT :** Changez le mot de passe après la première connexion !
