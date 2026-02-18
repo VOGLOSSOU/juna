@@ -23,10 +23,9 @@ export const createMealSchema = z.object({
     .positive('Le prix doit être positif')
     .min(100, 'Prix minimum: 100 XOF'),
   imageUrl: z
-    .string()
+    .string({ required_error: 'URL de l\'image requise' })
     .url('URL invalide')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'URL de l\'image requise'),
   mealType: mealTypeEnum,
 });
 
