@@ -465,34 +465,54 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ```bash
 curl -X POST http://localhost:5000/api/v1/providers/register \
-  -H "Authorization: Bearer <ACCESS_TOKEN>" \
+  -H "Authorization: Bearer <USER_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-    "businessName": "Restaurant Le Bon Goût",
-    "description": "Spécialités africaines",
+    "businessName": "Another Business",
+    "description": "Description du restaurant",
     "businessAddress": "Cotonou, Benin"
   }'
 ```
 
-**Response (201):**
+**Response (201) - ✅ TEST 3.2:**
 ```json
 {
   "success": true,
   "message": "Demande soumise, en attente de validation",
   "data": {
-    "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
-    "businessName": "Restaurant Le Bon Goût",
-    "description": "Spécialités africaines",
-    "businessAddress": "Cotonou, Benin",
+    "id": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+    "businessName": "Another Business",
     "status": "PENDING",
-    "createdAt": "2026-02-09T18:42:30.832Z"
+    "message": "Votre demande a été enregistrée. En attente de validation par l'admin."
   }
 }
 ```
 
+**Note:** Le status `PENDING` signifie en attente d'approbation par l'admin.
+
 ---
 
-### GET /providers/me - Obtenir mon profil fournisseur
+### POST /providers/register - Erreur: Token manquant (401)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/providers/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "businessName": "Test Business",
+    "description": "Description"
+  }'
+```
+
+**Response (401) - ✅ TEST 3.3:**
+```json
+{
+  "success": false,
+  "message": "Token manquant",
+  "error": {
+    "code": "UNAUTHORIZED"
+  }
+}
+```
 
 ```bash
 curl -X GET http://localhost:5000/api/v1/providers/me \
@@ -557,11 +577,36 @@ Un compte administrateur a été créé et est prêt à être utilisé :
 👤 ID: 4da90b25-ed3e-4d3e-8fe7-f87b21f71387
 ```
 
-**Pour se connecter en tant qu'admin :**
+**Pour se connecter en tant qu'admin (✅ TEST 2.1):**
 ```bash
 curl -X POST http://localhost:5000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"superadmin@juna.app","password":"Admin123!"}'
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Connexion réussie",
+  "data": {
+    "user": {
+      "id": "4da90b25-ed3e-4d3e-8fe7-f87b21f71387",
+      "email": "superadmin@juna.app",
+      "name": "Super Admin",
+      "phone": "+22990000000",
+      "role": "SUPER_ADMIN",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-02-17T18:30:09.187Z",
+      "updatedAt": "2026-02-17T18:30:09.187Z"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZGE5MGIyNS1lZDNlLTRkM2UtOGZlNy1mODdiMjFmNzEzODciLCJlbWFpbCI6InN1cGVyYWRtaW5AanVuYS5hcHAiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NzE0NTIxODYsImV4cCI6MTc3MTQ1MzA4Nn0.kwFIGb5I4bPVdm7jksWpAqeOzCibgGJSiZMLM4o6leU",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZGE5MGIyNS1lZDNlLTRkM2UtOGZlNy1mODdiMjFmNzEzODciLCJlbWFpbCI6InN1cGVyYWRtaW5AanVuYS5hcHAiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NzE0NTIxODYsImV4cCI6MTc3MjA1Njk4Nn0.3dKGRlwLrO7c-UpISj2tY0uQXDKh0gvG-9EReAsPF4A"
+    }
+  }
+}
 ```
 
 ---

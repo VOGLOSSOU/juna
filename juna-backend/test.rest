@@ -7,11 +7,11 @@
 # ============================================
 # VARIABLES POUR STOCKER LES DONNÉES
 # ============================================
-@user1Token = 
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzE0NTEzMjcsImV4cCI6MTc3MTQ1MjIyN30.PPeVgetPFP6h8aAPV0WiDu_2mdPXIYokS_ORxaxp8NA
 @user2Token = 
-@adminToken = 
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZGE5MGIyNS1lZDNlLTRkM2UtOGZlNy1mODdiMjFmNzEzODciLCJlbWFpbCI6InN1cGVyYWRtaW5AanVuYS5hcHAiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NzE0NTIxODYsImV4cCI6MTc3MTQ1MzA4Nn0.kwFIGb5I4bPVdm7jksWpAqeOzCibgGJSiZMLM4o6leU
 @providerToken = 
-@user1Id = 
+@user1Id = a647c4fd-5659-4955-87f0-038f99366bd0
 @user2Id = 
 @providerId = 
 @mealId = 
@@ -131,7 +131,7 @@ POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "admin@juna.app",
+    "email": "superadmin@juna.app",
     "password": "Admin123!"
 }
 
