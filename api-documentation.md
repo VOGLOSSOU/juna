@@ -660,13 +660,13 @@ curl -X GET http://localhost:5000/api/v1/admin/providers/pending \
 ### PUT /admin/providers/:id/approve - Approuver un fournisseur
 
 ```bash
-curl -X PUT http://localhost:5000/api/v1/admin/providers/702a3a2d-05cc-448a-a0ba-49ceee1fc616/approve \
+curl -X PUT http://localhost:5000/api/v1/admin/providers/b1f4ae83-2e36-4f28-b626-2f74ae82f1aa/approve \
   -H "Authorization: Bearer <ADMIN_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{"message": "Bienvenue sur JUNA!"}'
 ```
 
-**Response (200):**
+**Response (200) - ✅ TEST 3.4:**
 ```json
 {
   "success": true,
@@ -675,8 +675,8 @@ curl -X PUT http://localhost:5000/api/v1/admin/providers/702a3a2d-05cc-448a-a0ba
     "success": true,
     "message": "Fournisseur approuve avec succes",
     "provider": {
-      "id": "702a3a2d-05cc-448a-a0ba-49ceee1fc616",
-      "businessName": "Restaurant Le Bon Goût",
+      "id": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+      "businessName": "Another Business",
       "status": "APPROVED"
     }
   }
