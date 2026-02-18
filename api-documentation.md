@@ -1105,7 +1105,7 @@ curl -X GET http://localhost:5000/api/v1/meals/{{mealId}}
 ### PUT /meals/:id - Modifier un repas
 
 ```bash
-curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}} \
+curl -X PUT http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1ccff68 \
   -H "Authorization: Bearer <PROVIDER_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1114,13 +1114,53 @@ curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}} \
   }'
 ```
 
+**Response (200) - ✅ TEST 4.8:**
+```json
+{
+  "success": true,
+  "message": "Repas mis à jour avec succès",
+  "data": {
+    "id": "8101a51c-5752-4367-ba88-7405a1ccff68",
+    "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+    "name": "Poulet Rôti Updated",
+    "description": "Poulet rôti aux épices africaines",
+    "price": 2800,
+    "imageUrl": "https://example.com/poulet.jpg",
+    "mealType": "LUNCH",
+    "isActive": true,
+    "createdAt": "2026-02-18T22:41:31.935Z",
+    "updatedAt": "2026-02-18T23:38:52.044Z"
+  }
+}
+```
+
 ---
 
 ### PUT /meals/:id/toggle - Activer/Désactiver un repas
 
 ```bash
-curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}}/toggle \
+curl -X PUT http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1ccff68/toggle \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 4.9:**
+```json
+{
+  "success": true,
+  "message": "Statut du repas mis à jour",
+  "data": {
+    "id": "8101a51c-5752-4367-ba88-7405a1ccff68",
+    "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+    "name": "Poulet Rôti Updated",
+    "description": "Poulet rôti aux épices africaines",
+    "price": 2800,
+    "imageUrl": "https://example.com/poulet.jpg",
+    "mealType": "LUNCH",
+    "isActive": false,
+    "createdAt": "2026-02-18T22:41:31.935Z",
+    "updatedAt": "2026-02-18T23:39:21.018Z"
+  }
+}
 ```
 
 ---
@@ -1128,8 +1168,16 @@ curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}}/toggle \
 ### DELETE /meals/:id - Supprimer un repas
 
 ```bash
-curl -X DELETE http://localhost:5000/api/v1/meals/{{mealId}} \
+curl -X DELETE http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1ccff68 \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 4.10:**
+```json
+{
+  "success": true,
+  "message": "Repas supprimé avec succès"
+}
 ```
 
 | Méthode | Endpoint | Description |
