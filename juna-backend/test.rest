@@ -7,10 +7,10 @@
 # ============================================
 # VARIABLES POUR STOCKER LES DONNÉES
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDUzODk2LCJleHAiOjE3NzE0NTQ3OTZ9.qcxRMG5HrMN0n24SMsCfTbRnvsXUtBzPz6FtIf2Y4W8
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDU1ODA5LCJleHAiOjE3NzE0NTY3MDl9.lvM7apzX6aw4Dx2Sdqb-46_dG8NlqHP2P3GR4RgT2VI
 @user2Token = 
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZGE5MGIyNS1lZDNlLTRkM2UtOGZlNy1mODdiMjFmNzEzODciLCJlbWFpbCI6InN1cGVyYWRtaW5AanVuYS5hcHAiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NzE0NTIxODYsImV4cCI6MTc3MTQ1MzA4Nn0.kwFIGb5I4bPVdm7jksWpAqeOzCibgGJSiZMLM4o6leU
-@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDUzODk2LCJleHAiOjE3NzE0NTQ3OTZ9.qcxRMG5HrMN0n24SMsCfTbRnvsXUtBzPz6FtIf2Y4W8
+@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDU1ODA5LCJleHAiOjE3NzE0NTY3MDl9.lvM7apzX6aw4Dx2Sdqb-46_dG8NlqHP2P3GR4RgT2VI
 @user1Id = a647c4fd-5659-4955-87f0-038f99366bd0
 @user2Id = 
 @providerId = b1f4ae83-2e36-4f28-b626-2f74ae82f1aa
@@ -226,7 +226,8 @@ Authorization: Bearer {{providerToken}}
     "name": "Beignet",
     "description": "Beignets traditionnels",
     "price": 500,
-    "mealType": "SNACK"
+    "mealType": "SNACK",
+    "imageUrl": "https://example.com/beignet.jpg"
 }
 
 ###
@@ -239,7 +240,8 @@ Authorization: Bearer {{user2Token}}
     "name": "Unauthorized Meal",
     "description": "This should fail",
     "price": 1000,
-    "mealType": "LUNCH"
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/unauthorized.jpg"
 }
 
 ###
@@ -252,7 +254,8 @@ Authorization: Bearer {{providerToken}}
     "name": "Poulet Rôti",
     "description": "Duplicate name test",
     "price": 2000,
-    "mealType": "DINNER"
+    "mealType": "DINNER",
+    "imageUrl": "https://example.com/poulet2.jpg"
 }
 
 ###

@@ -890,6 +890,174 @@ curl -X PUT http://localhost:5000/api/v1/admin/providers/<PROVIDER_ID>/reject \
 
 ## 📋 RÉSUMÉ DES ENDPOINTS ADMIN
 
+---
+
+## MEAL - Gestion des Repas
+
+**Headers requis pour tous les endpoints MEAL:**
+```
+Authorization: Bearer <ACCESS_TOKEN> (doit être PROVIDER APPROVED)
+```
+
+---
+
+### POST /meals - Créer un repas
+
+```bash
+curl -X POST http://localhost:5000/api/v1/meals \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Poulet Rôti",
+    "description": "Poulet rôti aux épices africaines",
+    "price": 2500,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/poulet.jpg"
+  }'
+```
+
+**Response (201) - ✅ TEST 4.1/4.3:**
+```json
+{
+  "success": true,
+  "message": "Repas créé avec succès",
+  "data": {
+    "id": "5d111e6c-cced-4f75-b381-e7b88f595f8e",
+    "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+    "name": "Beignet",
+    "description": "Beignets traditionnels",
+    "price": 500,
+    "imageUrl": "https://example.com/beignet.jpg",
+    "mealType": "SNACK",
+    "isActive": true,
+    "createdAt": "2026-02-18T23:04:39.172Z",
+    "updatedAt": "2026-02-18T23:04:39.172Z"
+  }
+}
+```
+
+**Body Parameters:**
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| name | string | Nom du repas (required, 2-100 chars) |
+| description | string | Description (required, 5-500 chars) |
+| price | number | Prix en XOF (required, min 100) |
+| imageUrl | string | URL de l'image (required) |
+| mealType | enum | BREAKFAST, LUNCH, DINNER, SNACK |
+
+---
+
+### POST /meals - Erreur: User non-provider (401)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/meals \
+  -H "Authorization: Bearer <USER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Unauthorized Meal",
+    "description": "This should fail",
+    "price": 1000,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/unauthorized.jpg"
+  }'
+```
+
+**Response (401) - ✅ TEST 4.4:**
+```json
+{
+  "success": false,
+  "message": "Token manquant",
+  "error": {
+    "code": "UNAUTHORIZED"
+  }
+}
+```
+
+---
+
+### POST /meals - Erreur: Nom dupliqué (409)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/meals \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Poulet Rôti",
+    "description": "Duplicate name test",
+    "price": 2000,
+    "mealType": "DINNER",
+    "imageUrl": "https://example.com/poulet2.jpg"
+  }'
+```
+
+**Response (409) - ✅ TEST 4.5:**
+```json
+{
+  "success": false,
+  "message": "Un repas avec ce nom existe déjà",
+  "error": {
+    "code": "MEAL_ALREADY_EXISTS"
+  }
+}
+```
+
+---
+
+### GET /meals/me - Liste mes repas (provider)
+
+```bash
+curl -X GET http://localhost:5000/api/v1/meals/me \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+---
+
+### GET /meals - Liste meals publics
+
+```bash
+curl -X GET http://localhost:5000/api/v1/meals
+```
+
+---
+
+### GET /meals/:id - Détails d'un repas
+
+```bash
+curl -X GET http://localhost:5000/api/v1/meals/{{mealId}}
+```
+
+---
+
+### PUT /meals/:id - Modifier un repas
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}} \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Poulet Rôti Updated",
+    "price": 2800
+  }'
+```
+
+---
+
+### PUT /meals/:id/toggle - Activer/Désactiver un repas
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/meals/{{mealId}}/toggle \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+---
+
+### DELETE /meals/:id - Supprimer un repas
+
+```bash
+curl -X DELETE http://localhost:5000/api/v1/meals/{{mealId}} \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | GET | `/admin/providers/pending` | Lister les demandes en attente |
