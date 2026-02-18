@@ -1010,6 +1010,52 @@ curl -X GET http://localhost:5000/api/v1/meals/me \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
+**Response (200) - ✅ TEST 4.6:**
+```json
+{
+  "success": true,
+  "message": "Repas récupérés avec succès",
+  "data": [
+    {
+      "id": "5d111e6c-cced-4f75-b381-e7b88f595f8e",
+      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+      "name": "Beignet",
+      "description": "Beignets traditionnels",
+      "price": 500,
+      "imageUrl": "https://example.com/beignet.jpg",
+      "mealType": "SNACK",
+      "isActive": true,
+      "createdAt": "2026-02-18T23:04:39.172Z",
+      "updatedAt": "2026-02-18T23:04:39.172Z"
+    },
+    {
+      "id": "e5d17051-0e6c-432d-9bd5-3e0315100a4c",
+      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+      "name": "Salade Composée",
+      "description": "Salade fraîche avec légumes de saison",
+      "price": 1500,
+      "imageUrl": "https://example.com/salade.jpg",
+      "mealType": "LUNCH",
+      "isActive": true,
+      "createdAt": "2026-02-18T22:42:29.473Z",
+      "updatedAt": "2026-02-18T22:42:29.473Z"
+    },
+    {
+      "id": "8101a51c-5752-4367-ba88-7405a1ccff68",
+      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+      "name": "Poulet Rôti",
+      "description": "Poulet rôti aux épices africaines",
+      "price": 2500,
+      "imageUrl": "https://example.com/poulet.jpg",
+      "mealType": "LUNCH",
+      "isActive": true,
+      "createdAt": "2026-02-18T22:41:31.935Z",
+      "updatedAt": "2026-02-18T22:41:31.935Z"
+    }
+  ]
+}
+```
+
 ---
 
 ### GET /meals - Liste meals publics
@@ -1017,6 +1063,34 @@ curl -X GET http://localhost:5000/api/v1/meals/me \
 ```bash
 curl -X GET http://localhost:5000/api/v1/meals
 ```
+
+**Response (200) - ✅ TEST 4.7:**
+```json
+{
+  "success": true,
+  "message": "Repas récupérés avec succès",
+  "data": [
+    {
+      "id": "5d111e6c-cced-4f75-b381-e7b88f595f8e",
+      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+      "name": "Beignet",
+      "description": "Beignets traditionnels",
+      "price": 500,
+      "imageUrl": "https://example.com/beignet.jpg",
+      "mealType": "SNACK",
+      "isActive": true,
+      "createdAt": "2026-02-18T23:04:39.172Z",
+      "updatedAt": "2026-02-18T23:04:39.172Z",
+      "provider": {
+        "id": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
+        "businessName": "Another Business"
+      }
+    }
+  ]
+}
+```
+
+**Note:** La liste publique inclut les informations du provider.
 
 ---
 
