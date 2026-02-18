@@ -24,7 +24,7 @@ router.get(
 router.put(
   '/:id',
   authenticate,
-  validate(mealIdSchema),
+  validateParams(mealIdSchema),
   validate(updateMealSchema),
   mealController.update.bind(mealController)
 );
@@ -32,14 +32,14 @@ router.put(
 router.put(
   '/:id/toggle',
   authenticate,
-  validate(mealIdSchema),
+  validateParams(mealIdSchema),
   mealController.toggleActive.bind(mealController)
 );
 
 router.delete(
   '/:id',
   authenticate,
-  validate(mealIdSchema),
+  validateParams(mealIdSchema),
   mealController.delete.bind(mealController)
 );
 
@@ -52,7 +52,7 @@ router.get(
 
 router.get(
   '/:id',
-  validate(mealIdSchema),
+  validateParams(mealIdSchema),
   mealController.getById.bind(mealController)
 );
 
