@@ -1194,3 +1194,260 @@ curl -X DELETE http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1
 | PUT | `/admin/users/:id/activate` | Réactiver un utilisateur |
 | GET | `/admin/dashboard` | Statistiques du dashboard |
 
+---
+
+## SUBSCRIPTION - Gestion des Abonnements
+
+Les abonnements permettent aux clients de souscrire à des repas récurrents. Un abonnement est défini par :
+- **type** : BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, LUNCH_DINNER, FULL_DAY, CUSTOM
+- **duration** : DAY (1 jour), THREE_DAYS (3 jours), WEEK (7 jours), TWO_WEEKS (14 jours), MONTH (30 jours)
+- **category** : AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER
+
+### Types d'abonnements disponibles
+
+| Type | Description | Repas inclus |
+|------|-------------|---------------|
+| BREAKFAST | Petit-déjeuner | 1 repas breakfast |
+| LUNCH | Déjeuner | 1 repas lunch |
+| DINNER | Dîner | 1 repas dinner |
+| SNACK | Collation | 1 repas snack |
+| BREAKFAST_LUNCH | Formule matinale | 1 breakfast + 1 lunch |
+| LUNCH_DINNER | Formule midi-soir | 1 lunch + 1 dinner |
+| FULL_DAY | Journée complète | 1 breakfast + 1 lunch + 1 dinner |
+| CUSTOM | Personnalisé | Au choix |
+
+### Durées disponibles
+
+| Durée | Jours | Utilisation |
+|-------|-------|--------------|
+| DAY | 1 | Test, jour unique |
+| THREE_DAYS | 3 | Weekend |
+| WEEK | 7 | Semaine |
+| TWO_WEEKS | 14 | Deux semaines |
+| MONTH | 30 | Mensuel |
+
+---
+
+### POST /subscriptions - Créer un abonnement
+
+**Prérequis :** Être provider approuvé
+
+```bash
+curl -X POST http://localhost:5000/api/v1/subscriptions \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Menu Lunch Hebdomadaire",
+    "description": "Un lunch par jour pendant une semaine",
+    "price": 15000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "WEEK",
+    "isPublic": true,
+    "mealIds": ["<MEAL_ID_1>", "<MEAL_ID_2>"]
+  }'
+```
+
+**Response (201) - ✅ TEST 5.2:**
+```json
+{
+  "success": true,
+  "message": "Abonnement créé avec succès",
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "providerId": "provider-uuid",
+    "name": "Menu Lunch Hebdomadaire",
+    "description": "Un lunch par jour pendant une semaine",
+    "price": 15000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "WEEK",
+    "isPublic": true,
+    "mealIds": ["meal-uuid-1", "meal-uuid-2"],
+    "createdAt": "2026-02-19T12:00:00.000Z",
+    "updatedAt": "2026-02-19T12:00:00.000Z"
+  }
+}
+```
+
+---
+
+### GET /subscriptions - Liste des abonnements publics
+
+```bash
+curl -X GET http://localhost:5000/api/v1/subscriptions
+```
+
+**Response (200) - ✅ TEST 5.12:**
+```json
+{
+  "success": true,
+  "message": "Abonnements récupérés avec succès",
+  "data": [
+    {
+      "id": "abc123-def456-ghi789",
+      "name": "Menu Lunch Hebdomadaire",
+      "description": "Un lunch par jour pendant une semaine",
+      "price": 15000,
+      "type": "LUNCH",
+      "category": "AFRICAN",
+      "duration": "WEEK",
+      "isPublic": true,
+      "provider": {
+        "businessName": "John's Kitchen"
+      }
+    }
+  ]
+}
+```
+
+---
+
+### GET /subscriptions/me - Abonnements du provider
+
+```bash
+curl -X GET http://localhost:5000/api/v1/subscriptions/me \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 5.13:**
+```json
+{
+  "success": true,
+  "message": "Abonnements récupérés avec succès",
+  "data": [
+    {
+      "id": "abc123-def456-ghi789",
+      "name": "Menu Lunch Hebdomadaire",
+      "price": 15000,
+      "type": "LUNCH",
+      "duration": "WEEK",
+      "isPublic": true
+    }
+  ]
+}
+```
+
+---
+
+### GET /subscriptions/:id - Détails d'un abonnement
+
+```bash
+curl -X GET http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>
+```
+
+**Response (200) - ✅ TEST 5.14:**
+```json
+{
+  "success": true,
+  "message": "Abonnement récupéré avec succès",
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "name": "Menu Lunch Hebdomadaire",
+    "description": "Un lunch par jour pendant une semaine",
+    "price": 15000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "WEEK",
+    "isPublic": true,
+    "meals": [
+      {
+        "id": "meal-uuid-1",
+        "name": "Poulet Roti",
+        "mealType": "LUNCH"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### PUT /subscriptions/:id - Modifier un abonnement
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Menu Lunch Premium",
+    "price": 4000
+  }'
+```
+
+**Response (200) - ✅ TEST 5.15:**
+```json
+{
+  "success": true,
+  "message": "Abonnement mis à jour avec succès",
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "name": "Menu Lunch Premium",
+    "price": 4000
+  }
+}
+```
+
+---
+
+### PUT /subscriptions/:id/public - Publier/Dé-publier un abonnement
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/public \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 5.16:**
+```json
+{
+  "success": true,
+  "message": "Visibilité de l'abonnement mise à jour",
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "isPublic": false
+  }
+}
+```
+
+---
+
+### DELETE /subscriptions/:id - Supprimer un abonnement
+
+```bash
+curl -X DELETE http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 5.17:**
+```json
+{
+  "success": true,
+  "message": "Abonnement supprimé avec succès"
+}
+```
+
+---
+
+### Erreurs possibles
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 400 | Validation failed | Données invalides |
+| 401 | Non authentifié | Token manquant |
+| 403 | Permissions insuffisantes | Pas provider ou non approuvé |
+| 404 | Non trouvé | Subscription inexistante |
+
+---
+
+### Résumé des endpoints SUBSCRIPTION
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/subscriptions` | Créer un abonnement |
+| GET | `/subscriptions` | Liste publique des abonnements |
+| GET | `/subscriptions/me` | Abonnements du provider |
+| GET | `/subscriptions/:id` | Détails d'un abonnement |
+| PUT | `/subscriptions/:id` | Modifier un abonnement |
+| PUT | `/subscriptions/:id/public` | Publier/dé-publier |
+| DELETE | `/subscriptions/:id` | Supprimer un abonnement |
+

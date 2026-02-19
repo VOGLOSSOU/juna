@@ -18,6 +18,10 @@
 @mealId2 = 
 @mealId3 = 
 @mealId4 = 
+@mealId5 = 
+@mealId6 = 
+@mealId7 = 
+@mealId8 = 
 @subscriptionId1 = 
 @subscriptionId2 = 
 
@@ -27,92 +31,69 @@
 # ============================================
 # ============================================
 
-###
+### 
 # TEST 1.1 : Créer User 1 (succès)
 POST {{apiUrl}}/auth/register
 Content-Type: application/json
 
-{
-    "email": "john.doe@example.com",
-    "password": "Password123",
-    "name": "John Doe",
-    "phone": "+22961234567"
-}
-
+{"email": "john.doe@example.com", "password": "Password123", "name": "John Doe", "phone": "+22961234567"}
 ###
+
+### 
 # TEST 1.2 : Créer User 2 (succès)
 POST {{apiUrl}}/auth/register
 Content-Type: application/json
 
-{
-    "email": "jane.smith@example.com",
-    "password": "Password456",
-    "name": "Jane Smith",
-    "phone": "+22961234568"
-}
-
+{"email": "jane.smith@example.com", "password": "Password456", "name": "Jane Smith", "phone": "+22961234568"}
 ###
+
+### 
 # TEST 1.3 : Créer User avec email dupliqué (ERREUR)
 POST {{apiUrl}}/auth/register
 Content-Type: application/json
 
-{
-    "email": "john.doe@example.com",
-    "password": "Password999",
-    "name": "Duplicate User"
-}
-
+{"email": "john.doe@example.com", "password": "Password999", "name": "Duplicate User"}
 ###
+
+### 
 # TEST 1.4 : Créer User avec email invalide (ERREUR)
 POST {{apiUrl}}/auth/register
 Content-Type: application/json
 
-{
-    "email": "not-an-email",
-    "password": "Password123",
-    "name": "Invalid Email"
-}
-
+{"email": "not-an-email", "password": "Password123", "name": "Invalid Email"}
 ###
+
+### 
 # TEST 1.5 : Créer User avec password faible (ERREUR)
 POST {{apiUrl}}/auth/register
 Content-Type: application/json
 
-{
-    "email": "weak@example.com",
-    "password": "123",
-    "name": "Weak Password"
-}
-
+{"email": "weak@example.com", "password": "123", "name": "Weak Password"}
 ###
+
+### 
 # TEST 1.6 : Login User 1 (succès) - Pour récupérer le token
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
-{
-    "email": "john.doe@example.com",
-    "password": "Password123"
-}
-
+{"email": "john.doe@example.com", "password": "Password123"}
 ###
+
+### 
 # TEST 1.7 : Login avec mauvais password (ERREUR)
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
-{
-    "email": "john.doe@example.com",
-    "password": "WrongPassword"
-}
-
+{"email": "john.doe@example.com", "password": "WrongPassword"}
 ###
+
+### 
 # TEST 1.8 : Login avec email inexistant (ERREUR)
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
-{
-    "email": "nonexistent@example.com",
-    "password": "Password123"
-}
+{"email": "nonexistent@example.com", "password": "Password123"}
+###
 
 
 # ============================================
@@ -121,23 +102,14 @@ Content-Type: application/json
 # ============================================
 # ============================================
 
-###
-# NOTE: L'admin doit être créé via seed ou directement dans la DB
-# Pour tester, vous pouvez exécuter:
-# node create-admin.js
-# ou
-# npx prisma studio
-
-# Après création admin, test login:
-###
+# Login Admin (admin créé via node create-admin.js)
+### 
 # TEST 2.1 : Login Admin
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
-{
-    "email": "superadmin@juna.app",
-    "password": "Admin123!"
-}
+{"email": "superadmin@juna.app", "password": "Admin123!"}
+###
 
 
 # ============================================
@@ -146,44 +118,38 @@ Content-Type: application/json
 # ============================================
 # ============================================
 
-###
+### 
 # TEST 3.1 : User 1 devient Provider (succès)
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
-{
-    "businessName": "John's Kitchen",
-    "businessAddress": "Rue de la Paix, Cotonou",
-    "description": "Restaurant spécialités africaines et internationales"
-}
-
+{"businessName": "John's Kitchen", "businessAddress": "Rue de la Paix, Cotonou", "description": "Restaurant specialites africaines et internationales"}
 ###
+
+### 
 # TEST 3.2 : User déjà provider tente de s'inscrire (ERREUR)
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
-{
-    "businessName": "Another Business",
-    "businessAddress": "Another Address"
-}
-
+{"businessName": "Another Business", "businessAddress": "Another Address"}
 ###
+
+### 
 # TEST 3.3 : User non-connecté tente de s'inscrire (ERREUR)
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 
-{
-    "businessName": "No Auth Business",
-    "businessAddress": "Some Address"
-}
-
+{"businessName": "No Auth Business", "businessAddress": "Some Address"}
 ###
+
+### 
 # TEST 3.4 : Admin approve le provider
 PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
+###
 
 
 # ============================================
@@ -192,184 +158,141 @@ Authorization: Bearer {{adminToken}}
 # ============================================
 # ============================================
 
-###
 # ===== CRÉATION MEALS PAR TYPE =====
-###
 
+### 
 # TEST 4.1 : Provider crée un BREAKFAST
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Petit Déjeuner Continental",
-    "description": "Pain, beurre, confiture, œuf dur, café au lait",
-    "price": 1500,
-    "mealType": "BREAKFAST",
-    "imageUrl": "https://example.com/breakfast1.jpg"
-}
+{"name": "Petit Dejeuner Continental", "description": "Pain, beurre, confiture, oeuf dur, cafe au lait", "price": 1500, "mealType": "BREAKFAST", "imageUrl": "https://example.com/breakfast1.jpg"}
+###
 
+### 
 # TEST 4.2 : Provider crée un LUNCH
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Poulet Rôti",
-    "description": "Poulet rôti aux épices africaines avec riz",
-    "price": 2500,
-    "mealType": "LUNCH",
-    "imageUrl": "https://example.com/poulet.jpg"
-}
+{"name": "Poulet Roti", "description": "Poulet roti aux epices africaines avec riz", "price": 2500, "mealType": "LUNCH", "imageUrl": "https://example.com/poulet.jpg"}
+###
 
+### 
 # TEST 4.3 : Provider crée un DINNER
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Fisch & Chips",
-    "description": "Poisson pané avec frites et sauce tartare",
-    "price": 3000,
-    "mealType": "DINNER",
-    "imageUrl": "https://example.com/fisch.jpg"
-}
+{"name": "Fisch and Chips", "description": "Poisson pane avec frites et sauce tartare", "price": 3000, "mealType": "DINNER", "imageUrl": "https://example.com/fisch.jpg"}
+###
 
+### 
 # TEST 4.4 : Provider crée un SNACK
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Beignet",
-    "description": "Beignets traditionnels au sucre",
-    "price": 500,
-    "mealType": "SNACK",
-    "imageUrl": "https://example.com/beignet.jpg"
-}
+{"name": "Beignet", "description": "Beignets traditionnels au sucre", "price": 500, "mealType": "SNACK", "imageUrl": "https://example.com/beignet.jpg"}
+###
 
+### 
 # TEST 4.5 : Provider crée un 2ème BREAKFAST
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Gâteau au Yaourt",
-    "description": "Gâteau moelleux fait maison",
-    "price": 800,
-    "mealType": "BREAKFAST",
-    "imageUrl": "https://example.com/gateau.jpg"
-}
+{"name": "Gateau au Yaourt", "description": "Gateau moelleux fait maison", "price": 800, "mealType": "BREAKFAST", "imageUrl": "https://example.com/gateau.jpg"}
+###
 
+### 
 # TEST 4.6 : Provider crée un 2ème LUNCH (végétarien)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Salade Composée",
-    "description": "Laitue, tomate, concombre, carotte, vinaigrette",
-    "price": 1500,
-    "mealType": "LUNCH",
-    "imageUrl": "https://example.com/salade.jpg"
-}
+{"name": "Salade Composee", "description": "Laitue, tomate, concombre, carotte, vinaigrette", "price": 1500, "mealType": "LUNCH", "imageUrl": "https://example.com/salade.jpg"}
+###
 
+### 
 # TEST 4.7 : Provider crée un 2ème DINNER
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Pâtes Carbonara",
-    "description": "Pâtes avec crème, lardons et parmesan",
-    "price": 2800,
-    "mealType": "DINNER",
-    "imageUrl": "https://example.com/carbonara.jpg"
-}
+{"name": "Pates Carbonara", "description": "Pates avec creme, lardons et parmesan", "price": 2800, "mealType": "DINNER", "imageUrl": "https://example.com/carbonara.jpg"}
+###
 
+### 
 # TEST 4.8 : Provider crée un 2ème SNACK
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Chips",
-    "description": "Chips de pommes de terre naturelles",
-    "price": 400,
-    "mealType": "SNACK",
-    "imageUrl": "https://example.com/chips.jpg"
-}
-
+{"name": "Chips", "description": "Chips de pommes de terre naturelles", "price": 400, "mealType": "SNACK", "imageUrl": "https://example.com/chips.jpg"}
 ###
+
 # ===== TESTS D'ERREUR MEAL =====
-###
 
+### 
 # TEST 4.9 : User non-provider tente de créer un meal (ERREUR)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
 
-{
-    "name": "Unauthorized Meal",
-    "description": "This should fail",
-    "price": 1000,
-    "mealType": "LUNCH",
-    "imageUrl": "https://example.com/unauthorized.jpg"
-}
+{"name": "Unauthorized Meal", "description": "This should fail", "price": 1000, "mealType": "LUNCH", "imageUrl": "https://example.com/unauthorized.jpg"}
+###
 
+### 
 # TEST 4.10 : Créer meal avec nom dupliqué (ERREUR)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Poulet Rôti",
-    "description": "Duplicate name test",
-    "price": 2000,
-    "mealType": "DINNER",
-    "imageUrl": "https://example.com/poulet2.jpg"
-}
+{"name": "Poulet Roti", "description": "Duplicate name test", "price": 2000, "mealType": "DINNER", "imageUrl": "https://example.com/poulet2.jpg"}
+###
 
+### 
 # TEST 4.11 : User non-connecté tente de créer un meal (ERREUR)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 
-{
-    "name": "No Auth Meal",
-    "description": "Should fail",
-    "price": 1000,
-    "mealType": "LUNCH",
-    "imageUrl": "https://example.com/noauth.jpg"
-}
-
+{"name": "No Auth Meal", "description": "Should fail", "price": 1000, "mealType": "LUNCH", "imageUrl": "https://example.com/noauth.jpg"}
 ###
+
 # ===== LISTE ET MODIFICATION MEAL =====
-###
 
+### 
 # TEST 4.12 : Provider liste ses meals
 GET {{apiUrl}}/meals/me
 Authorization: Bearer {{providerToken}}
+###
 
+### 
 # TEST 4.13 : Liste meals publics
 GET {{apiUrl}}/meals
+###
 
+### 
 # TEST 4.14 : Modifier un meal
 PUT {{apiUrl}}/meals/{{mealId2}}
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Poulet Rôti Premium",
-    "price": 2800
-}
+{"name": "Poulet Roti Premium", "price": 2800}
+###
 
+### 
 # TEST 4.15 : Toggle meal (activer/désactiver)
 PUT {{apiUrl}}/meals/{{mealId2}}/toggle
 Authorization: Bearer {{providerToken}}
+###
 
+### 
 # TEST 4.16 : Supprimer un meal (sans orders)
 DELETE {{apiUrl}}/meals/{{mealId4}}
 Authorization: Bearer {{providerToken}}
+###
 
 
 # ============================================
@@ -378,220 +301,147 @@ Authorization: Bearer {{providerToken}}
 # ============================================
 # ============================================
 
-###
 # ===== CRÉATION SUBSCRIPTIONS PAR TYPE =====
-###
 
+### 
 # TEST 5.1 : Subscription BREAKFAST - 1 jour
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Petit Déjeuner du Matin",
-    "description": "Un petit déjeuner complet chaque matin",
-    "price": 1500,
-    "type": "BREAKFAST",
-    "category": "AFRICAN",
-    "duration": "DAY",
-    "isPublic": true,
-    "mealIds": ["{{mealId1}}"]
-}
+{"name": "Petit Dejeuner du Matin", "description": "Un petit dejeuner complet chaque matin", "price": 1500, "type": "BREAKFAST", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "mealIds": ["{{mealId1}}"]}
+###
 
+### 
 # TEST 5.2 : Subscription LUNCH - 1 semaine
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Menu Lunch Hebdomadaire",
-    "description": "Un lunch par jour pendant une semaine",
-    "price": 15000,
-    "type": "LUNCH",
-    "category": "AFRICAN",
-    "duration": "WEEK",
-    "isPublic": true,
-    "mealIds": ["{{mealId2}}", "{{mealId6}}"]
-}
+{"name": "Menu Lunch Hebdomadaire", "description": "Un lunch par jour pendant une semaine", "price": 15000, "type": "LUNCH", "category": "AFRICAN", "duration": "WEEK", "isPublic": true, "mealIds": ["{{mealId2}}", "{{mealId6}}"]}
+###
 
+### 
 # TEST 5.3 : Subscription DINNER - 1 mois
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Menu Dinner Mensuel",
-    "description": "Un dinner chaque soir pendant un mois",
-    "price": 45000,
-    "type": "DINNER",
-    "category": "EUROPEAN",
-    "duration": "MONTH",
-    "isPublic": true,
-    "mealIds": ["{{mealId3}}", "{{mealId7}}"]
-}
+{"name": "Menu Dinner Mensuel", "description": "Un dinner chaque soir pendant un mois", "price": 45000, "type": "DINNER", "category": "EUROPEAN", "duration": "MONTH", "isPublic": true, "mealIds": ["{{mealId3}}", "{{mealId7}}"]}
+###
 
+### 
 # TEST 5.4 : Subscription FULL_DAY - 3 jours
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Pack Full Day Weekend",
-    "description": "Breakfast, lunch et dinner pour le weekend",
-    "price": 12000,
-    "type": "FULL_DAY",
-    "category": "FUSION",
-    "duration": "THREE_DAYS",
-    "isPublic": true,
-    "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}"]
-}
+{"name": "Pack Full Day Weekend", "description": "Breakfast, lunch et dinner pour le weekend", "price": 12000, "type": "FULL_DAY", "category": "FUSION", "duration": "THREE_DAYS", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}"]}
+###
 
+### 
 # TEST 5.5 : Subscription SNACK - 2 semaines
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Snack Pack",
-    "description": "Snacks pour les pauses",
-    "price": 3000,
-    "type": "SNACK",
-    "category": "OTHER",
-    "duration": "TWO_WEEKS",
-    "isPublic": true,
-    "mealIds": ["{{mealId4}}", "{{mealId8}}"]
-}
+{"name": "Snack Pack", "description": "Snacks pour les pauses", "price": 3000, "type": "SNACK", "category": "OTHER", "duration": "TWO_WEEKS", "isPublic": true, "mealIds": ["{{mealId4}}", "{{mealId8}}"]}
+###
 
+### 
 # TEST 5.6 : Subscription BREAKFAST_LUNCH - 1 jour
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Formule Matinale",
-    "description": "Breakfast + Lunch",
-    "price": 3500,
-    "type": "BREAKFAST_LUNCH",
-    "category": "AFRICAN",
-    "duration": "DAY",
-    "isPublic": true,
-    "mealIds": ["{{mealId1}}", "{{mealId2}}"]
-}
+{"name": "Formule Matinale", "description": "Breakfast plus Lunch", "price": 3500, "type": "BREAKFAST_LUNCH", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}"]}
+###
 
+### 
 # TEST 5.7 : Subscription LUNCH_DINNER - 1 semaine
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Formule Midi-Soir",
-    "description": "Lunch + Dinner quotidien",
-    "price": 18000,
-    "type": "LUNCH_DINNER",
-    "category": "EUROPEAN",
-    "duration": "WEEK",
-    "isPublic": true,
-    "mealIds": ["{{mealId2}}", "{{mealId3}}"]
-}
+{"name": "Formule Midi-Soir", "description": "Lunch et Dinner quotidien", "price": 18000, "type": "LUNCH_DINNER", "category": "EUROPEAN", "duration": "WEEK", "isPublic": true, "mealIds": ["{{mealId2}}", "{{mealId3}}"]}
+###
 
+### 
 # TEST 5.8 : Subscription CUSTOM - 1 mois
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Menu Personnalisé",
-    "description": "Choix libre parmi tous les repas",
-    "price": 60000,
-    "type": "CUSTOM",
-    "category": "VEGETARIAN",
-    "duration": "MONTH",
-    "isPublic": true,
-    "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}", "{{mealId4}}", "{{mealId5}}", "{{mealId6}}", "{{mealId7}}", "{{mealId8}}"]
-}
-
+{"name": "Menu Personnalise", "description": "Choix libre parmi tous les repas", "price": 60000, "type": "CUSTOM", "category": "VEGETARIAN", "duration": "MONTH", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}", "{{mealId4}}", "{{mealId5}}", "{{mealId6}}", "{{mealId7}}", "{{mealId8}}"]}
 ###
+
 # ===== TESTS D'ERREUR SUBSCRIPTION =====
-###
 
+### 
 # TEST 5.9 : Subscription avec meal inexistant (ERREUR)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Invalid Meal Subscription",
-    "description": "Test with invalid meal",
-    "price": 3000,
-    "type": "LUNCH",
-    "category": "AFRICAN",
-    "duration": "DAY",
-    "mealIds": ["invalid-uuid-here"]
-}
+{"name": "Invalid Meal Subscription", "description": "Test with invalid meal", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "mealIds": ["invalid-uuid-here"]}
+###
 
+### 
 # TEST 5.10 : Subscription sans mealIds (ERREUR)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "No Meals Subscription",
-    "description": "Test without meals",
-    "price": 3000,
-    "type": "LUNCH",
-    "category": "AFRICAN",
-    "duration": "DAY"
-}
+{"name": "No Meals Subscription", "description": "Test without meals", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY"}
+###
 
+### 
 # TEST 5.11 : User non-provider tente de créer subscription (ERREUR)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
 
-{
-    "name": "Unauthorized Subscription",
-    "description": "Should fail",
-    "price": 3000,
-    "type": "LUNCH",
-    "category": "AFRICAN",
-    "duration": "DAY",
-    "mealIds": ["{{mealId1}}"]
-}
-
-# TEST 5.12 : Provider non-approuvé tente de créer subscription (ERREUR)
-# Note: Faire ce test AVANT d'approuver le provider
-
+{"name": "Unauthorized Subscription", "description": "Should fail", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "mealIds": ["{{mealId1}}"]}
 ###
+
 # ===== LISTE ET MODIFICATION SUBSCRIPTION =====
+
+### 
+# TEST 5.12 : Liste abonnements publics
+GET {{apiUrl}}/subscriptions
 ###
 
-# TEST 5.13 : Liste abonnements publics
-GET {{apiUrl}}/subscriptions
-
-# TEST 5.14 : Provider liste ses abonnements
+### 
+# TEST 5.13 : Provider liste ses abonnements
 GET {{apiUrl}}/subscriptions/me
 Authorization: Bearer {{providerToken}}
+###
 
-# TEST 5.15 : Détails abonnement
+### 
+# TEST 5.14 : Détails abonnement
 GET {{apiUrl}}/subscriptions/{{subscriptionId1}}
+###
 
-# TEST 5.16 : Modifier abonnement
+### 
+# TEST 5.15 : Modifier abonnement
 PUT {{apiUrl}}/subscriptions/{{subscriptionId1}}
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{
-    "name": "Menu Lunch Premium",
-    "price": 4000
-}
+{"name": "Menu Lunch Premium", "price": 4000}
+###
 
-# TEST 5.17 : Toggle abonnement (publier/dé-publier)
+### 
+# TEST 5.16 : Toggle abonnement (publier/dé-publier)
 PUT {{apiUrl}}/subscriptions/{{subscriptionId1}}/public
 Authorization: Bearer {{providerToken}}
+###
 
-# TEST 5.18 : Supprimer abonnement
+### 
+# TEST 5.17 : Supprimer abonnement
 DELETE {{apiUrl}}/subscriptions/{{subscriptionId2}}
 Authorization: Bearer {{providerToken}}
+###
 
 
 # ============================================
@@ -600,35 +450,17 @@ Authorization: Bearer {{providerToken}}
 # ============================================
 # ============================================
 
-###
+### 
 # TEST 6.1 : Get mon profil
 GET {{apiUrl}}/users/me
 Authorization: Bearer {{user1Token}}
-
 ###
+
+### 
 # TEST 6.2 : Update profil
 PUT {{apiUrl}}/users/me
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
-{
-    "name": "John Doe Updated",
-    "address": "Nouvelle adresse",
-    "city": "Cotonou"
-}
-
-
-# ============================================
-# ============================================
-# COMMANDES CURL POUR TEST RAPIDE
-# ============================================
-
-# Créer user 1
-# curl -X POST http://localhost:5000/api/v1/auth/register \
-#   -H "Content-Type: application/json" \
-#   -d '{"email":"john.doe@example.com","password":"Password123","name":"John Doe","phone":"+22961234567"}'
-
-# Login
-# curl -X POST http://localhost:5000/api/v1/auth/login \
-#   -H "Content-Type: application/json" \
-#   -d '{"email":"john.doe@example.com","password":"Password123"}'
+{"name": "John Doe Updated", "address": "Nouvelle adresse", "city": "Cotonou"}
+###
