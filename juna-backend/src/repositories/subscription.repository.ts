@@ -47,6 +47,15 @@ export class SubscriptionRepository {
   }
 
   /**
+   * Trouver un abonnement par provider et nom
+   */
+  async findByProviderAndName(providerId: string, name: string): Promise<Subscription | null> {
+    return prisma.subscription.findFirst({
+      where: { providerId, name },
+    });
+  }
+
+  /**
    * Trouver un abonnement par ID avec provider et repas
    */
   async findByIdWithDetails(id: string): Promise<(Subscription & {

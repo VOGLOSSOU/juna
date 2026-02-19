@@ -28,6 +28,19 @@ export class SubscriptionService {
       );
     }
 
+    // Vérifier si un abonnement avec le même nom existe déjà pour ce fournisseur
+    const existingSubscription = await subscriptionRepository.findByProviderAndName(
+      providerId,
+      data.name
+    );
+
+    if (existingSubscription) {
+      throw new ConflictError(
+        'Un abonnement avec ce nom existe déjà',
+        ERROR_CODES.SUBSCRIPTION_ALREADY_EXISTS
+      );
+    }
+
     // Valider les repas si fournis
     if (data.mealIds && data.mealIds.length > 0) {
       const validation = await mealService.validateMealsForSubscription(providerId, data.mealIds);
