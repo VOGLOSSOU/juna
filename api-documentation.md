@@ -962,7 +962,7 @@ curl -X POST http://localhost:5000/api/v1/meals \
   }'
 ```
 
-**Response (401) - ✅ TEST 4.4:**
+**Response (401) - ✅ TEST 4.9:**
 ```json
 {
   "success": false,
@@ -976,6 +976,57 @@ curl -X POST http://localhost:5000/api/v1/meals \
 ---
 
 ### POST /meals - Erreur: Nom dupliqué (409)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/meals \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Poulet Rôti",
+    "description": "Duplicate name test",
+    "price": 2000,
+    "mealType": "DINNER",
+    "imageUrl": "https://example.com/poulet2.jpg"
+  }'
+```
+
+**Response (409) - ✅ TEST 4.10:**
+```json
+{
+  "success": false,
+  "message": "Un repas avec ce nom existe déjà",
+  "error": {
+    "code": "MEAL_ALREADY_EXISTS"
+  }
+}
+```
+
+---
+
+### POST /meals - Erreur: User non-connecté (401)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/meals \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "No Auth Meal",
+    "description": "Should fail",
+    "price": 1000,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/noauth.jpg"
+  }'
+```
+
+**Response (401) - ✅ TEST 4.11:**
+```json
+{
+  "success": false,
+  "message": "Token manquant",
+  "error": {
+    "code": "UNAUTHORIZED"
+  }
+}
+```
 
 ```bash
 curl -X POST http://localhost:5000/api/v1/meals \
