@@ -7,14 +7,19 @@
 # ============================================
 # VARIABLES POUR STOCKER LES DONNÉES
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDU3NTEwLCJleHAiOjE3NzE0NTg0MTB9.B0cDepKMUApLRJggBNrvnktLFvcS4qBwS59_FBKCQkk
+@user1Token = 
 @user2Token = 
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0ZGE5MGIyNS1lZDNlLTRkM2UtOGZlNy1mODdiMjFmNzEzODciLCJlbWFpbCI6InN1cGVyYWRtaW5AanVuYS5hcHAiLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJpYXQiOjE3NzE0NTIxODYsImV4cCI6MTc3MTQ1MzA4Nn0.kwFIGb5I4bPVdm7jksWpAqeOzCibgGJSiZMLM4o6leU
-@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNjQ3YzRmZC01NjU5LTQ5NTUtODdmMC0wMzhmOTkzNjZiZDAiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNDU3NTEwLCJleHAiOjE3NzE0NTg0MTB9.B0cDepKMUApLRJggBNrvnktLFvcS4qBwS59_FBKCQkk
-@user1Id = a647c4fd-5659-4955-87f0-038f99366bd0
+@adminToken = 
+@providerToken = 
+@user1Id = 
 @user2Id = 
-@providerId = b1f4ae83-2e36-4f28-b626-2f74ae82f1aa
-@mealId = 8101a51c-5752-4367-ba88-7405a1ccff68
+@providerId = 
+@mealId1 = 
+@mealId2 = 
+@mealId3 = 
+@mealId4 = 
+@subscriptionId1 = 
+@subscriptionId2 = 
 
 # ============================================
 # ============================================
@@ -119,10 +124,9 @@ Content-Type: application/json
 ###
 # NOTE: L'admin doit être créé via seed ou directement dans la DB
 # Pour tester, vous pouvez exécuter:
-# npx prisma studio
+# node create-admin.js
 # ou
-# INSERT INTO users (id, email, password, name, role, "isVerified", "isActive", "createdAt", "updatedAt")
-# VALUES (gen_random_uuid(), 'admin@juna.app', '$2b$10$...', 'Admin User', 'ADMIN', true, true, NOW(), NOW());
+# npx prisma studio
 
 # Après création admin, test login:
 ###
@@ -176,7 +180,7 @@ Content-Type: application/json
 }
 
 ###
-# TEST 3.4 : Admin approuve le provider
+# TEST 3.4 : Admin approve le provider
 PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
@@ -184,54 +188,123 @@ Authorization: Bearer {{adminToken}}
 
 # ============================================
 # ============================================
-# PARTIE 4 : TESTS MEAL
+# PARTIE 4 : TESTS MEAL - CRÉATION DE PLUSIEURS REPAS
 # ============================================
 # ============================================
 
 ###
-# TEST 4.1 : Provider crée un meal (succès)
+# ===== CRÉATION MEALS PAR TYPE =====
+###
+
+# TEST 4.1 : Provider crée un BREAKFAST
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Petit Déjeuner Continental",
+    "description": "Pain, beurre, confiture, œuf dur, café au lait",
+    "price": 1500,
+    "mealType": "BREAKFAST",
+    "imageUrl": "https://example.com/breakfast1.jpg"
+}
+
+# TEST 4.2 : Provider crée un LUNCH
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
 {
     "name": "Poulet Rôti",
-    "description": "Poulet rôti aux épices africaines",
+    "description": "Poulet rôti aux épices africaines avec riz",
     "price": 2500,
     "mealType": "LUNCH",
     "imageUrl": "https://example.com/poulet.jpg"
 }
 
-###
-# TEST 4.2 : Provider crée un 2ème meal (succès)
+# TEST 4.3 : Provider crée un DINNER
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
 {
-    "name": "Salade Composée",
-    "description": "Salade fraîche avec légumes de saison",
-    "price": 1500,
-    "mealType": "LUNCH",
-    "imageUrl": "https://example.com/salade.jpg"
+    "name": "Fisch & Chips",
+    "description": "Poisson pané avec frites et sauce tartare",
+    "price": 3000,
+    "mealType": "DINNER",
+    "imageUrl": "https://example.com/fisch.jpg"
 }
 
-###
-# TEST 4.3 : Provider crée un 3ème meal (snack)
+# TEST 4.4 : Provider crée un SNACK
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
 {
     "name": "Beignet",
-    "description": "Beignets traditionnels",
+    "description": "Beignets traditionnels au sucre",
     "price": 500,
     "mealType": "SNACK",
     "imageUrl": "https://example.com/beignet.jpg"
 }
 
+# TEST 4.5 : Provider crée un 2ème BREAKFAST
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Gâteau au Yaourt",
+    "description": "Gâteau moelleux fait maison",
+    "price": 800,
+    "mealType": "BREAKFAST",
+    "imageUrl": "https://example.com/gateau.jpg"
+}
+
+# TEST 4.6 : Provider crée un 2ème LUNCH (végétarien)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Salade Composée",
+    "description": "Laitue, tomate, concombre, carotte, vinaigrette",
+    "price": 1500,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/salade.jpg"
+}
+
+# TEST 4.7 : Provider crée un 2ème DINNER
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Pâtes Carbonara",
+    "description": "Pâtes avec crème, lardons et parmesan",
+    "price": 2800,
+    "mealType": "DINNER",
+    "imageUrl": "https://example.com/carbonara.jpg"
+}
+
+# TEST 4.8 : Provider crée un 2ème SNACK
+POST {{apiUrl}}/meals
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Chips",
+    "description": "Chips de pommes de terre naturelles",
+    "price": 400,
+    "mealType": "SNACK",
+    "imageUrl": "https://example.com/chips.jpg"
+}
+
 ###
-# TEST 4.4 : User non-provider tente de créer un meal (ERREUR)
+# ===== TESTS D'ERREUR MEAL =====
+###
+
+# TEST 4.9 : User non-provider tente de créer un meal (ERREUR)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
@@ -244,8 +317,7 @@ Authorization: Bearer {{user2Token}}
     "imageUrl": "https://example.com/unauthorized.jpg"
 }
 
-###
-# TEST 4.5 : Créer meal avec nom dupliqué (ERREUR)
+# TEST 4.10 : Créer meal avec nom dupliqué (ERREUR)
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -258,62 +330,191 @@ Authorization: Bearer {{providerToken}}
     "imageUrl": "https://example.com/poulet2.jpg"
 }
 
+# TEST 4.11 : User non-connecté tente de créer un meal (ERREUR)
+POST {{apiUrl}}/meals
+Content-Type: application/json
+
+{
+    "name": "No Auth Meal",
+    "description": "Should fail",
+    "price": 1000,
+    "mealType": "LUNCH",
+    "imageUrl": "https://example.com/noauth.jpg"
+}
+
 ###
-# TEST 4.6 : Provider liste ses meals
+# ===== LISTE ET MODIFICATION MEAL =====
+###
+
+# TEST 4.12 : Provider liste ses meals
 GET {{apiUrl}}/meals/me
 Authorization: Bearer {{providerToken}}
 
-###
-# TEST 4.7 : Liste meals publics
+# TEST 4.13 : Liste meals publics
 GET {{apiUrl}}/meals
 
-###
-# TEST 4.8 : Modifier un meal
-PUT {{apiUrl}}/meals/{{mealId}}
+# TEST 4.14 : Modifier un meal
+PUT {{apiUrl}}/meals/{{mealId2}}
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
 {
-    "name": "Poulet Rôti Updated",
+    "name": "Poulet Rôti Premium",
     "price": 2800
 }
 
-###
-# TEST 4.9 : Toggle meal (activer/désactiver)
-PUT {{apiUrl}}/meals/{{mealId}}/toggle
+# TEST 4.15 : Toggle meal (activer/désactiver)
+PUT {{apiUrl}}/meals/{{mealId2}}/toggle
 Authorization: Bearer {{providerToken}}
 
-###
-# TEST 4.10 : Supprimer un meal (sans订单)
-DELETE {{apiUrl}}/meals/{{mealId}}
+# TEST 4.16 : Supprimer un meal (sans orders)
+DELETE {{apiUrl}}/meals/{{mealId4}}
 Authorization: Bearer {{providerToken}}
 
 
 # ============================================
 # ============================================
-# PARTIE 5 : TESTS SUBSCRIPTION
+# PARTIE 5 : TESTS SUBSCRIPTION - CRÉATION D'ABONNEMENTS
 # ============================================
 # ============================================
 
 ###
-# TEST 5.1 : Provider crée un abonnement (succès)
+# ===== CRÉATION SUBSCRIPTIONS PAR TYPE =====
+###
+
+# TEST 5.1 : Subscription BREAKFAST - 1 jour
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
 {
-    "name": "Menu Lunch Standard",
-    "description": "Un lunch complet avec entrée, plat et dessert",
-    "price": 3500,
+    "name": "Petit Déjeuner du Matin",
+    "description": "Un petit déjeuner complet chaque matin",
+    "price": 1500,
+    "type": "BREAKFAST",
+    "category": "AFRICAN",
+    "duration": "DAY",
+    "isPublic": true,
+    "mealIds": ["{{mealId1}}"]
+}
+
+# TEST 5.2 : Subscription LUNCH - 1 semaine
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Menu Lunch Hebdomadaire",
+    "description": "Un lunch par jour pendant une semaine",
+    "price": 15000,
     "type": "LUNCH",
     "category": "AFRICAN",
-    "frequency": "DAILY",
+    "duration": "WEEK",
     "isPublic": true,
-    "mealIds": ["{{mealId}}"]
+    "mealIds": ["{{mealId2}}", "{{mealId6}}"]
+}
+
+# TEST 5.3 : Subscription DINNER - 1 mois
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Menu Dinner Mensuel",
+    "description": "Un dinner chaque soir pendant un mois",
+    "price": 45000,
+    "type": "DINNER",
+    "category": "EUROPEAN",
+    "duration": "MONTH",
+    "isPublic": true,
+    "mealIds": ["{{mealId3}}", "{{mealId7}}"]
+}
+
+# TEST 5.4 : Subscription FULL_DAY - 3 jours
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Pack Full Day Weekend",
+    "description": "Breakfast, lunch et dinner pour le weekend",
+    "price": 12000,
+    "type": "FULL_DAY",
+    "category": "FUSION",
+    "duration": "THREE_DAYS",
+    "isPublic": true,
+    "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}"]
+}
+
+# TEST 5.5 : Subscription SNACK - 2 semaines
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Snack Pack",
+    "description": "Snacks pour les pauses",
+    "price": 3000,
+    "type": "SNACK",
+    "category": "OTHER",
+    "duration": "TWO_WEEKS",
+    "isPublic": true,
+    "mealIds": ["{{mealId4}}", "{{mealId8}}"]
+}
+
+# TEST 5.6 : Subscription BREAKFAST_LUNCH - 1 jour
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Formule Matinale",
+    "description": "Breakfast + Lunch",
+    "price": 3500,
+    "type": "BREAKFAST_LUNCH",
+    "category": "AFRICAN",
+    "duration": "DAY",
+    "isPublic": true,
+    "mealIds": ["{{mealId1}}", "{{mealId2}}"]
+}
+
+# TEST 5.7 : Subscription LUNCH_DINNER - 1 semaine
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Formule Midi-Soir",
+    "description": "Lunch + Dinner quotidien",
+    "price": 18000,
+    "type": "LUNCH_DINNER",
+    "category": "EUROPEAN",
+    "duration": "WEEK",
+    "isPublic": true,
+    "mealIds": ["{{mealId2}}", "{{mealId3}}"]
+}
+
+# TEST 5.8 : Subscription CUSTOM - 1 mois
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "Menu Personnalisé",
+    "description": "Choix libre parmi tous les repas",
+    "price": 60000,
+    "type": "CUSTOM",
+    "category": "VEGETARIAN",
+    "duration": "MONTH",
+    "isPublic": true,
+    "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}", "{{mealId4}}", "{{mealId5}}", "{{mealId6}}", "{{mealId7}}", "{{mealId8}}"]
 }
 
 ###
-# TEST 5.2 : Créer abonnement avec meal inexistant (ERREUR)
+# ===== TESTS D'ERREUR SUBSCRIPTION =====
+###
+
+# TEST 5.9 : Subscription avec meal inexistant (ERREUR)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -324,26 +525,58 @@ Authorization: Bearer {{providerToken}}
     "price": 3000,
     "type": "LUNCH",
     "category": "AFRICAN",
-    "frequency": "DAILY",
+    "duration": "DAY",
     "mealIds": ["invalid-uuid-here"]
 }
 
-###
-# TEST 5.3 : Liste abonnements publics
-GET {{apiUrl}}/subscriptions
+# TEST 5.10 : Subscription sans mealIds (ERREUR)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+    "name": "No Meals Subscription",
+    "description": "Test without meals",
+    "price": 3000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "DAY"
+}
+
+# TEST 5.11 : User non-provider tente de créer subscription (ERREUR)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+    "name": "Unauthorized Subscription",
+    "description": "Should fail",
+    "price": 3000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "DAY",
+    "mealIds": ["{{mealId1}}"]
+}
+
+# TEST 5.12 : Provider non-approuvé tente de créer subscription (ERREUR)
+# Note: Faire ce test AVANT d'approuver le provider
 
 ###
-# TEST 5.4 : Provider liste ses abonnements
+# ===== LISTE ET MODIFICATION SUBSCRIPTION =====
+###
+
+# TEST 5.13 : Liste abonnements publics
+GET {{apiUrl}}/subscriptions
+
+# TEST 5.14 : Provider liste ses abonnements
 GET {{apiUrl}}/subscriptions/me
 Authorization: Bearer {{providerToken}}
 
-###
-# TEST 5.5 : Détails abonnement
-GET {{apiUrl}}/subscriptions/{{subscriptionId}}
+# TEST 5.15 : Détails abonnement
+GET {{apiUrl}}/subscriptions/{{subscriptionId1}}
 
-###
-# TEST 5.6 : Modifier abonnement
-PUT {{apiUrl}}/subscriptions/{{subscriptionId}}
+# TEST 5.16 : Modifier abonnement
+PUT {{apiUrl}}/subscriptions/{{subscriptionId1}}
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
@@ -352,14 +585,12 @@ Authorization: Bearer {{providerToken}}
     "price": 4000
 }
 
-###
-# TEST 5.7 : Toggle abonnement (publier/dé-publier)
-PUT {{apiUrl}}/subscriptions/{{subscriptionId}}/public
+# TEST 5.17 : Toggle abonnement (publier/dé-publier)
+PUT {{apiUrl}}/subscriptions/{{subscriptionId1}}/public
 Authorization: Bearer {{providerToken}}
 
-###
-# TEST 5.8 : Supprimer abonnement
-DELETE {{apiUrl}}/subscriptions/{{subscriptionId}}
+# TEST 5.18 : Supprimer abonnement
+DELETE {{apiUrl}}/subscriptions/{{subscriptionId2}}
 Authorization: Bearer {{providerToken}}
 
 
