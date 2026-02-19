@@ -66,7 +66,7 @@ export const createSubscriptionSchema = z.object({
   isPublic: z.boolean().optional(),
   mealIds: z
     .array(z.string().uuid('ID de repas invalide'))
-    .optional(),
+    .min(1, 'Au moins un repas requis'),
 });
 
 /**
