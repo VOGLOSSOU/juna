@@ -271,7 +271,7 @@ model Subscription {
   isPublic         Boolean            @default(true)
   deliveryZones    Json?
   pickupLocations  Json?
-  imageUrl         String?
+  imageUrl         String
   subscriberCount  Int                @default(0)
   rating           Float              @default(0)
   totalReviews     Int                @default(0)

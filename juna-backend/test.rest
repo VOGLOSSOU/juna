@@ -309,7 +309,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Petit Dejeuner du Matin", "description": "Un petit dejeuner complet chaque matin", "price": 1500, "type": "BREAKFAST", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "mealIds": ["{{mealId1}}"]}
+{"name": "Petit Dejeuner du Matin", "description": "Un petit dejeuner complet chaque matin", "price": 1500, "type": "BREAKFAST", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "imageUrl": "https://example.com/sub-breakfast.jpg", "mealIds": ["{{mealId1}}"]}
 ###
 
 ### 
@@ -318,7 +318,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Menu Lunch Hebdomadaire", "description": "Un lunch par jour pendant une semaine", "price": 15000, "type": "LUNCH", "category": "AFRICAN", "duration": "WEEK", "isPublic": true, "mealIds": ["{{mealId2}}", "{{mealId6}}"]}
+{"name": "Menu Lunch Hebdomadaire", "description": "Un lunch par jour pendant une semaine", "price": 15000, "type": "LUNCH", "category": "AFRICAN", "duration": "WEEK", "isPublic": true, "imageUrl": "https://example.com/sub-lunch.jpg", "mealIds": ["{{mealId2}}", "{{mealId6}}"]}
 ###
 
 ### 
@@ -327,7 +327,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Menu Dinner Mensuel", "description": "Un dinner chaque soir pendant un mois", "price": 45000, "type": "DINNER", "category": "EUROPEAN", "duration": "MONTH", "isPublic": true, "mealIds": ["{{mealId3}}", "{{mealId7}}"]}
+{"name": "Menu Dinner Mensuel", "description": "Un dinner chaque soir pendant un mois", "price": 45000, "type": "DINNER", "category": "EUROPEAN", "duration": "MONTH", "isPublic": true, "imageUrl": "https://example.com/sub-dinner.jpg", "mealIds": ["{{mealId3}}", "{{mealId7}}"]}
 ###
 
 ### 
@@ -336,7 +336,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Pack Full Day Weekend", "description": "Breakfast, lunch et dinner pour le weekend", "price": 12000, "type": "FULL_DAY", "category": "FUSION", "duration": "THREE_DAYS", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}"]}
+{"name": "Pack Full Day Weekend", "description": "Breakfast, lunch et dinner pour le weekend", "price": 12000, "type": "FULL_DAY", "category": "FUSION", "duration": "THREE_DAYS", "isPublic": true, "imageUrl": "https://example.com/sub-fullday.jpg", "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}"]}
 ###
 
 ### 
@@ -345,7 +345,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Snack Pack", "description": "Snacks pour les pauses", "price": 3000, "type": "SNACK", "category": "OTHER", "duration": "TWO_WEEKS", "isPublic": true, "mealIds": ["{{mealId4}}", "{{mealId8}}"]}
+{"name": "Snack Pack", "description": "Snacks pour les pauses", "price": 3000, "type": "SNACK", "category": "OTHER", "duration": "TWO_WEEKS", "isPublic": true, "imageUrl": "https://example.com/sub-snack.jpg", "mealIds": ["{{mealId4}}", "{{mealId8}}"]}
 ###
 
 ### 
@@ -354,7 +354,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Formule Matinale", "description": "Breakfast plus Lunch", "price": 3500, "type": "BREAKFAST_LUNCH", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}"]}
+{"name": "Formule Matinale", "description": "Breakfast plus Lunch", "price": 3500, "type": "BREAKFAST_LUNCH", "category": "AFRICAN", "duration": "DAY", "isPublic": true, "imageUrl": "https://example.com/sub-matin.jpg", "mealIds": ["{{mealId1}}", "{{mealId2}}"]}
 ###
 
 ### 
@@ -363,7 +363,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Formule Midi-Soir", "description": "Lunch et Dinner quotidien", "price": 18000, "type": "LUNCH_DINNER", "category": "EUROPEAN", "duration": "WEEK", "isPublic": true, "mealIds": ["{{mealId2}}", "{{mealId3}}"]}
+{"name": "Formule Midi-Soir", "description": "Lunch et Dinner quotidien", "price": 18000, "type": "LUNCH_DINNER", "category": "EUROPEAN", "duration": "WEEK", "isPublic": true, "imageUrl": "https://example.com/sub-midisoir.jpg", "mealIds": ["{{mealId2}}", "{{mealId3}}"]}
 ###
 
 ### 
@@ -372,7 +372,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Menu Personnalise", "description": "Choix libre parmi tous les repas", "price": 60000, "type": "CUSTOM", "category": "VEGETARIAN", "duration": "MONTH", "isPublic": true, "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}", "{{mealId4}}", "{{mealId5}}", "{{mealId6}}", "{{mealId7}}", "{{mealId8}}"]}
+{"name": "Menu Personnalise", "description": "Choix libre parmi tous les repas", "price": 60000, "type": "CUSTOM", "category": "VEGETARIAN", "duration": "MONTH", "isPublic": true, "imageUrl": "https://example.com/sub-custom.jpg", "mealIds": ["{{mealId1}}", "{{mealId2}}", "{{mealId3}}", "{{mealId4}}", "{{mealId5}}", "{{mealId6}}", "{{mealId7}}", "{{mealId8}}"]}
 ###
 
 # ===== TESTS D'ERREUR SUBSCRIPTION =====
@@ -383,7 +383,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "Invalid Meal Subscription", "description": "Test with invalid meal", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "mealIds": ["invalid-uuid-here"]}
+{"name": "Invalid Meal Subscription", "description": "Test with invalid meal", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "imageUrl": "https://example.com/sub-invalid.jpg", "mealIds": ["invalid-uuid-here"]}
 ###
 
 ### 
@@ -392,7 +392,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
 
-{"name": "No Meals Subscription", "description": "Test without meals", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY"}
+{"name": "No Meals Subscription", "description": "Test without meals", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "imageUrl": "https://example.com/sub-nomeals.jpg"}
 ###
 
 ### 
@@ -401,7 +401,7 @@ POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
 
-{"name": "Unauthorized Subscription", "description": "Should fail", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "mealIds": ["{{mealId1}}"]}
+{"name": "Unauthorized Subscription", "description": "Should fail", "price": 3000, "type": "LUNCH", "category": "AFRICAN", "duration": "DAY", "imageUrl": "https://example.com/sub-unauthorized.jpg", "mealIds": ["{{mealId1}}"]}
 ###
 
 # ===== LISTE ET MODIFICATION SUBSCRIPTION =====

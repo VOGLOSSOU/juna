@@ -60,10 +60,9 @@ export const createSubscriptionSchema = z.object({
   deliveryZones: z.any().optional(),
   pickupLocations: z.any().optional(),
   imageUrl: z
-    .string()
+    .string({ required_error: 'URL de l\'image requise' })
     .url('URL invalide')
-    .optional()
-    .or(z.literal('')),
+    .min(1, 'URL de l\'image obligatoire'),
   isPublic: z.boolean().optional(),
   mealIds: z
     .array(z.string().uuid('ID de repas invalide'))
@@ -99,8 +98,7 @@ export const updateSubscriptionSchema = z.object({
   imageUrl: z
     .string()
     .url('URL invalide')
-    .optional()
-    .or(z.literal('')),
+    .optional(),
   isActive: z.boolean().optional(),
   isPublic: z.boolean().optional(),
   mealIds: z

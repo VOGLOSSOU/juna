@@ -1282,6 +1282,7 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
     "type": "LUNCH",
     "category": "AFRICAN",
     "duration": "WEEK",
+    "imageUrl": "https://example.com/subscription-lunch.jpg",
     "isPublic": true,
     "mealIds": ["<MEAL_ID_1>", "<MEAL_ID_2>"]
   }'
@@ -1308,6 +1309,19 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
   }
 }
 ```
+
+**Body Parameters:**
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| name | string | Nom de l'abonnement (required, 3-100 chars) |
+| description | string | Description (required, 10-1000 chars) |
+| price | number | Prix en XOF (required, min 100) |
+| type | enum | BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, LUNCH_DINNER, FULL_DAY, CUSTOM |
+| category | enum | AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER |
+| duration | enum | DAY, THREE_DAYS, WEEK, TWO_WEEKS, MONTH |
+| imageUrl | string | URL de l'image (required) |
+| isPublic | boolean | Visible publiquement (optional) |
+| mealIds | array | IDs des repas inclus (optional) |
 
 ---
 
