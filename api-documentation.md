@@ -1489,6 +1489,39 @@ curl -X DELETE http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
 | 401 | Non authentifié | Token manquant |
 | 403 | Permissions insuffisantes | Pas provider ou non approuvé |
 | 404 | Non trouvé | Subscription inexistante |
+| 409 | Conflit | Abonnement avec le même nom existe déjà |
+
+---
+
+### POST /subscriptions - Erreur: Abonnement dupliqué (409)
+
+```bash
+curl -X POST http://localhost:5000/api/v1/subscriptions \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Menu Lunch Hebdomadaire",
+    "description": "Un lunch par jour pendant une semaine",
+    "price": 15000,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "WEEK",
+    "imageUrl": "https://example.com/sub-lunch.jpg",
+    "isPublic": true,
+    "mealIds": ["<MEAL_ID_1>"]
+  }'
+```
+
+**Response (409) - ✅ TEST:**
+```json
+{
+  "success": false,
+  "message": "Un abonnement avec ce nom existe déjà",
+  "error": {
+    "code": "SUBSCRIPTION_ALREADY_EXISTS"
+  }
+}
+```
 
 ---
 
