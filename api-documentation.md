@@ -1320,8 +1320,8 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
 | category | enum | AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER |
 | duration | enum | DAY, THREE_DAYS, WEEK, TWO_WEEKS, MONTH |
 | imageUrl | string | URL de l'image (required) |
-| isPublic | boolean | Visible publiquement (optional) |
-| mealIds | array | IDs des repas inclus (optional) |
+| isPublic | boolean | Visible publiquement (optional, default: false) |
+| mealIds | array | IDs des repas inclus (required, au moins 1 repas) |
 
 ---
 
@@ -1338,15 +1338,24 @@ curl -X GET http://localhost:5000/api/v1/subscriptions
   "message": "Abonnements récupérés avec succès",
   "data": [
     {
-      "id": "abc123-def456-ghi789",
-      "name": "Menu Lunch Hebdomadaire",
-      "description": "Un lunch par jour pendant une semaine",
-      "price": 15000,
-      "type": "LUNCH",
-      "category": "AFRICAN",
-      "duration": "WEEK",
+      "id": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+      "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+      "name": "Menu Dinner Mensuel",
+      "description": "Un dinner chaque soir pendant un mois",
+      "price": 45000,
+      "type": "DINNER",
+      "category": "EUROPEAN",
+      "duration": "MONTH",
+      "isActive": true,
       "isPublic": true,
+      "imageUrl": "https://example.com/sub-dinner.jpg",
+      "subscriberCount": 0,
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-02-19T19:46:16.209Z",
+      "updatedAt": "2026-02-19T19:46:16.209Z",
       "provider": {
+        "id": "317f10f2-134d-4109-a087-6c4691f0f7fa",
         "businessName": "John's Kitchen"
       }
     }
@@ -1386,7 +1395,8 @@ curl -X GET http://localhost:5000/api/v1/subscriptions/me \
 ### GET /subscriptions/:id - Détails d'un abonnement
 
 ```bash
-curl -X GET http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>
+curl -X GET http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5777fca66c95 \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
 **Response (200) - ✅ TEST 5.14:**
@@ -1395,24 +1405,63 @@ curl -X GET http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>
   "success": true,
   "message": "Abonnement récupéré avec succès",
   "data": {
-    "id": "abc123-def456-ghi789",
-    "name": "Menu Lunch Hebdomadaire",
-    "description": "Un lunch par jour pendant une semaine",
-    "price": 15000,
-    "type": "LUNCH",
-    "category": "AFRICAN",
-    "duration": "WEEK",
+    "id": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+    "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+    "name": "Menu Dinner Mensuel",
+    "description": "Un dinner chaque soir pendant un mois",
+    "price": 45000,
+    "type": "DINNER",
+    "category": "EUROPEAN",
+    "duration": "MONTH",
+    "isActive": true,
     "isPublic": true,
-    "meals": [
+    "deliveryZones": null,
+    "pickupLocations": null,
+    "imageUrl": "https://example.com/sub-dinner.jpg",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-02-19T19:46:16.209Z",
+    "updatedAt": "2026-02-19T19:46:16.209Z",
+    "provider": {
+      "id": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+      "businessName": "John's Kitchen"
+    },
+    "mealsInSubscriptions": [
       {
-        "id": "meal-uuid-1",
-        "name": "Poulet Roti",
-        "mealType": "LUNCH"
+        "id": "e0073460-557d-491f-906d-e618d6cd7321",
+        "subscriptionId": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+        "mealId": "d9328a6f-2deb-4c5c-8e4b-77d73045a90d",
+        "quantity": 1,
+        "meal": {
+          "id": "d9328a6f-2deb-4c5c-8e4b-77d73045a90d",
+          "name": "Fisch and Chips",
+          "description": "Poisson pane avec frites et sauce tartare",
+          "price": 3000,
+          "imageUrl": "https://example.com/fisch.jpg",
+          "mealType": "DINNER"
+        }
+      },
+      {
+        "id": "744fff55-01eb-4404-9614-48c0395ec4db",
+        "subscriptionId": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+        "mealId": "37aa74a9-1e5f-4e5a-9245-60d06619573d",
+        "quantity": 1,
+        "meal": {
+          "id": "37aa74a9-1e5f-4e5a-9245-60d06619573d",
+          "name": "Pates Carbonara",
+          "description": "Pates avec creme, lardons et parmesan",
+          "price": 2800,
+          "imageUrl": "https://example.com/carbonara.jpg",
+          "mealType": "DINNER"
+        }
       }
     ]
   }
 }
 ```
+
+**Note:** La réponse inclut les détails complets du provider et des repas inclus (`mealsInSubscriptions`).
 
 ---
 
@@ -1458,6 +1507,27 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/public 
   "data": {
     "id": "abc123-def456-ghi789",
     "isPublic": false
+  }
+}
+```
+
+---
+
+### PUT /subscriptions/:id/toggle - Activer/Désactiver un abonnement
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/toggle \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "Statut de l'abonnement mis à jour",
+  "data": {
+    "id": "abc123-def456-ghi789",
+    "isActive": false
   }
 }
 ```
@@ -1534,6 +1604,7 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
 | GET | `/subscriptions/me` | Abonnements du provider |
 | GET | `/subscriptions/:id` | Détails d'un abonnement |
 | PUT | `/subscriptions/:id` | Modifier un abonnement |
+| PUT | `/subscriptions/:id/toggle` | Activer/Désactiver un abonnement |
 | PUT | `/subscriptions/:id/public` | Publier/dé-publier |
 | DELETE | `/subscriptions/:id` | Supprimer un abonnement |
 
