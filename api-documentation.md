@@ -258,40 +258,34 @@ curl -X GET http://localhost:5000/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-**Response (200):**
+**Response (200) - ✅ TEST 6.1:**
 ```json
 {
   "success": true,
-  "message": "Profil recupere avec succes",
+  "message": "Profil récupéré avec succès",
   "data": {
-    "id": "804afb88-1477-41cc-b4b8-ff4a97fc71d4",
-    "email": "nathan@juna.app",
-    "name": "Nathan V.",
-    "phone": "+22997654321",
-    "role": "USER",
+    "id": "47dbbcc7-fff8-4126-9230-52790e825a45",
+    "email": "john.doe@example.com",
+    "name": "John Doe",
+    "phone": "+22961234567",
+    "role": "PROVIDER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "2025-12-22T06:11:42.518Z",
+    "createdAt": "2026-02-19T09:49:30.641Z",
     "profile": {
       "avatar": null,
-      "address": "Cotonou, Benin",
-      "city": "Cotonou",
-      "country": "Benin",
+      "address": null,
+      "city": null,
+      "country": null,
       "latitude": null,
       "longitude": null,
-      "preferences": {
-        "notifications": {
-          "sms": false,
-          "push": true,
-          "email": true
-        },
-        "favoriteCategories": ["AFRICAN", "ASIAN"],
-        "dietaryRestrictions": ["halal", "vegetarian"]
-      }
+      "preferences": null
     }
   }
 }
 ```
+
+**Note:** Le rôle peut être USER, PROVIDER, ADMIN ou SUPER_ADMIN.
 
 ---
 
@@ -302,33 +296,32 @@ curl -X PUT http://localhost:5000/api/v1/users/me \
   -H "Authorization: Bearer <ACCESS_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Nathan V.",
-    "phone": "+22997654321",
-    "address": "Cotonou, Benin",
-    "city": "Cotonou",
-    "country": "Benin"
+    "name": "John Doe Updated",
+    "phone": "+22961234567",
+    "address": "Nouvelle adresse",
+    "city": "Cotonou"
   }'
 ```
 
-**Response (200):**
+**Response (200) - ✅ TEST 6.2:**
 ```json
 {
   "success": true,
-  "message": "Profil mis a jour avec succes",
+  "message": "Profil mis à jour avec succès",
   "data": {
-    "id": "804afb88-1477-41cc-b4b8-ff4a97fc71d4",
-    "email": "nathan@juna.app",
-    "name": "Nathan V.",
-    "phone": "+22997654321",
-    "role": "USER",
+    "id": "47dbbcc7-fff8-4126-9230-52790e825a45",
+    "email": "john.doe@example.com",
+    "name": "John Doe Updated",
+    "phone": "+22961234567",
+    "role": "PROVIDER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "2025-12-22T06:11:42.518Z",
+    "createdAt": "2026-02-19T09:49:30.641Z",
     "profile": {
       "avatar": null,
-      "address": "Cotonou, Benin",
+      "address": "Nouvelle adresse",
       "city": "Cotonou",
-      "country": "Benin",
+      "country": null,
       "latitude": null,
       "longitude": null,
       "preferences": null
