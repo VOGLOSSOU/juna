@@ -17,7 +17,7 @@ export class SubscriptionRepository {
     isPublic?: boolean;
     deliveryZones?: any;
     pickupLocations?: any;
-    imageUrl?: string;
+    imageUrl: string;
     mealIds?: string[];
   }): Promise<Subscription> {
     const { mealIds, ...subscriptionData } = data;

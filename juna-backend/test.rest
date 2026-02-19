@@ -20,7 +20,7 @@
 @mealId4 = 6c808078-811c-40fb-add5-670700ba8c63
 @mealId5 = 8ff636b7-00b7-401b-822c-b26b39c19fb1
 @mealId6 = a54b7801-7e64-42c3-b0f1-f3077c76e381
-@mealId7 = 37aa74a9-1e5f-4e5a-9245-60d06619573d"
+@mealId7 = 37aa74a9-1e5f-4e5a-9245-60d06619573d
 @mealId8 = d6358c4e-625e-4fd7-9b26-a070162a8f07
 @subscriptionId1 = 
 @subscriptionId2 = 
