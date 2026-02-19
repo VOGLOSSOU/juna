@@ -1061,47 +1061,35 @@ curl -X GET http://localhost:5000/api/v1/meals/me \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
-**Response (200) - ✅ TEST 4.6:**
+**Response (200) - ✅ TEST 4.12:**
 ```json
 {
   "success": true,
   "message": "Repas récupérés avec succès",
   "data": [
     {
-      "id": "5d111e6c-cced-4f75-b381-e7b88f595f8e",
-      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
-      "name": "Beignet",
-      "description": "Beignets traditionnels",
-      "price": 500,
-      "imageUrl": "https://example.com/beignet.jpg",
+      "id": "d6358c4e-625e-4fd7-9b26-a070162a8f07",
+      "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+      "name": "Chips",
+      "description": "Chips de pommes de terre naturelles",
+      "price": 400,
+      "imageUrl": "https://example.com/chips.jpg",
       "mealType": "SNACK",
       "isActive": true,
-      "createdAt": "2026-02-18T23:04:39.172Z",
-      "updatedAt": "2026-02-18T23:04:39.172Z"
+      "createdAt": "2026-02-19T18:45:55.913Z",
+      "updatedAt": "2026-02-19T18:45:55.913Z"
     },
     {
-      "id": "e5d17051-0e6c-432d-9bd5-3e0315100a4c",
-      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
-      "name": "Salade Composée",
-      "description": "Salade fraîche avec légumes de saison",
-      "price": 1500,
-      "imageUrl": "https://example.com/salade.jpg",
-      "mealType": "LUNCH",
+      "id": "37aa74a9-1e5f-4e5a-9245-60d06619573d",
+      "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+      "name": "Pates Carbonara",
+      "description": "Pates avec creme, lardons et parmesan",
+      "price": 2800,
+      "imageUrl": "https://example.com/carbonara.jpg",
+      "mealType": "DINNER",
       "isActive": true,
-      "createdAt": "2026-02-18T22:42:29.473Z",
-      "updatedAt": "2026-02-18T22:42:29.473Z"
-    },
-    {
-      "id": "8101a51c-5752-4367-ba88-7405a1ccff68",
-      "providerId": "b1f4ae83-2e36-4f28-b626-2f74ae82f1aa",
-      "name": "Poulet Rôti",
-      "description": "Poulet rôti aux épices africaines",
-      "price": 2500,
-      "imageUrl": "https://example.com/poulet.jpg",
-      "mealType": "LUNCH",
-      "isActive": true,
-      "createdAt": "2026-02-18T22:41:31.935Z",
-      "updatedAt": "2026-02-18T22:41:31.935Z"
+      "createdAt": "2026-02-19T18:45:50.187Z",
+      "updatedAt": "2026-02-19T18:45:50.187Z"
     }
   ]
 }
@@ -1115,7 +1103,7 @@ curl -X GET http://localhost:5000/api/v1/meals/me \
 curl -X GET http://localhost:5000/api/v1/meals
 ```
 
-**Response (200) - ✅ TEST 4.7:**
+**Response (200) - ✅ TEST 4.13:**
 ```json
 {
   "success": true,
@@ -1165,7 +1153,7 @@ curl -X PUT http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1ccf
   }'
 ```
 
-**Response (200) - ✅ TEST 4.8:**
+**Response (200) - ✅ TEST 4.14:**
 ```json
 {
   "success": true,
@@ -1194,7 +1182,7 @@ curl -X PUT http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1ccf
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
-**Response (200) - ✅ TEST 4.9:**
+**Response (200) - ✅ TEST 4.15:**
 ```json
 {
   "success": true,
@@ -1223,7 +1211,7 @@ curl -X DELETE http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
-**Response (200) - ✅ TEST 4.10:**
+**Response (200) - ✅ TEST 4.16:**
 ```json
 {
   "success": true,
