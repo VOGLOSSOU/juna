@@ -1,5 +1,5 @@
 import prisma from '@/config/database';
-import { Subscription, SubscriptionType, SubscriptionCategory, SubscriptionFrequency, Prisma } from '@prisma/client';
+import { Subscription, SubscriptionType, SubscriptionCategory, SubscriptionDuration, Prisma } from '@prisma/client';
 
 export class SubscriptionRepository {
   /**
@@ -12,7 +12,7 @@ export class SubscriptionRepository {
     price: number;
     type: SubscriptionType;
     category: SubscriptionCategory;
-    frequency: SubscriptionFrequency;
+    duration: SubscriptionDuration;
     isActive?: boolean;
     isPublic?: boolean;
     deliveryZones?: any;
@@ -133,7 +133,7 @@ export class SubscriptionRepository {
     price?: number;
     type?: SubscriptionType;
     category?: SubscriptionCategory;
-    frequency?: SubscriptionFrequency;
+    duration?: SubscriptionDuration;
     isActive?: boolean;
     isPublic?: boolean;
     deliveryZones?: any;
@@ -196,7 +196,7 @@ export class SubscriptionRepository {
   async findPublic(filters?: {
     type?: SubscriptionType;
     category?: SubscriptionCategory;
-    frequency?: SubscriptionFrequency;
+    duration?: SubscriptionDuration;
     minPrice?: number;
     maxPrice?: number;
     providerId?: string;
@@ -215,8 +215,8 @@ export class SubscriptionRepository {
       where.category = filters.category;
     }
 
-    if (filters?.frequency) {
-      where.frequency = filters.frequency;
+    if (filters?.duration) {
+      where.duration = filters.duration;
     }
 
     if (filters?.providerId) {
@@ -261,7 +261,7 @@ export class SubscriptionRepository {
     providerId?: string;
     type?: SubscriptionType;
     category?: SubscriptionCategory;
-    frequency?: SubscriptionFrequency;
+    duration?: SubscriptionDuration;
     isActive?: boolean;
     isPublic?: boolean;
     search?: string;
@@ -280,8 +280,8 @@ export class SubscriptionRepository {
       where.category = filters.category;
     }
 
-    if (filters?.frequency) {
-      where.frequency = filters.frequency;
+    if (filters?.duration) {
+      where.duration = filters.duration;
     }
 
     if (filters?.isActive !== undefined) {

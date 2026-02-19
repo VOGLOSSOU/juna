@@ -53,7 +53,7 @@ export class SubscriptionController {
       const filters = {
         type: req.query.type as any,
         category: req.query.category as any,
-        frequency: req.query.frequency as any,
+        duration: req.query.duration as any,
         minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
         providerId: req.query.providerId as string,
@@ -76,7 +76,7 @@ export class SubscriptionController {
       const filters = {
         type: req.query.type as any,
         category: req.query.category as any,
-        frequency: req.query.frequency as any,
+        duration: req.query.duration as any,
         providerId: req.query.providerId as string,
         search: req.query.search as string,
         isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,

@@ -54,12 +54,12 @@ enum DeliveryMethod {
   PICKUP
 }
 
-enum SubscriptionFrequency {
-  DAILY
-  THREE_PER_WEEK
-  WEEKLY
-  BIWEEKLY
-  MONTHLY
+enum SubscriptionDuration {
+  DAY
+  THREE_DAYS
+  WEEK
+  TWO_WEEKS
+  MONTH
 }
 
 enum MealType {
@@ -266,7 +266,7 @@ model Subscription {
   price           Float
   type             SubscriptionType
   category         SubscriptionCategory
-  frequency        SubscriptionFrequency
+  duration        SubscriptionDuration
   isActive         Boolean            @default(true)
   isPublic         Boolean            @default(true)
   deliveryZones    Json?
@@ -288,7 +288,7 @@ model Subscription {
   @@index([providerId])
   @@index([type])
   @@index([category])
-  @@index([frequency])
+  @@index([duration])
   @@index([isActive])
   @@index([isPublic])
   @@map("subscriptions")

@@ -1,4 +1,4 @@
-import { SubscriptionCategory, SubscriptionFrequency, SubscriptionType } from '@prisma/client';
+import { SubscriptionCategory, SubscriptionDuration, SubscriptionType } from '@prisma/client';
 
 export interface CreateSubscriptionDTO {
   name: string;
@@ -6,7 +6,7 @@ export interface CreateSubscriptionDTO {
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;
-  frequency: SubscriptionFrequency;
+  duration: SubscriptionDuration;
   deliveryZones?: any;
   pickupLocations?: any;
   imageUrl?: string;
@@ -20,7 +20,7 @@ export interface UpdateSubscriptionDTO {
   price?: number;
   type?: SubscriptionType;
   category?: SubscriptionCategory;
-  frequency?: SubscriptionFrequency;
+  duration?: SubscriptionDuration;
   deliveryZones?: any;
   pickupLocations?: any;
   imageUrl?: string;
@@ -32,7 +32,7 @@ export interface UpdateSubscriptionDTO {
 export interface SubscriptionFilters {
   type?: SubscriptionType;
   category?: SubscriptionCategory;
-  frequency?: SubscriptionFrequency;
+  duration?: SubscriptionDuration;
   minPrice?: number;
   maxPrice?: number;
   providerId?: string;
@@ -55,7 +55,7 @@ export interface SubscriptionWithMeals {
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;
-  frequency: SubscriptionFrequency;
+  duration: SubscriptionDuration;
   isActive: boolean;
   isPublic: boolean;
   deliveryZones: any;

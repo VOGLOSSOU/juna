@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SubscriptionType, SubscriptionCategory, SubscriptionFrequency } from '@prisma/client';
+import { SubscriptionType, SubscriptionCategory, SubscriptionDuration } from '@prisma/client';
 
 // Validation pour SubscriptionType
 const subscriptionTypeEnum = z.enum([
@@ -27,13 +27,13 @@ const subscriptionCategoryEnum = z.enum([
   'OTHER',
 ]);
 
-// Validation pour SubscriptionFrequency
-const subscriptionFrequencyEnum = z.enum([
-  'DAILY',
-  'THREE_PER_WEEK',
-  'WEEKLY',
-  'BIWEEKLY',
-  'MONTHLY',
+// Validation pour SubscriptionDuration
+const subscriptionDurationEnum = z.enum([
+  'DAY',
+  'THREE_DAYS',
+  'WEEK',
+  'TWO_WEEKS',
+  'MONTH',
 ]);
 
 /**
@@ -56,7 +56,7 @@ export const createSubscriptionSchema = z.object({
     .min(100, 'Prix minimum: 100 XOF'),
   type: subscriptionTypeEnum,
   category: subscriptionCategoryEnum,
-  frequency: subscriptionFrequencyEnum,
+  duration: subscriptionDurationEnum,
   deliveryZones: z.any().optional(),
   pickupLocations: z.any().optional(),
   imageUrl: z
@@ -93,7 +93,7 @@ export const updateSubscriptionSchema = z.object({
     .optional(),
   type: subscriptionTypeEnum.optional(),
   category: subscriptionCategoryEnum.optional(),
-  frequency: subscriptionFrequencyEnum.optional(),
+  duration: subscriptionDurationEnum.optional(),
   deliveryZones: z.any().optional(),
   pickupLocations: z.any().optional(),
   imageUrl: z
@@ -114,7 +114,7 @@ export const updateSubscriptionSchema = z.object({
 export const subscriptionFiltersSchema = z.object({
   type: subscriptionTypeEnum.optional(),
   category: subscriptionCategoryEnum.optional(),
-  frequency: subscriptionFrequencyEnum.optional(),
+  duration: subscriptionDurationEnum.optional(),
   minPrice: z.number().positive().optional(),
   maxPrice: z.number().positive().optional(),
   providerId: z.string().uuid('ID de fournisseur invalide').optional(),
