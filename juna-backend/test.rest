@@ -22,8 +22,8 @@
 @mealId6 = a54b7801-7e64-42c3-b0f1-f3077c76e381
 @mealId7 = 37aa74a9-1e5f-4e5a-9245-60d06619573d
 @mealId8 = d6358c4e-625e-4fd7-9b26-a070162a8f07
-@subscriptionId1 = 
-@subscriptionId2 = 
+@subscriptionId1 = 1393ab4d-2c1b-423d-bcf4-5777fca66c95
+@subscriptionId2 = 28ba3319-e88d-4b2c-8611-733ab361da39
 
 # ============================================
 # ============================================

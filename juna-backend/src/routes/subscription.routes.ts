@@ -24,7 +24,7 @@ router.get(
 router.put(
   '/:id',
   authenticate,
-  validate(subscriptionIdSchema),
+  validateParams(subscriptionIdSchema),
   validate(updateSubscriptionSchema),
   subscriptionController.update.bind(subscriptionController)
 );
@@ -32,21 +32,21 @@ router.put(
 router.put(
   '/:id/toggle',
   authenticate,
-  validate(subscriptionIdSchema),
+  validateParams(subscriptionIdSchema),
   subscriptionController.toggleActive.bind(subscriptionController)
 );
 
 router.put(
   '/:id/public',
   authenticate,
-  validate(subscriptionIdSchema),
+  validateParams(subscriptionIdSchema),
   subscriptionController.togglePublic.bind(subscriptionController)
 );
 
 router.delete(
   '/:id',
   authenticate,
-  validate(subscriptionIdSchema),
+  validateParams(subscriptionIdSchema),
   subscriptionController.delete.bind(subscriptionController)
 );
 
@@ -59,7 +59,7 @@ router.get(
 
 router.get(
   '/:id',
-  validate(subscriptionIdSchema),
+  validateParams(subscriptionIdSchema),
   subscriptionController.getById.bind(subscriptionController)
 );
 
