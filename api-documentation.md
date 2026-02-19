@@ -1468,7 +1468,7 @@ curl -X GET http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5
 ### PUT /subscriptions/:id - Modifier un abonnement
 
 ```bash
-curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
+curl -X PUT http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5777fca66c95 \
   -H "Authorization: Bearer <PROVIDER_TOKEN>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1483,9 +1483,24 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
   "success": true,
   "message": "Abonnement mis à jour avec succès",
   "data": {
-    "id": "abc123-def456-ghi789",
+    "id": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+    "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
     "name": "Menu Lunch Premium",
-    "price": 4000
+    "description": "Un dinner chaque soir pendant un mois",
+    "price": 4000,
+    "type": "DINNER",
+    "category": "EUROPEAN",
+    "duration": "MONTH",
+    "isActive": true,
+    "isPublic": true,
+    "deliveryZones": null,
+    "pickupLocations": null,
+    "imageUrl": "https://example.com/sub-dinner.jpg",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-02-19T19:46:16.209Z",
+    "updatedAt": "2026-02-19T20:17:36.934Z"
   }
 }
 ```
@@ -1495,7 +1510,7 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
 ### PUT /subscriptions/:id/public - Publier/Dé-publier un abonnement
 
 ```bash
-curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/public \
+curl -X PUT http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5777fca66c95/public \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
@@ -1503,13 +1518,31 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/public 
 ```json
 {
   "success": true,
-  "message": "Visibilité de l'abonnement mise à jour",
+  "message": "Statut de l'abonnement mis à jour",
   "data": {
-    "id": "abc123-def456-ghi789",
-    "isPublic": false
+    "id": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+    "providerId": "317f10f2-134d-4109-a087-6c4691f0f7fa",
+    "name": "Menu Lunch Premium",
+    "description": "Un dinner chaque soir pendant un mois",
+    "price": 4000,
+    "type": "DINNER",
+    "category": "EUROPEAN",
+    "duration": "MONTH",
+    "isActive": true,
+    "isPublic": false,
+    "deliveryZones": null,
+    "pickupLocations": null,
+    "imageUrl": "https://example.com/sub-dinner.jpg",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-02-19T19:46:16.209Z",
+    "updatedAt": "2026-02-19T20:18:01.197Z"
   }
 }
 ```
+
+**Note:** `isPublic` est passé de `true` à `false`.
 
 ---
 
@@ -1537,7 +1570,7 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID>/toggle 
 ### DELETE /subscriptions/:id - Supprimer un abonnement
 
 ```bash
-curl -X DELETE http://localhost:5000/api/v1/subscriptions/<SUBSCRIPTION_ID> \
+curl -X DELETE http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5777fca66c95 \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
