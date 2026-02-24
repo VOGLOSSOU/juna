@@ -1,5 +1,5 @@
 import prisma from '@/config/database';
-import { Order, OrderStatus, Prisma } from '@prisma/client';
+import { Order, OrderStatus, DeliveryMethod, Prisma } from '@prisma/client';
 
 export class OrderRepository {
   /**
@@ -25,9 +25,14 @@ export class OrderRepository {
    */
   async findByIdWithRelations(id: string): Promise<
     | (Order & {
-        user: { id: string; name: string; email: string };
-        subscription: { id: string; name: string; provider: { id: string; businessName: string } };
-        payment: { id: string; status: string; amount: number } | null;
+        user: { id: string; name: string; email: string; phone: string | null };
+        subscription: { 
+          id: string; 
+          name: string; 
+          price: number;
+          provider: { id: string; businessName: string };
+        };
+        payment: { id: string; status: string; amount: number; method: string } | null;
       })
     | null
   > {
@@ -39,12 +44,14 @@ export class OrderRepository {
             id: true,
             name: true,
             email: true,
+            phone: true,
           },
         },
         subscription: {
           select: {
             id: true,
             name: true,
+            price: true,
             provider: {
               select: {
                 id: true,
@@ -58,6 +65,7 @@ export class OrderRepository {
             id: true,
             status: true,
             amount: true,
+            method: true,
           },
         },
       },
@@ -70,6 +78,15 @@ export class OrderRepository {
   async findByOrderNumber(orderNumber: string): Promise<Order | null> {
     return prisma.order.findUnique({
       where: { orderNumber },
+    });
+  }
+
+  /**
+   * Trouver une commande par QR code
+   */
+  async findByQrCode(qrCode: string): Promise<Order | null> {
+    return prisma.order.findUnique({
+      where: { qrCode },
     });
   }
 
@@ -89,6 +106,53 @@ export class OrderRepository {
                 businessName: true,
               },
             },
+          },
+        },
+        payment: {
+          select: {
+            status: true,
+            amount: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Trouver les commandes d'un fournisseur (via abonnements)
+   */
+  async findByProviderId(providerId: string): Promise<Order[]> {
+    return prisma.order.findMany({
+      where: {
+        subscription: {
+          providerId,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        subscription: {
+          select: {
+            id: true,
+            name: true,
+            provider: {
+              select: {
+                businessName: true,
+              },
+            },
+          },
+        },
+        payment: {
+          select: {
+            status: true,
+            amount: true,
           },
         },
       },
@@ -116,12 +180,14 @@ export class OrderRepository {
   }
 
   /**
-   * Lister les commandes avec filtres
+   * Lister les commandes avec filtres (admin)
    */
   async findAll(filters?: {
     userId?: string;
     subscriptionId?: string;
+    providerId?: string;
     status?: OrderStatus;
+    deliveryMethod?: DeliveryMethod;
   }): Promise<Order[]> {
     const where: Prisma.OrderWhereInput = {};
 
@@ -133,8 +199,20 @@ export class OrderRepository {
       where.subscriptionId = filters.subscriptionId;
     }
 
+    if (filters?.providerId) {
+      where.subscription = {
+        provider: {
+          id: filters.providerId,
+        },
+      };
+    }
+
     if (filters?.status) {
       where.status = filters.status;
+    }
+
+    if (filters?.deliveryMethod) {
+      where.deliveryMethod = filters.deliveryMethod;
     }
 
     return prisma.order.findMany({
@@ -151,6 +229,17 @@ export class OrderRepository {
           select: {
             id: true,
             name: true,
+            provider: {
+              select: {
+                businessName: true,
+              },
+            },
+          },
+        },
+        payment: {
+          select: {
+            status: true,
+            amount: true,
           },
         },
       },
@@ -178,6 +267,16 @@ export class OrderRepository {
         status,
         ...(status === 'COMPLETED' ? { completedAt: new Date() } : {}),
       },
+    });
+  }
+
+  /**
+   * Mettre à jour le QR code
+   */
+  async updateQrCode(id: string, qrCode: string): Promise<Order> {
+    return prisma.order.update({
+      where: { id },
+      data: { qrCode },
     });
   }
 
@@ -218,12 +317,26 @@ export class OrderRepository {
   }
 
   /**
-   * Obtenir le prochaine numéro de commande
+   * Compter les commandes d'un fournisseur
+   */
+  async countByProvider(providerId: string): Promise<number> {
+    return prisma.order.count({
+      where: {
+        subscription: {
+          providerId,
+        },
+      },
+    });
+  }
+
+  /**
+   * Obtenir le prochain numéro de commande
    */
   async getNextOrderNumber(): Promise<string> {
     const count = await prisma.order.count();
     const year = new Date().getFullYear();
-    return `ORD-${year}-${String(count + 1).padStart(6, '0')}`;
+    const month = String(new Date().getMonth() + 1).padStart(2, '0');
+    return `ORD-${year}${month}-${String(count + 1).padStart(5, '0')}`;
   }
 }
 

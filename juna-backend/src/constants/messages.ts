@@ -32,6 +32,8 @@ export const SUCCESS_MESSAGES = {
 
   // Order
   ORDER_CREATED: 'Commande créée avec succès',
+  ORDER_FETCHED: 'Commande récupérée avec succès',
+  ORDERS_FETCHED: 'Commandes récupérées avec succès',
   ORDER_CANCELLED: 'Commande annulée avec succès',
   ORDER_STATUS_UPDATED: 'Statut de la commande mis à jour',
   QR_CODE_REGENERATED: 'QR code régénéré avec succès',
