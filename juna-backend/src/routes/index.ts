@@ -5,10 +5,10 @@ import providerRoutes from './provider.routes';
 import adminRoutes from './admin.routes';
 import mealRoutes from './meal.routes';
 import subscriptionRoutes from './subscription.routes';
+import reviewRoutes from './review.routes';
 // Import des autres routes ici plus tard
 // import orderRoutes from './order.routes';
 // import proposalRoutes from './proposal.routes';
-// import reviewRoutes from './review.routes';
 // import ticketRoutes from './ticket.routes';
 // import notificationRoutes from './notification.routes';
 // import referralRoutes from './referral.routes';
@@ -22,11 +22,11 @@ router.use('/providers', providerRoutes);
 router.use('/admin', adminRoutes);
 router.use('/meals', mealRoutes);
 router.use('/subscriptions', subscriptionRoutes);
+router.use('/reviews', reviewRoutes);
 
 // Plus tard, ajouter les autres routes
 // router.use('/orders', orderRoutes);
 // router.use('/proposals', proposalRoutes);
-// router.use('/reviews', reviewRoutes);
 // router.use('/tickets', ticketRoutes);
 // router.use('/notifications', notificationRoutes);
 // router.use('/referrals', referralRoutes);

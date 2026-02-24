@@ -44,11 +44,16 @@ export const SUCCESS_MESSAGES = {
   PROPOSAL_REJECTED: 'Proposition rejetée',
 
   // Review
-  REVIEW_SUBMITTED: 'Avis soumis avec succès, en attente de modération',
+  REVIEW_CREATED: 'Avis créé avec succès, en attente de modération',
   REVIEW_UPDATED: 'Avis mis à jour avec succès',
   REVIEW_DELETED: 'Avis supprimé avec succès',
+  REVIEW_FETCHED: 'Avis récupéré avec succès',
+  REVIEWS_FETCHED: 'Avis récupérés avec succès',
+  REVIEW_MODERATED: 'Avis modéré avec succès',
   REVIEW_APPROVED: 'Avis approuvé et publié',
   REVIEW_REJECTED: 'Avis rejeté',
+  STATS_FETCHED: 'Statistiques récupérées avec succès',
+  COUNT_FETCHED: 'Nombre récupéré avec succès',
 
   // Ticket
   TICKET_CREATED: 'Ticket créé avec succès',

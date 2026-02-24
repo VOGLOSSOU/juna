@@ -765,7 +765,7 @@ curl -X GET http://localhost:5000/api/v1/admin/dashboard \
 
 ---
 
-## 🛠️ GUIDE DE CONFIGURATION - CRÉER UN ADMIN
+##  GUIDE DE CONFIGURATION - CRÉER UN ADMIN
 
 ### Méthode 1 : Via le seed (recommandé)
 
