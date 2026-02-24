@@ -1815,6 +1815,22 @@ curl -X PUT http://localhost:5000/api/v1/orders/<ORDER_ID>/confirm \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
 ```
 
+**Response (200) - ✅ TEST 7.8:**
+```json
+{
+  "success": true,
+  "message": "Statut de la commande mis à jour",
+  "data": {
+    "id": "1116b659-49ba-4bb4-8c3e-3bb6d5045940",
+    "orderNumber": "ORD-202602-00002",
+    "amount": 15000,
+    "status": "CONFIRMED",
+    "deliveryMethod": "DELIVERY",
+    "deliveryAddress": "Cotonou, Benin"
+  }
+}
+```
+
 ---
 
 ### PUT /orders/:id/ready - Marquer comme prête
@@ -1822,6 +1838,22 @@ curl -X PUT http://localhost:5000/api/v1/orders/<ORDER_ID>/confirm \
 ```bash
 curl -X PUT http://localhost:5000/api/v1/orders/<ORDER_ID>/ready \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 7.9:**
+```json
+{
+  "success": true,
+  "message": "Statut de la commande mis à jour",
+  "data": {
+    "id": "1116b659-49ba-4bb4-8c3e-3bb6d5045940",
+    "orderNumber": "ORD-202602-00002",
+    "amount": 15000,
+    "status": "READY",
+    "deliveryMethod": "DELIVERY",
+    "deliveryAddress": "Cotonou, Benin"
+  }
+}
 ```
 
 ---
