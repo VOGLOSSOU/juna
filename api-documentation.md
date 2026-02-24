@@ -1717,6 +1717,44 @@ curl -X GET http://localhost:5000/api/v1/orders/me \
   -H "Authorization: Bearer <USER_TOKEN>"
 ```
 
+**Response (200) - ✅ TEST 7.5:**
+```json
+{
+  "success": true,
+  "message": "Commandes récupérées avec succès",
+  "data": [
+    {
+      "id": "1116b659-49ba-4bb4-8c3e-3bb6d5045940",
+      "orderNumber": "ORD-202602-00002",
+      "amount": 15000,
+      "status": "PENDING",
+      "deliveryMethod": "DELIVERY",
+      "deliveryAddress": "Cotonou, Benin",
+      "subscription": {
+        "name": "Menu Lunch Hebdomadaire",
+        "provider": {
+          "businessName": "John's Kitchen"
+        }
+      }
+    },
+    {
+      "id": "77a6ffb4-b3cd-40e6-bafe-21fd53590bde",
+      "orderNumber": "ORD-202602-00001",
+      "amount": 4000,
+      "status": "PENDING",
+      "deliveryMethod": "PICKUP",
+      "pickupLocation": "John's Kitchen, Rue de la Paix",
+      "subscription": {
+        "name": "Menu Lunch Premium",
+        "provider": {
+          "businessName": "John's Kitchen"
+        }
+      }
+    }
+  ]
+}
+```
+
 ---
 
 ### GET /orders/provider/me - Commandes du fournisseur
@@ -1724,6 +1762,48 @@ curl -X GET http://localhost:5000/api/v1/orders/me \
 ```bash
 curl -X GET http://localhost:5000/api/v1/orders/provider/me \
   -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+**Response (200) - ✅ TEST 7.6:**
+```json
+{
+  "success": true,
+  "message": "Commandes récupérées avec succès",
+  "data": [
+    {
+      "id": "1116b659-49ba-4bb4-8c3e-3bb6d5045940",
+      "orderNumber": "ORD-202602-00002",
+      "amount": 15000,
+      "status": "PENDING",
+      "deliveryMethod": "DELIVERY",
+      "deliveryAddress": "Cotonou, Benin",
+      "user": {
+        "id": "517835a3-ea23-4252-9e50-949b8000227f",
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com"
+      },
+      "subscription": {
+        "name": "Menu Lunch Hebdomadaire"
+      }
+    },
+    {
+      "id": "77a6ffb4-b3cd-40e6-bafe-21fd53590bde",
+      "orderNumber": "ORD-202602-00001",
+      "amount": 4000,
+      "status": "PENDING",
+      "deliveryMethod": "PICKUP",
+      "pickupLocation": "John's Kitchen, Rue de la Paix",
+      "user": {
+        "id": "517835a3-ea23-4252-9e50-949b8000227f",
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com"
+      },
+      "subscription": {
+        "name": "Menu Lunch Premium"
+      }
+    }
+  ]
+}
 ```
 
 ---

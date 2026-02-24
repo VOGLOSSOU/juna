@@ -7,10 +7,10 @@
 # ============================================
 # VARIABLES POUR STOCKER LES DONNÉES
 # ============================================
-@user1Token = 
-@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MTc4MzVhMy1lYTIzLTQyNTItOWU1MC05NDliODAwMDIyN2YiLCJlbWFpbCI6ImphbmUuc21pdGhAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3MTk2NzM1NCwiZXhwIjoxNzcxOTY4MjU0fQ.EJFzXy2h9veznUA3sqF4tpUjx7Tz12N_oxuWTANbXYQ
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiYmNjNy1mZmY4LTQxMjYtOTIzMC01Mjc5MGU4MjVhNDUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxOTY4NTIwLCJleHAiOjE3NzE5Njk0MjB9.wwpNG01ZaoV8GjrlDiSunqstIb5g_J3B4xDGb2eus6c
+@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MTc4MzVhMy1lYTIzLTQyNTItOWU1MC05NDliODAwMDIyN2YiLCJlbWFpbCI6ImphbmUuc21pdGhAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3MTk2ODQyMSwiZXhwIjoxNzcxOTY5MzIxfQ.eFJB0TepBRBFLO0Q6hWJvbE-0q30AkMfbELPx7hjG1w
 @adminToken = 
-@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiYmNjNy1mZmY4LTQxMjYtOTIzMC01Mjc5MGU4MjVhNDUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNTMyMjA4LCJleHAiOjE3NzE1MzMxMDh9.QZM6IXcqQ14x1RqwOtXUyBsPc9PDuGacbYrYjGkAmR8
+@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiYmNjNy1mZmY4LTQxMjYtOTIzMC01Mjc5MGU4MjVhNDUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxOTY4NTIwLCJleHAiOjE3NzE5Njk0MjB9.wwpNG01ZaoV8GjrlDiSunqstIb5g_J3B4xDGb2eus6c
 @user1Id = 
 @user2Id = 
 @providerId = 317f10f2-134d-4109-a087-6c4691f0f7fa
@@ -24,8 +24,8 @@
 @mealId8 = d6358c4e-625e-4fd7-9b26-a070162a8f07
 @subscriptionId1 = 1393ab4d-2c1b-423d-bcf4-5777fca66c95
 @subscriptionId2 = 368c1f4d-384d-4bc8-9f30-ba0afdfe256c
-@orderId1 = 
-@orderId2 = 
+@orderId1 = 1116b659-49ba-4bb4-8c3e-3bb6d5045940
+@orderId2 = 77a6ffb4-b3cd-40e6-bafe-21fd53590bde
 @qrCode1 = 
 @reviewId1 = 
 @reviewId2 = 
@@ -527,7 +527,7 @@ Content-Type: application/json
 ###
 # TEST 7.5 : Mes commandes (user)
 GET {{apiUrl}}/orders/me
-Authorization: Bearer {{user1Token}}
+Authorization: Bearer {{user2Token}}
 ###
 
 ###
@@ -539,7 +539,7 @@ Authorization: Bearer {{providerToken}}
 ###
 # TEST 7.7 : Details commande
 GET {{apiUrl}}/orders/{{orderId1}}
-Authorization: Bearer {{user1Token}}
+Authorization: Bearer {{user2Token}}
 ###
 
 # ===== GESTION STATUT =====
