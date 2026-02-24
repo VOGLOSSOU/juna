@@ -1634,3 +1634,255 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
 | PUT | `/subscriptions/:id/public` | Publier/dé-publier |
 | DELETE | `/subscriptions/:id` | Supprimer un abonnement |
 
+---
+
+## ORDER - Gestion des Commandes
+
+Les commandes représentent les souscriptions des utilisateurs aux abonnements. Chaque commande génère un QR code unique pour la validation du retrait/livraison.
+
+### Statuts de commande
+
+| Statut | Description |
+|--------|-------------|
+| PENDING | En attente de confirmation |
+| CONFIRMED | Confirmée par le fournisseur |
+| PREPARING | En préparation |
+| READY | Prête pour retrait/livraison |
+| IN_DELIVERY | En livraison |
+| DELIVERED | Livrée |
+| COMPLETED | Terminée (retrait validé) |
+| CANCELLED | Annulée |
+
+### Modes de livraison
+
+| Mode | Description |
+|------|-------------|
+| PICKUP | Retrait sur place |
+| DELIVERY | Livraison à domicile |
+
+---
+
+### POST /orders - Créer une commande
+
+```bash
+curl -X POST http://localhost:5000/api/v1/orders \
+  -H "Authorization: Bearer <USER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subscriptionId": "<SUBSCRIPTION_ID>",
+    "deliveryMethod": "PICKUP",
+    "pickupLocation": "John\'s Kitchen, Rue de la Paix"
+  }'
+```
+
+**Response (201) - ✅ TEST 7.1:**
+```json
+{
+  "success": true,
+  "message": "Commande créée avec succès",
+  "data": {
+    "id": "77a6ffb4-b3cd-40e6-bafe-21fd53590bde",
+    "userId": "517835a3-ea23-4252-9e50-949b8000227f",
+    "subscriptionId": "1393ab4d-2c1b-423d-bcf4-5777fca66c95",
+    "orderNumber": "ORD-202602-00001",
+    "amount": 4000,
+    "status": "PENDING",
+    "deliveryMethod": "PICKUP",
+    "deliveryAddress": null,
+    "pickupLocation": "John's Kitchen, Rue de la Paix",
+    "scheduledFor": null,
+    "completedAt": null,
+    "qrCode": "JUNA-01E271F3",
+    "createdAt": "2026-02-24T21:11:02.765Z",
+    "updatedAt": "2026-02-24T21:11:02.765Z"
+  }
+}
+```
+
+**Body Parameters:**
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| subscriptionId | string | ID de l'abonnement (required, UUID) |
+| deliveryMethod | enum | PICKUP ou DELIVERY (required) |
+| deliveryAddress | string | Adresse de livraison (required si DELIVERY) |
+| pickupLocation | string | Lieu de retrait (required si PICKUP) |
+| scheduledFor | string | Date/heure prévue (optional, ISO datetime) |
+
+---
+
+### GET /orders/me - Mes commandes
+
+```bash
+curl -X GET http://localhost:5000/api/v1/orders/me \
+  -H "Authorization: Bearer <USER_TOKEN>"
+```
+
+---
+
+### GET /orders/provider/me - Commandes du fournisseur
+
+```bash
+curl -X GET http://localhost:5000/api/v1/orders/provider/me \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+---
+
+### PUT /orders/:id/confirm - Confirmer une commande
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/orders/<ORDER_ID>/confirm \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+---
+
+### PUT /orders/:id/ready - Marquer comme prête
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/orders/<ORDER_ID>/ready \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>"
+```
+
+---
+
+### POST /orders/:id/complete - Valider le retrait/livraison
+
+```bash
+curl -X POST http://localhost:5000/api/v1/orders/<ORDER_ID>/complete \
+  -H "Authorization: Bearer <PROVIDER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "qrCode": "JUNA-01E271F3"
+  }'
+```
+
+---
+
+### Erreurs possibles ORDER
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 400 | Validation failed | Données invalides |
+| 401 | Non authentifié | Token manquant |
+| 403 | Permissions insuffisantes | Pas le propriétaire |
+| 404 | Non trouvé | Commande inexistante |
+| 409 | Conflit | QR code invalide ou déjà utilisé |
+
+---
+
+### Résumé des endpoints ORDER
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/orders` | Créer une commande |
+| GET | `/orders/me` | Mes commandes |
+| GET | `/orders/provider/me` | Commandes fournisseur |
+| GET | `/orders/:id` | Détails commande |
+| PUT | `/orders/:id/confirm` | Confirmer commande |
+| PUT | `/orders/:id/ready` | Marquer prêt |
+| POST | `/orders/:id/complete` | Valider retrait/livraison |
+| DELETE | `/orders/:id` | Annuler commande |
+| PUT | `/orders/:id/qrcode` | Régénérer QR code |
+
+
+---
+
+## REVIEW - Gestion des Avis
+
+Les avis permettent aux utilisateurs de noter et commenter les abonnements qu'ils ont	testés. Un avis ne peut être donné qu'après une commande livrée.
+
+### Statuts d'avis
+
+| Statut | Description |
+|--------|-------------|
+| PENDING | En attente de modération |
+| APPROVED | Approuvé et publié |
+| REJECTED | Rejeté par l'admin |
+
+---
+
+### POST /reviews - Créer un avis
+
+**Prérequis :** Commande livrée
+
+```bash
+curl -X POST http://localhost:5000/api/v1/reviews \
+  -H "Authorization: Bearer <USER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": "<ORDER_ID>",
+    "subscriptionId": "<SUBSCRIPTION_ID>",
+    "rating": 5,
+    "comment": "Excellent service!"
+  }'
+```
+
+**Body Parameters:**
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| orderId | string | ID de la commande (required, UUID) |
+| subscriptionId | string | ID de l'abonnement (required, UUID) |
+| rating | number | Note de 1 à 5 (required) |
+| comment | string | Commentaire (optional, max 1000 chars) |
+
+---
+
+### GET /reviews/subscription/:id - Avis d'un abonnement
+
+```bash
+curl -X GET http://localhost:5000/api/v1/reviews/subscription/<SUBSCRIPTION_ID>
+```
+
+**Note:** Retourne uniquement les avis APPROUVÉS.
+
+---
+
+### GET /reviews/subscription/:id/stats - Statistiques
+
+```bash
+curl -X GET http://localhost:5000/api/v1/reviews/subscription/<SUBSCRIPTION_ID>/stats
+```
+
+---
+
+### PUT /reviews/:id/moderate - Modérer un avis (admin)
+
+```bash
+curl -X PUT http://localhost:5000/api/v1/reviews/<REVIEW_ID>/moderate \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "APPROVED"
+  }'
+```
+
+**Status values:** APPROVED, REJECTED
+
+---
+
+### Erreurs possibles REVIEW
+
+| Code | Message | Cause |
+|------|---------|-------|
+| 400 | Validation failed | Données invalides |
+| 401 | Non authentifié | Token manquant |
+| 403 | Permissions insuffisantes | Pas le propriétaire |
+| 404 | Non trouvé | Avis inexistant |
+| 409 | Conflit | Avis déjà existant pour cette commande |
+
+---
+
+### Résumé des endpoints REVIEW
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/reviews` | Créer un avis |
+| GET | `/reviews/me` | Mes avis |
+| GET | `/reviews/subscription/:id` | Avis d'un abonnement |
+| GET | `/reviews/subscription/:id/stats` | Statistiques |
+| GET | `/reviews/:id` | Détails avis (admin) |
+| PUT | `/reviews/:id` | Modifier mon avis |
+| DELETE | `/reviews/:id` | Supprimer mon avis |
+| PUT | `/reviews/:id/moderate` | Modérer (admin) |
+| GET | `/reviews/pending/count` | Avis en attente (admin) |

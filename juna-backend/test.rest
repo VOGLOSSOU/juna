@@ -7,8 +7,8 @@
 # ============================================
 # VARIABLES POUR STOCKER LES DONNÉES
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiYmNjNy1mZmY4LTQxMjYtOTIzMC01Mjc5MGU4MjVhNDUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNTMyMjA4LCJleHAiOjE3NzE1MzMxMDh9.QZM6IXcqQ14x1RqwOtXUyBsPc9PDuGacbYrYjGkAmR8
-@user2Token = 
+@user1Token = 
+@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MTc4MzVhMy1lYTIzLTQyNTItOWU1MC05NDliODAwMDIyN2YiLCJlbWFpbCI6ImphbmUuc21pdGhAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc3MTk2NzM1NCwiZXhwIjoxNzcxOTY4MjU0fQ.EJFzXy2h9veznUA3sqF4tpUjx7Tz12N_oxuWTANbXYQ
 @adminToken = 
 @providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiYmNjNy1mZmY4LTQxMjYtOTIzMC01Mjc5MGU4MjVhNDUiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzcxNTMyMjA4LCJleHAiOjE3NzE1MzMxMDh9.QZM6IXcqQ14x1RqwOtXUyBsPc9PDuGacbYrYjGkAmR8
 @user1Id = 
@@ -23,7 +23,12 @@
 @mealId7 = 37aa74a9-1e5f-4e5a-9245-60d06619573d
 @mealId8 = d6358c4e-625e-4fd7-9b26-a070162a8f07
 @subscriptionId1 = 1393ab4d-2c1b-423d-bcf4-5777fca66c95
-@subscriptionId2 = 28ba3319-e88d-4b2c-8611-733ab361da39
+@subscriptionId2 = 368c1f4d-384d-4bc8-9f30-ba0afdfe256c
+@orderId1 = 
+@orderId2 = 
+@qrCode1 = 
+@reviewId1 = 
+@reviewId2 = 
 
 # ============================================
 # ============================================
@@ -77,6 +82,14 @@ POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
 {"email": "john.doe@example.com", "password": "Password123"}
+###
+
+### 
+# TEST  : Créer User 2 (succès)
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{"email": "jane.smith@example.com", "password": "Password456"}
 ###
 
 ### 
@@ -463,4 +476,221 @@ Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
 {"name": "John Doe Updated", "address": "Nouvelle adresse", "city": "Cotonou"}
+###
+
+
+# ============================================
+# ============================================
+# PARTIE 7 : TESTS ORDER - COMMANDES
+# ============================================
+# ============================================
+
+# ===== CRÉATION COMMANDES =====
+
+###
+# TEST 7.1 : User passe une commande (PICKUP)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{"subscriptionId": "{{subscriptionId1}}", "deliveryMethod": "PICKUP", "pickupLocation": "John's Kitchen, Rue de la Paix"}
+###
+
+###
+# TEST 7.2 : User passe une commande (DELIVERY)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{"subscriptionId": "{{subscriptionId2}}", "deliveryMethod": "DELIVERY", "deliveryAddress": "Cotonou, Benin"}
+###
+
+###
+# TEST 7.3 : User passe commande avec abonnement inexistant (ERREUR)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"subscriptionId": "invalid-uuid", "deliveryMethod": "PICKUP"}
+###
+
+###
+# TEST 7.4 : User non-connecté tente de commander (ERREUR)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+
+{"subscriptionId": "{{subscriptionId1}}", "deliveryMethod": "PICKUP"}
+###
+
+# ===== LISTE COMMANDES =====
+
+###
+# TEST 7.5 : Mes commandes (user)
+GET {{apiUrl}}/orders/me
+Authorization: Bearer {{user1Token}}
+###
+
+###
+# TEST 7.6 : Commandes du fournisseur
+GET {{apiUrl}}/orders/provider/me
+Authorization: Bearer {{providerToken}}
+###
+
+###
+# TEST 7.7 : Details commande
+GET {{apiUrl}}/orders/{{orderId1}}
+Authorization: Bearer {{user1Token}}
+###
+
+# ===== GESTION STATUT =====
+
+###
+# TEST 7.8 : Provider confirme la commande
+PUT {{apiUrl}}/orders/{{orderId1}}/confirm
+Authorization: Bearer {{providerToken}}
+###
+
+###
+# TEST 7.9 : Provider marque comme pret
+PUT {{apiUrl}}/orders/{{orderId1}}/ready
+Authorization: Bearer {{providerToken}}
+###
+
+###
+# TEST 7.10 : Valider le retrait (scan QR)
+POST {{apiUrl}}/orders/{{orderId1}}/complete
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{"qrCode": "{{qrCode1}}"}
+###
+
+###
+# TEST 7.11 : Annuler une commande (avant confirmation)
+DELETE {{apiUrl}}/orders/{{orderId2}}
+Authorization: Bearer {{user1Token}}
+###
+
+###
+# TEST 7.12 : Regenerer QR code
+PUT {{apiUrl}}/orders/{{orderId1}}/qrcode
+Authorization: Bearer {{providerToken}}
+###
+
+
+# ============================================
+# ============================================
+# PARTIE 8 : TESTS REVIEW - AVIS
+# ============================================
+# ============================================
+
+# ===== CRÉATION AVIS =====
+
+###
+# TEST 8.1 : User donne un avis (apres commande livree)
+POST {{apiUrl}}/reviews
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"orderId": "{{orderId1}}", "subscriptionId": "{{subscriptionId1}}", "rating": 5, "comment": "Excellent service, repas tres frais!"}
+###
+
+###
+# TEST 8.2 : User donne avis sur commande non-livree (ERREUR)
+POST {{apiUrl}}/reviews
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"orderId": "{{orderId2}}", "subscriptionId": "{{subscriptionId2}}", "rating": 4}
+###
+
+###
+# TEST 8.3 : User donne deuxieme avis sur meme commande (ERREUR)
+POST {{apiUrl}}/reviews
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"orderId": "{{orderId1}}", "subscriptionId": "{{subscriptionId1}}", "rating": 3}
+###
+
+###
+# TEST 8.4 : Avis avec note invalide (ERREUR)
+POST {{apiUrl}}/reviews
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"orderId": "{{orderId1}}", "subscriptionId": "{{subscriptionId1}}", "rating": 6}
+###
+
+# ===== LISTE AVIS =====
+
+###
+# TEST 8.5 : Mes avis (user)
+GET {{apiUrl}}/reviews/me
+Authorization: Bearer {{user1Token}}
+###
+
+###
+# TEST 8.6 : Avis d'un abonnement (public)
+GET {{apiUrl}}/reviews/subscription/{{subscriptionId1}}
+###
+
+###
+# TEST 8.7 : Statistiques d'un abonnement
+GET {{apiUrl}}/reviews/subscription/{{subscriptionId1}}/stats
+###
+
+###
+# TEST 8.8 : Details avis (admin)
+GET {{apiUrl}}/reviews/{{reviewId1}}
+Authorization: Bearer {{adminToken}}
+###
+
+###
+# TEST 8.9 : Liste tous les avis (admin)
+GET {{apiUrl}}/reviews
+Authorization: Bearer {{adminToken}}
+###
+
+# ===== MODERATION =====
+
+###
+# TEST 8.10 : Admin approuve l'avis
+PUT {{apiUrl}}/reviews/{{reviewId1}}/moderate
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{"status": "APPROVED"}
+###
+
+###
+# TEST 8.11 : Admin rejette l'avis
+PUT {{apiUrl}}/reviews/{{reviewId2}}/moderate
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{"status": "REJECTED", "reason": "Contenu inapproprie"}
+###
+
+###
+# TEST 8.12 : Nombre avis en attente (admin)
+GET {{apiUrl}}/reviews/pending/count
+Authorization: Bearer {{adminToken}}
+###
+
+# ===== MODIFIER/SUPPRIMER AVIS =====
+
+###
+# TEST 8.13 : Modifier son avis (avant moderation)
+PUT {{apiUrl}}/reviews/{{reviewId1}}
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{"rating": 4, "comment": "Mise a jour: toujours excellent!"}
+###
+
+###
+# TEST 8.14 : Supprimer son avis (avant moderation)
+DELETE {{apiUrl}}/reviews/{{reviewId1}}
+Authorization: Bearer {{user1Token}}
 ###
