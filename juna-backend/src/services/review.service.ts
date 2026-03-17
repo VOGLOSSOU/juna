@@ -37,10 +37,10 @@ export class ReviewService {
       );
     }
 
-    // Vérifier que la commande est livrée/complétée
-    if (order.status !== 'DELIVERED' && order.status !== 'COMPLETED') {
+    // Vérifier que la commande n'est plus en attente (doit être confirmée ou plus)
+    if (order.status === 'PENDING') {
       throw new ValidationError(
-        'Vous ne pouvez donner un avis que sur une commande livrée',
+        'Vous ne pouvez donner un avis que sur une commande confirmée',
         ERROR_CODES.INVALID_INPUT
       );
     }
