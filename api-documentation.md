@@ -1235,6 +1235,13 @@ Les abonnements permettent aux clients de souscrire à des repas récurrents. Un
 - **duration** : DAY (1 jour), THREE_DAYS (3 jours), WEEK (7 jours), TWO_WEEKS (14 jours), MONTH (30 jours), WORK_WEEK (5 jours - semaine de travail), WORK_WEEK_2 (10 jours), WORK_MONTH (20 jours), WEEKEND (2 jours - Samedi-Dimanche)
 - **category** : AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER
 
+> **💰 Modèle économique - Commission JUNA :**
+> - Chaque abonnement peut avoir un pourcentage de commission différent (0-100%, défaut: 10%)
+> - Exemple : Prix = 10.000 XOF, Commission = 10%
+>   - JUNA reçoit : 1.000 XOF
+>   - Provider reçoit : 9.000 XOF
+> - Le frontend gère l'affichage (si le provider veut recevoir 10.000XOF après 10% de commission, il doit afficher 11.111XOF)
+
 ### Types d'abonnements disponibles
 
 | Type | Description | Repas inclus |
@@ -1312,7 +1319,8 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
 |-----------|------|-------------|
 | name | string | Nom de l'abonnement (required, 3-100 chars) |
 | description | string | Description (required, 10-1000 chars) |
-| price | number | Prix en XOF (required, min 100) |
+| price | number | Prix en XOF affiché à l'utilisateur (required, min 100) |
+| junaCommissionPercent | number | Pourcentage de commission pour JUNA (optional, 0-100, default: 10). Ex: 10% de 10.000XOF = JUNA reçoit 1.000XOF, Provider reçoit 9.000XOF |
 | type | enum | BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, LUNCH_DINNER, FULL_DAY, CUSTOM |
 | category | enum | AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER |
 | duration | enum | DAY, THREE_DAYS, WEEK, TWO_WEEKS, MONTH, WORK_WEEK, WORK_WEEK_2, WORK_MONTH, WEEKEND |
