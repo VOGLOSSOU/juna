@@ -1232,7 +1232,7 @@ curl -X DELETE http://localhost:5000/api/v1/meals/8101a51c-5752-4367-ba88-7405a1
 
 Les abonnements permettent aux clients de souscrire à des repas récurrents. Un abonnement est défini par :
 - **type** : BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, LUNCH_DINNER, FULL_DAY, CUSTOM
-- **duration** : DAY (1 jour), THREE_DAYS (3 jours), WEEK (7 jours), TWO_WEEKS (14 jours), MONTH (30 jours)
+- **duration** : DAY (1 jour), THREE_DAYS (3 jours), WEEK (7 jours), TWO_WEEKS (14 jours), MONTH (30 jours), WORK_WEEK (5 jours - semaine de travail), WORK_WEEK_2 (10 jours), WORK_MONTH (20 jours)
 - **category** : AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER
 
 ### Types d'abonnements disponibles
@@ -1257,6 +1257,9 @@ Les abonnements permettent aux clients de souscrire à des repas récurrents. Un
 | WEEK | 7 | Semaine |
 | TWO_WEEKS | 14 | Deux semaines |
 | MONTH | 30 | Mensuel |
+| WORK_WEEK | 5 | Semaine de travail (Lundi-Vendredi) |
+| WORK_WEEK_2 | 10 | Deux semaines de travail |
+| WORK_MONTH | 20 | Mois de travail (4 semaines) |
 
 ---
 
@@ -1311,7 +1314,7 @@ curl -X POST http://localhost:5000/api/v1/subscriptions \
 | price | number | Prix en XOF (required, min 100) |
 | type | enum | BREAKFAST, LUNCH, DINNER, SNACK, BREAKFAST_LUNCH, LUNCH_DINNER, FULL_DAY, CUSTOM |
 | category | enum | AFRICAN, EUROPEAN, ASIAN, AMERICAN, FUSION, VEGETARIAN, VEGAN, HALAL, OTHER |
-| duration | enum | DAY, THREE_DAYS, WEEK, TWO_WEEKS, MONTH |
+| duration | enum | DAY, THREE_DAYS, WEEK, TWO_WEEKS, MONTH, WORK_WEEK, WORK_WEEK_2, WORK_MONTH |
 | imageUrl | string | URL de l'image (required) |
 | isPublic | boolean | Visible publiquement (optional, default: false) |
 | mealIds | array | IDs des repas inclus (required, au moins 1 repas) |

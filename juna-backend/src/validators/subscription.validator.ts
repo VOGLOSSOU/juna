@@ -34,6 +34,9 @@ const subscriptionDurationEnum = z.enum([
   'WEEK',
   'TWO_WEEKS',
   'MONTH',
+  'WORK_WEEK',       // 5 jours (Lundi-Vendredi)
+  'WORK_WEEK_2',     // 10 jours (2 semaines de travail)
+  'WORK_MONTH',      // 20 jours (4 semaines de travail)
 ]);
 
 /**
