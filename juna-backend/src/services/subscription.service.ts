@@ -157,6 +157,7 @@ export class SubscriptionService {
       name: data.name,
       description: data.description,
       price: data.price,
+      junaCommissionPercent: data.junaCommissionPercent,
       type: data.type,
       category: data.category,
       duration: data.duration,

@@ -141,6 +141,7 @@ export class SubscriptionRepository {
     name?: string;
     description?: string;
     price?: number;
+    junaCommissionPercent?: number;
     type?: SubscriptionType;
     category?: SubscriptionCategory;
     duration?: SubscriptionDuration;
