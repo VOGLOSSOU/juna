@@ -1478,7 +1478,8 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5
   -H "Content-Type: application/json" \
   -d '{
     "name": "Menu Lunch Premium",
-    "price": 4000
+    "price": 4000,
+    "junaCommissionPercent": 15
   }'
 ```
 
@@ -1493,6 +1494,7 @@ curl -X PUT http://localhost:5000/api/v1/subscriptions/1393ab4d-2c1b-423d-bcf4-5
     "name": "Menu Lunch Premium",
     "description": "Un dinner chaque soir pendant un mois",
     "price": 4000,
+    "junaCommissionPercent": 15,
     "type": "DINNER",
     "category": "EUROPEAN",
     "duration": "MONTH",
