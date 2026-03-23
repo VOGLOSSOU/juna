@@ -412,17 +412,26 @@ Une seule ligne de chips horizontale scrollable, avec les catégories les plus p
 
 Le corps de la page est un scroll vertical fluide avec plusieurs sections :
 
-**Section 1 — Abonnements populaires près de toi**
+**Principe important :** chaque section affiche seulement 4 à 6 abonnements maximum, avec un lien **"Explorer →"** en fin de section qui redirige vers la page Explorer avec le filtre correspondant pré-appliqué.
+
+**Section 1 — Populaires près de toi**
 - Scroll horizontal de cards larges (type "featured")
-- Card grande : image food pleine largeur, titre, prestataire, prix, note
-- Animation d'entrée douce (fade + slide) au chargement
+- Card grande : image food, titre, prestataire, prix, note
+- Animation d'entrée douce (fade + slide up) au chargement
+- Lien "Explorer →" → page Explorer sans filtre particulier
 
-**Section 2 — Par catégorie active**
-- Titre de section : "Africain", "Halal", etc. (selon filtre actif)
-- Grille 2 colonnes ou liste verticale de cards compactes
+**Section 2 — Cuisine Africaine**
+- Scroll horizontal de cards compactes
+- Lien "Explorer →" → page Explorer avec filtre `category=AFRICAN` pré-appliqué
 
-**Section 3 — Découvrir les prestataires**
+**Section 3 — Formules semaine de travail**
+- Scroll horizontal de cards compactes
+- Lien "Explorer →" → page Explorer avec filtre `duration=WORK_WEEK` pré-appliqué
+
+**Section 4 — Découvrir les prestataires**
 - Scroll horizontal de cards prestataires (avatar, nom, note, badge certifié)
+
+> Les sections affichées peuvent évoluer selon la localisation et les données disponibles.
 
 **Skeleton loaders** : présents sur toutes les sections pendant le chargement. Jamais d'écran vide.
 
@@ -730,6 +739,51 @@ Accessible au clic sur une commande de la liste.
 - QR Code uniquement visible dans l'app — pas de bouton télécharger, pas de partage (v1)
 - Bouton "Laisser un avis" apparaît uniquement quand la commande est au statut COMPLÉTÉE
 - Bouton "Annuler" visible uniquement si statut = EN ATTENTE ou CONFIRMÉE
+
+---
+
+### 5.8b Page Explorer
+
+Accessible via le 2ème onglet de la bottom bar, ou via un lien "Explorer →" depuis l'accueil (avec filtre pré-appliqué).
+
+C'est le catalogue complet de tous les abonnements disponibles, avec tous les filtres accessibles.
+
+#### Structure
+
+```
+┌─────────────────────────────────┐
+│  🔍  Rechercher un abonnement   │  ← barre de recherche texte libre en haut
+│                                 │
+│  [ 🌍 Africain ][ ☪️ Halal ]...  ⚙️ Filtres (2) │  ← même système que l'accueil
+│                                 │
+│  245 abonnements trouvés        │  ← compteur dynamique
+│  Trier par : [ Pertinence ▾ ]  │  ← selector de tri
+│                                 │
+│  ┌──────────┐  ┌──────────┐    │
+│  │  card    │  │  card    │    │  ← grille 2 colonnes
+│  └──────────┘  └──────────┘    │
+│  ┌──────────┐  ┌──────────┐    │
+│  │  card    │  │  card    │    │
+│  └──────────┘  └──────────┘    │
+│       ... (scroll infini)       │
+└─────────────────────────────────┘
+```
+
+**Différences avec l'accueil :**
+- Barre de recherche texte libre visible en permanence
+- Grille 2 colonnes au lieu du scroll horizontal — on veut voir un maximum d'abonnements
+- Compteur de résultats dynamique qui se met à jour à chaque filtre
+- Options de tri : Pertinence / Prix croissant / Prix décroissant / Mieux notés / Les plus récents
+- Scroll infini (pagination automatique) — pas de bouton "charger plus"
+
+**Si arrivée depuis un lien "Explorer →" de l'accueil :**
+- Le filtre correspondant est pré-appliqué automatiquement
+- Le badge "Filtres (1)" reflète ce filtre actif
+- L'user peut le retirer ou en ajouter d'autres
+
+**Si aucun résultat :**
+- Illustration sobre + message "Aucun abonnement trouvé dans cette zone"
+- Bouton "Réinitialiser les filtres"
 
 ---
 
