@@ -1,0 +1,25 @@
+# Claude Code
+.claude/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Environnement
+.env
+.env.local
+.env.production
+.env.staging
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/settings.json
