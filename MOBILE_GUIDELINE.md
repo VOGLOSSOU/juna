@@ -733,6 +733,62 @@ Accessible au clic sur une commande de la liste.
 
 ---
 
+### 5.9 Page Profil
+
+Accessible via le 4ème onglet de la bottom bar.
+
+```
+┌─────────────────────────────────┐
+│                                 │
+│         [  PHOTO  ]             │  ← avatar circulaire, initiales si pas de photo
+│        Marcus Dupont            │  ← nom complet
+│      marcus@email.com           │  ← email, gris clair
+│                                 │
+│  ─────────────────────────────  │
+│                                 │
+│  ⚙️   Paramètres du compte    › │
+│  🔔   Notifications            › │
+│  ❤️   Mes favoris              › │
+│                                 │
+│  ─────────────────────────────  │
+│                                 │
+│  🍽️   Devenir prestataire      › │  ← CTA important, légèrement mis en avant
+│  💡   Proposer un abonnement   › │
+│  🎁   Parrainer un ami         › │
+│                                 │
+│  ─────────────────────────────  │
+│                                 │
+│  💬   Contacter le support     › │
+│  🚩   Signaler un problème     › │
+│                                 │
+│  ─────────────────────────────  │
+│                                 │
+│  [ Se déconnecter ]             │  ← bouton outline rouge discret
+│                                 │
+└─────────────────────────────────┘
+```
+
+**Règles :**
+- Photo de profil : circulaire, cliquable pour modifier
+- Si pas de photo → initiales du nom sur fond vert foncé
+- "Devenir prestataire" : légèrement mis en avant (fond vert très clair, texte vert foncé) — c'est un CTA stratégique pour Juna
+- "Se déconnecter" : bouton discret, outline rouge, tout en bas — pas de confirmation requise
+
+---
+
+**Sous-pages accessibles depuis le profil :**
+
+- **Paramètres du compte** → modifier nom, prénom, téléphone, photo, mot de passe
+- **Notifications** → activer/désactiver les types de notifications
+- **Mes favoris** → abonnements sauvegardés (icône ♡ depuis la page détail)
+- **Devenir prestataire** → formulaire de candidature prestataire
+- **Proposer un abonnement** → formulaire de proposition personnalisée (CustomProposal)
+- **Parrainer un ami** → code de parrainage à partager
+- **Contacter le support** → ouvrir un ticket ou voir les tickets existants
+- **Signaler un problème** → formulaire rapide (catégorie + description)
+
+---
+
 ## 6. Parcours prestataire (PROVIDER)
 
 > *À compléter*
