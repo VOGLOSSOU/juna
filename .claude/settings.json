@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /home/nathan-voglossou/juna/juna-backend/src/controllers/*.ts)",
+      "Bash(wc -l /home/nathan-voglossou/juna/juna-backend/src/services/*.ts)",
+      "Bash(find /home/nathan-voglossou/juna/juna-backend/src -name \"*.ts\" -exec wc -l {} +)"
+    ]
+  }
+}
