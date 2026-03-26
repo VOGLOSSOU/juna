@@ -81,6 +81,15 @@ export class SubscriptionRepository {
           select: {
             id: true,
             businessName: true,
+            businessAddress: true,
+            city: true,
+            country: true,
+            acceptsDelivery: true,
+            acceptsPickup: true,
+            deliveryZones: true,
+            rating: true,
+            totalReviews: true,
+            status: true,
           },
         },
         mealsInSubscriptions: {

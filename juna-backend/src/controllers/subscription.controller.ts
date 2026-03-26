@@ -58,6 +58,8 @@ export class SubscriptionController {
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
         providerId: req.query.providerId as string,
         search: req.query.search as string,
+        city: req.query.city as string | undefined,
+        country: req.query.country as string | undefined,
         isActive: true,
         isPublic: true,
       };
