@@ -62,12 +62,8 @@ router.get(
   async (req: any, res: any, next: any) => {
     try {
       const { id } = req.params;
-      const providers = await providerService.listAll();
-      const provider = providers.find((p: any) => p.id === id);
-      if (!provider) {
-        return res.status(404).json({ success: false, message: 'Fournisseur introuvable' });
-      }
-      res.json({ success: true, data: provider });
+      const result = await providerService.getById(id);
+      res.json({ success: true, data: result });
     } catch (error) {
       next(error);
     }

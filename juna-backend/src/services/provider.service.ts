@@ -219,6 +219,12 @@ export class ProviderService {
       businessName: provider.businessName,
       description: provider.description,
       businessAddress: provider.businessAddress,
+      city: provider.city,
+      country: provider.country,
+      acceptsDelivery: provider.acceptsDelivery,
+      acceptsPickup: provider.acceptsPickup,
+      deliveryZones: provider.deliveryZones,
+      documentUrl: provider.documentUrl,
       status: provider.status,
       rating: provider.rating,
       totalReviews: provider.totalReviews,
@@ -231,6 +237,34 @@ export class ProviderService {
    */
   async getPending() {
     return this.listAll({ status: 'PENDING' });
+  }
+
+  /**
+   * Obtenir un fournisseur par ID avec tous ses détails (Admin uniquement)
+   */
+  async getById(providerId: string) {
+    const provider = await providerRepository.findByIdWithUser(providerId);
+    if (!provider) {
+      throw new NotFoundError('Fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
+    }
+
+    return {
+      id: provider.id,
+      businessName: provider.businessName,
+      description: provider.description,
+      businessAddress: provider.businessAddress,
+      city: provider.city,
+      country: provider.country,
+      acceptsDelivery: provider.acceptsDelivery,
+      acceptsPickup: provider.acceptsPickup,
+      deliveryZones: provider.deliveryZones,
+      documentUrl: provider.documentUrl,
+      status: provider.status,
+      rating: provider.rating,
+      totalReviews: provider.totalReviews,
+      createdAt: provider.createdAt,
+      user: provider.user,
+    };
   }
 
   /**
