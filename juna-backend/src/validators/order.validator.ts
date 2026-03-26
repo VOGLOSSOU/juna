@@ -17,6 +17,11 @@ export const createOrderSchema = z.object({
     .max(500, 'Maximum 500 caractères')
     .optional()
     .nullable(),
+  deliveryCity: z
+    .string()
+    .min(2, 'Ville de livraison invalide')
+    .optional()
+    .nullable(),
   pickupLocation: z
     .string()
     .max(500, 'Maximum 500 caractères')
@@ -27,7 +32,10 @@ export const createOrderSchema = z.object({
     .datetime('Date invalide')
     .optional()
     .nullable(),
-});
+}).refine(
+  (data) => data.deliveryMethod !== 'DELIVERY' || !!data.deliveryCity,
+  { message: 'La ville de livraison est requise pour une commande en livraison', path: ['deliveryCity'] }
+);
 
 /**
  * Schéma de validation pour l'ID dans les params

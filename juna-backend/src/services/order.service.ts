@@ -8,7 +8,19 @@ import {
   ValidationError,
 } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
-import { OrderStatus, DeliveryMethod } from '@prisma/client';
+import { OrderStatus, DeliveryMethod, SubscriptionDuration } from '@prisma/client';
+
+const DURATION_DAYS: Record<SubscriptionDuration, number> = {
+  DAY:        1,
+  THREE_DAYS: 3,
+  WEEK:       7,
+  TWO_WEEKS:  14,
+  MONTH:      30,
+  WORK_WEEK:  5,
+  WORK_WEEK_2: 10,
+  WORK_MONTH: 20,
+  WEEKEND:    2,
+};
 import { randomBytes } from 'crypto';
 
 export class OrderService {
@@ -21,6 +33,7 @@ export class OrderService {
       subscriptionId: string;
       deliveryMethod: DeliveryMethod;
       deliveryAddress?: string;
+      deliveryCity?: string;
       pickupLocation?: string;
       scheduledFor?: Date;
     }
@@ -47,19 +60,53 @@ export class OrderService {
       );
     }
 
+    // Vérifier que le mode de réception choisi est bien supporté par le provider
+    if (data.deliveryMethod === DeliveryMethod.DELIVERY && !provider.acceptsDelivery) {
+      throw new ValidationError(
+        'Ce prestataire ne propose pas la livraison',
+        ERROR_CODES.INVALID_INPUT
+      );
+    }
+
+    if (data.deliveryMethod === DeliveryMethod.PICKUP && !provider.acceptsPickup) {
+      throw new ValidationError(
+        'Ce prestataire n\'accepte pas le retrait sur place',
+        ERROR_CODES.INVALID_INPUT
+      );
+    }
+
+    // Si livraison : trouver la zone, calculer le coût total (coût/jour × nombre de jours)
+    let deliveryCost = 0;
+    if (data.deliveryMethod === DeliveryMethod.DELIVERY && data.deliveryCity) {
+      const zones = (provider.deliveryZones as Array<{ city: string; country: string; cost: number }>) ?? [];
+      const zone = zones.find(
+        (z) => z.city.toLowerCase() === data.deliveryCity!.toLowerCase()
+      );
+      if (!zone) {
+        throw new ValidationError(
+          `Le prestataire ne livre pas à ${data.deliveryCity}`,
+          ERROR_CODES.INVALID_INPUT
+        );
+      }
+      const numberOfDays = DURATION_DAYS[subscription.duration];
+      deliveryCost = zone.cost * numberOfDays;
+    }
+
     // Générer le numéro de commande et QR code
     const orderNumber = await orderRepository.getNextOrderNumber();
     const qrCode = `JUNA-${randomBytes(4).toString('hex').toUpperCase()}`;
 
-    // Créer la commande
+    // Créer la commande (montant total = prix abonnement + frais de livraison)
     const order = await orderRepository.create({
       user: { connect: { id: userId } },
       subscription: { connect: { id: data.subscriptionId } },
       orderNumber,
-      amount: subscription.price,
+      amount: subscription.price + deliveryCost,
       status: OrderStatus.PENDING,
       deliveryMethod: data.deliveryMethod,
       deliveryAddress: data.deliveryAddress,
+      deliveryCity: data.deliveryCity,
+      deliveryCost,
       pickupLocation: data.pickupLocation,
       scheduledFor: data.scheduledFor,
       qrCode,

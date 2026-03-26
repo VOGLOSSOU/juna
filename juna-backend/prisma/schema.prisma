@@ -327,6 +327,8 @@ model Order {
   status          OrderStatus     @default(PENDING)
   deliveryMethod  DeliveryMethod
   deliveryAddress String?
+  deliveryCity    String?
+  deliveryCost    Float           @default(0)
   pickupLocation  String?
   scheduledFor    DateTime?
   completedAt     DateTime?
