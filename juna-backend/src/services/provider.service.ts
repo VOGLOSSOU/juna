@@ -40,6 +40,11 @@ export class ProviderService {
       businessName: data.businessName,
       description: data.description,
       businessAddress: data.businessAddress,
+      city: data.city,
+      country: data.country,
+      acceptsDelivery: data.acceptsDelivery,
+      acceptsPickup: data.acceptsPickup,
+      deliveryZones: data.deliveryZones ?? [],
       documentUrl: data.documentUrl,
       status: 'PENDING',
     });
@@ -69,6 +74,11 @@ export class ProviderService {
       businessName: provider.businessName,
       description: provider.description,
       businessAddress: provider.businessAddress,
+      city: provider.city,
+      country: provider.country,
+      acceptsDelivery: provider.acceptsDelivery,
+      acceptsPickup: provider.acceptsPickup,
+      deliveryZones: provider.deliveryZones,
       documentUrl: provider.documentUrl,
       status: provider.status,
       rating: provider.rating,
@@ -102,6 +112,11 @@ export class ProviderService {
     if (data.businessName) updateData.businessName = data.businessName;
     if (data.description) updateData.description = data.description;
     if (data.businessAddress) updateData.businessAddress = data.businessAddress;
+    if (data.city) updateData.city = data.city;
+    if (data.country) updateData.country = data.country;
+    if (data.acceptsDelivery !== undefined) updateData.acceptsDelivery = data.acceptsDelivery;
+    if (data.acceptsPickup !== undefined) updateData.acceptsPickup = data.acceptsPickup;
+    if (data.deliveryZones !== undefined) updateData.deliveryZones = data.deliveryZones;
     if (data.documentUrl) updateData.documentUrl = data.documentUrl;
 
     const updatedProvider = await providerRepository.update(provider.id, updateData);
@@ -111,6 +126,11 @@ export class ProviderService {
       businessName: updatedProvider.businessName,
       description: updatedProvider.description,
       businessAddress: updatedProvider.businessAddress,
+      city: updatedProvider.city,
+      country: updatedProvider.country,
+      acceptsDelivery: updatedProvider.acceptsDelivery,
+      acceptsPickup: updatedProvider.acceptsPickup,
+      deliveryZones: updatedProvider.deliveryZones,
       status: updatedProvider.status,
     };
   }
