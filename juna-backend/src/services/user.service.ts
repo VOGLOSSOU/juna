@@ -7,7 +7,7 @@ import {
   UnauthorizedError,
 } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
-import { UpdateProfileDTO, UpdatePreferencesDTO, DeleteAccountDTO } from '@/validators/user.validator';
+import { UpdateProfileDTO, UpdatePreferencesDTO, DeleteAccountDTO, UpdateLocationDTO } from '@/validators/user.validator';
 import { UserProfileResponse } from '@/types/user.types';
 import { User, UserProfile, Prisma } from '@prisma/client';
 
@@ -125,6 +125,53 @@ export class UserService {
     }
 
     return { message: 'Préférences mises à jour avec succès' };
+  }
+
+  /**
+   * Mettre à jour la localisation de l'utilisateur
+   */
+  async updateLocation(userId: string, data: UpdateLocationDTO): Promise<{
+    city: string;
+    country: string;
+    latitude: number | null;
+    longitude: number | null;
+  }> {
+    const existingUser = await userRepository.findById(userId);
+    if (!existingUser) {
+      throw new NotFoundError('Utilisateur introuvable', ERROR_CODES.USER_NOT_FOUND);
+    }
+
+    const userWithProfile = await userRepository.findByIdWithProfile(userId);
+
+    if (userWithProfile?.profile) {
+      await prisma.userProfile.update({
+        where: { userId },
+        data: {
+          city: data.city,
+          country: data.country,
+          latitude: data.latitude,
+          longitude: data.longitude,
+        },
+      });
+    } else {
+      await prisma.userProfile.create({
+        data: {
+          userId,
+          address: '',
+          city: data.city,
+          country: data.country,
+          latitude: data.latitude || 0,
+          longitude: data.longitude || 0,
+        },
+      });
+    }
+
+    return {
+      city: data.city,
+      country: data.country,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+    };
   }
 
   /**

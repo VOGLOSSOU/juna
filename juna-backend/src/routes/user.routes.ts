@@ -6,6 +6,7 @@ import {
   updateProfileSchema,
   updatePreferencesSchema,
   deleteAccountSchema,
+  updateLocationSchema,
 } from '@/validators/user.validator';
 
 const router = Router();
@@ -40,6 +41,17 @@ router.put(
   authenticate,
   validate(updatePreferencesSchema),
   userController.updatePreferences.bind(userController)
+);
+
+/**
+ * PUT /api/v1/users/me/location
+ * Mettre à jour la localisation (ville + pays)
+ */
+router.put(
+  '/me/location',
+  authenticate,
+  validate(updateLocationSchema),
+  userController.updateLocation.bind(userController)
 );
 
 /**

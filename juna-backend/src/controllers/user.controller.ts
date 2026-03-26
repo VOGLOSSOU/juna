@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import userService from '@/services/user.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
-import { UpdateProfileDTO, UpdatePreferencesDTO, DeleteAccountDTO } from '@/validators/user.validator';
+import { UpdateProfileDTO, UpdatePreferencesDTO, DeleteAccountDTO, UpdateLocationDTO } from '@/validators/user.validator';
 
 export class UserController {
   /**
@@ -44,6 +44,21 @@ export class UserController {
       const data: UpdatePreferencesDTO = req.body;
       const result = await userService.updatePreferences(userId, data);
       sendSuccess(res, SUCCESS_MESSAGES.PREFERENCES_UPDATED, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Mettre à jour la localisation
+   * PUT /api/v1/users/me/location
+   */
+  async updateLocation(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user!.id;
+      const data: UpdateLocationDTO = req.body;
+      const result = await userService.updateLocation(userId, data);
+      sendSuccess(res, 'Localisation mise à jour avec succès', result);
     } catch (error) {
       next(error);
     }

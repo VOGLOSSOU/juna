@@ -212,6 +212,8 @@ export class SubscriptionRepository {
     maxPrice?: number;
     providerId?: string;
     search?: string;
+    city?: string;
+    country?: string;
   }): Promise<Subscription[]> {
     const where: Prisma.SubscriptionWhereInput = {
       isPublic: true,
@@ -245,6 +247,15 @@ export class SubscriptionRepository {
         { name: { contains: filters.search, mode: 'insensitive' } },
         { description: { contains: filters.search, mode: 'insensitive' } },
       ];
+    }
+
+    if (filters?.city || filters?.country) {
+      where.provider = {
+        is: {
+          ...(filters.city && { city: { equals: filters.city, mode: 'insensitive' } }),
+          ...(filters.country && { country: filters.country }),
+        },
+      };
     }
 
     return prisma.subscription.findMany({

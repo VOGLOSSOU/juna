@@ -225,6 +225,8 @@ model Provider {
   businessName    String
   description     String?         @db.Text
   businessAddress String
+  city            String          @default("")
+  country         String          @default("")
   documentUrl     String?
   status          ProviderStatus  @default(PENDING)
   rating          Float           @default(0)

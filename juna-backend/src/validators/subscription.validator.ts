@@ -133,6 +133,8 @@ export const subscriptionFiltersSchema = z.object({
   search: z.string().optional(),
   isActive: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  city: z.string().optional(),
+  country: z.string().length(2).toUpperCase().optional(),
 });
 
 /**

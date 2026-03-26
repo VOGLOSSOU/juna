@@ -41,6 +41,18 @@ export const deleteAccountSchema = z.object({
 export type DeleteAccountDTO = z.infer<typeof deleteAccountSchema>;
 
 /**
+ * Schéma pour la mise à jour de la localisation
+ */
+export const updateLocationSchema = z.object({
+  city: z.string().min(2, 'Ville invalide').trim(),
+  country: z.string().length(2, 'Le code pays doit être en format ISO 2 lettres (ex: BJ)').toUpperCase().trim(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+});
+
+export type UpdateLocationDTO = z.infer<typeof updateLocationSchema>;
+
+/**
  * Schéma pour l'upload d'avatar (v1 basique - sans fichier)
  */
 export const avatarSchema = z.object({
