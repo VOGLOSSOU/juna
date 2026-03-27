@@ -35,7 +35,8 @@ export class OrderService {
       deliveryAddress?: string;
       deliveryCity?: string;
       pickupLocation?: string;
-      scheduledFor?: Date;
+      startAsap?: boolean;
+      requestedStartDate?: string;
     }
   ) {
     // Vérifier que l'abonnement existe et est actif
@@ -92,6 +93,24 @@ export class OrderService {
       deliveryCost = zone.cost * numberOfDays;
     }
 
+    // Calculer la date de début de l'abonnement
+    const now = new Date();
+    const earliestStart = new Date(now.getTime() + subscription.preparationHours * 60 * 60 * 1000);
+
+    let scheduledFor: Date;
+    if (data.startAsap) {
+      scheduledFor = earliestStart;
+    } else {
+      const requested = new Date(data.requestedStartDate!);
+      if (requested < earliestStart) {
+        throw new ValidationError(
+          `La date de début doit être au moins ${subscription.preparationHours}h après maintenant (au plus tôt le ${earliestStart.toISOString()})`,
+          ERROR_CODES.INVALID_INPUT
+        );
+      }
+      scheduledFor = requested;
+    }
+
     // Générer le numéro de commande et QR code
     const orderNumber = await orderRepository.getNextOrderNumber();
     const qrCode = `JUNA-${randomBytes(4).toString('hex').toUpperCase()}`;
@@ -108,7 +127,7 @@ export class OrderService {
       deliveryCity: data.deliveryCity,
       deliveryCost,
       pickupLocation: data.pickupLocation,
-      scheduledFor: data.scheduledFor,
+      scheduledFor,
       qrCode,
     });
 

@@ -73,10 +73,15 @@ export const createSubscriptionSchema = z.object({
     .url('URL invalide')
     .min(1, 'URL de l\'image obligatoire'),
   isPublic: z.boolean().optional(),
+  isImmediate: z.boolean().optional(),
+  preparationHours: z.number().int().min(0, 'Le délai ne peut pas être négatif').optional(),
   mealIds: z
     .array(z.string().uuid('ID de repas invalide'))
     .min(1, 'Au moins un repas requis'),
-});
+}).refine(
+  (data) => data.isImmediate !== false || (data.preparationHours !== undefined && data.preparationHours > 0),
+  { message: 'Le délai de préparation est requis si l\'abonnement n\'est pas immédiat', path: ['preparationHours'] }
+);
 
 /**
  * Schéma de validation pour mettre à jour un abonnement
@@ -115,10 +120,15 @@ export const updateSubscriptionSchema = z.object({
     .optional(),
   isActive: z.boolean().optional(),
   isPublic: z.boolean().optional(),
+  isImmediate: z.boolean().optional(),
+  preparationHours: z.number().int().min(0).optional(),
   mealIds: z
     .array(z.string().uuid('ID de repas invalide'))
     .optional(),
-});
+}).refine(
+  (data) => data.isImmediate !== false || (data.preparationHours !== undefined && data.preparationHours > 0),
+  { message: 'Le délai de préparation est requis si l\'abonnement n\'est pas immédiat', path: ['preparationHours'] }
+);
 
 /**
  * Schéma de validation pour les filtres d'abonnement

@@ -27,14 +27,20 @@ export const createOrderSchema = z.object({
     .max(500, 'Maximum 500 caractères')
     .optional()
     .nullable(),
-  scheduledFor: z
+  startAsap: z
+    .boolean()
+    .optional(),
+  requestedStartDate: z
     .string()
-    .datetime('Date invalide')
+    .datetime('Date de début invalide')
     .optional()
     .nullable(),
 }).refine(
   (data) => data.deliveryMethod !== 'DELIVERY' || !!data.deliveryCity,
   { message: 'La ville de livraison est requise pour une commande en livraison', path: ['deliveryCity'] }
+).refine(
+  (data) => data.startAsap === true || !!data.requestedStartDate,
+  { message: 'Précisez si vous voulez démarrer dès que possible ou choisissez une date de début', path: ['startAsap'] }
 );
 
 /**

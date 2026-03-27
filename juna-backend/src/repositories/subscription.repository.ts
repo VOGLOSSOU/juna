@@ -16,6 +16,8 @@ export class SubscriptionRepository {
     duration: SubscriptionDuration;
     isActive?: boolean;
     isPublic?: boolean;
+    isImmediate?: boolean;
+    preparationHours?: number;
     deliveryZones?: any;
     pickupLocations?: any;
     imageUrl: string;
@@ -156,6 +158,8 @@ export class SubscriptionRepository {
     duration?: SubscriptionDuration;
     isActive?: boolean;
     isPublic?: boolean;
+    isImmediate?: boolean;
+    preparationHours?: number;
     deliveryZones?: any;
     pickupLocations?: any;
     imageUrl?: string;

@@ -11,14 +11,16 @@ export class OrderController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user.id;
-      const { subscriptionId, deliveryMethod, deliveryAddress, pickupLocation, scheduledFor } = req.body;
+      const { subscriptionId, deliveryMethod, deliveryAddress, deliveryCity, pickupLocation, startAsap, requestedStartDate } = req.body;
 
       const order = await orderService.create(userId, {
         subscriptionId,
         deliveryMethod: deliveryMethod as DeliveryMethod,
         deliveryAddress,
+        deliveryCity,
         pickupLocation,
-        scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
+        startAsap,
+        requestedStartDate,
       });
 
       sendSuccess(res, SUCCESS_MESSAGES.ORDER_CREATED, order, 201);

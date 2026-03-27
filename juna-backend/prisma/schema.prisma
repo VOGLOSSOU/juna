@@ -279,6 +279,8 @@ model Subscription {
   duration        SubscriptionDuration
   isActive         Boolean            @default(true)
   isPublic         Boolean            @default(true)
+  isImmediate      Boolean            @default(true)
+  preparationHours Int                @default(0)
   deliveryZones    Json?
   pickupLocations  Json?
   imageUrl         String

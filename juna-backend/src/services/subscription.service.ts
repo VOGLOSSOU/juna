@@ -66,6 +66,8 @@ export class SubscriptionService {
       imageUrl: data.imageUrl,
       isActive: true,
       isPublic: data.isPublic ?? false,
+      isImmediate: data.isImmediate ?? true,
+      preparationHours: data.isImmediate === false ? (data.preparationHours ?? 0) : 0,
       mealIds: data.mealIds,
     });
   }
@@ -166,6 +168,8 @@ export class SubscriptionService {
       imageUrl: data.imageUrl,
       isActive: data.isActive,
       isPublic: data.isPublic,
+      isImmediate: data.isImmediate,
+      preparationHours: data.isImmediate === false ? data.preparationHours : data.isImmediate === true ? 0 : undefined,
       mealIds: data.mealIds,
     });
   }
