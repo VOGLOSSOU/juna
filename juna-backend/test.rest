@@ -374,7 +374,7 @@ Authorization: Bearer {{providerToken}}
 # ============================================
 
 ###
-# TEST 7.1 — Créer un abonnement semaine de travail
+# TEST 7.1 — Créer un abonnement semaine de travail (disponible sous 24h)
 # (remplacer les meal IDs par @meal1Id, @meal2Id, @meal3Id)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
@@ -389,8 +389,48 @@ Authorization: Bearer {{providerToken}}
   "category": "AFRICAN",
   "duration": "WORK_WEEK",
   "isPublic": true,
+  "isImmediate": false,
+  "preparationHours": 24,
   "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
   "mealIds": ["{{meal1Id}}", "{{meal2Id}}", "{{meal3Id}}"]
+}
+
+###
+# TEST 7.1b — Créer un abonnement disponible immédiatement (isImmediate = true)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+  "name": "Formule Express Déjeuner",
+  "description": "Déjeuner africain prêt à emporter ou livré rapidement, disponible tous les jours.",
+  "price": 8000,
+  "junaCommissionPercent": 10,
+  "type": "LUNCH",
+  "category": "AFRICAN",
+  "duration": "WORK_WEEK",
+  "isPublic": true,
+  "isImmediate": true,
+  "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+  "mealIds": ["{{meal2Id}}"]
+}
+
+###
+# TEST 7.1c — Abonnement non immédiat sans preparationHours (ERREUR attendue)
+POST {{apiUrl}}/subscriptions
+Content-Type: application/json
+Authorization: Bearer {{providerToken}}
+
+{
+  "name": "Formule invalide",
+  "description": "Description suffisamment longue pour passer la validation basique.",
+  "price": 10000,
+  "type": "LUNCH",
+  "category": "AFRICAN",
+  "duration": "WEEK",
+  "isImmediate": false,
+  "imageUrl": "https://images.unsplash.com/photo-1504674900247",
+  "mealIds": ["{{meal1Id}}"]
 }
 
 ###
@@ -459,7 +499,7 @@ GET {{apiUrl}}/subscriptions/{{subscriptionId}}
 # ============================================
 
 ###
-# TEST 9.1 — User 1 commande avec livraison à Cotonou
+# TEST 9.1 — User 1 commande avec livraison à Cotonou, dès que possible
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
@@ -468,11 +508,42 @@ Authorization: Bearer {{user1Token}}
   "subscriptionId": "{{subscriptionId}}",
   "deliveryMethod": "DELIVERY",
   "deliveryCity": "Cotonou",
-  "deliveryAddress": "Quartier Cadjehoun, immeuble bleu face école primaire"
+  "deliveryAddress": "Quartier Cadjehoun, immeuble bleu face école primaire",
+  "startAsap": true
 }
 
 ###
-# TEST 9.2 — User 1 commande avec livraison dans une ville non couverte (ERREUR attendue)
+# TEST 9.2 — User 1 commande avec date de début choisie (dans 3 jours)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "subscriptionId": "{{subscriptionId}}",
+  "deliveryMethod": "DELIVERY",
+  "deliveryCity": "Cotonou",
+  "deliveryAddress": "Quartier Cadjehoun, immeuble bleu face école primaire",
+  "startAsap": false,
+  "requestedStartDate": "2026-03-30T08:00:00.000Z"
+}
+
+###
+# TEST 9.3 — Date trop proche (ERREUR attendue — délai 24h non respecté)
+POST {{apiUrl}}/orders
+Content-Type: application/json
+Authorization: Bearer {{user1Token}}
+
+{
+  "subscriptionId": "{{subscriptionId}}",
+  "deliveryMethod": "DELIVERY",
+  "deliveryCity": "Cotonou",
+  "deliveryAddress": "Quelque part",
+  "startAsap": false,
+  "requestedStartDate": "2026-03-27T10:00:00.000Z"
+}
+
+###
+# TEST 9.4 — Livraison dans une ville non couverte (ERREUR attendue)
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
@@ -481,42 +552,44 @@ Authorization: Bearer {{user1Token}}
   "subscriptionId": "{{subscriptionId}}",
   "deliveryMethod": "DELIVERY",
   "deliveryCity": "Lagos",
-  "deliveryAddress": "Some address in Lagos"
+  "deliveryAddress": "Some address in Lagos",
+  "startAsap": true
 }
 
 ###
-# TEST 9.3 — User 3 commande avec retrait sur place
+# TEST 9.5 — User 3 commande avec retrait sur place, dès que possible
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user3Token}}
 
 {
   "subscriptionId": "{{subscriptionId}}",
-  "deliveryMethod": "PICKUP"
+  "deliveryMethod": "PICKUP",
+  "startAsap": true
 }
 
 ###
-# TEST 9.4 — User 1 voit ses commandes
+# TEST 9.6 — User 1 voit ses commandes
 GET {{apiUrl}}/orders/me
 Authorization: Bearer {{user1Token}}
 
 ###
-# TEST 9.5 — Voir détails d'une commande (avec QR code)
+# TEST 9.7 — Voir détails d'une commande (startDate, montant, QR code)
 GET {{apiUrl}}/orders/{{orderId}}
 Authorization: Bearer {{user1Token}}
 
 ###
-# TEST 9.6 — Provider voit ses commandes reçues
+# TEST 9.8 — Provider voit ses commandes reçues
 GET {{apiUrl}}/orders/provider/me
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.7 — Provider confirme la commande
+# TEST 9.9 — Provider confirme la commande
 PUT {{apiUrl}}/orders/{{orderId}}/confirm
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.8 — Provider marque la commande comme prête
+# TEST 9.10 — Provider marque la commande comme prête
 PUT {{apiUrl}}/orders/{{orderId}}/ready
 Authorization: Bearer {{providerToken}}
 
