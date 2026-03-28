@@ -237,10 +237,10 @@ Authorization: Bearer {{user2Token}}
 Content-Type: multipart/form-data; boundary=----FormBoundary
 
 ------FormBoundary
-Content-Disposition: form-data; name="image"; filename="logo.jpg"
-Content-Type: image/jpeg
+Content-Disposition: form-data; name="image"; filename="logo.png"
+Content-Type: image/png
 
-< ./test-assets/logo.jpg
+< ./test-assets/logo.png
 ------FormBoundary--
 
 ###
