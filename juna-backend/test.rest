@@ -202,8 +202,8 @@ POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@juna.com",
-  "password": "Admin123!"
+  "email": "admin@juna.app",
+  "password": "ChangeMe123!"
 }
 
 ###
