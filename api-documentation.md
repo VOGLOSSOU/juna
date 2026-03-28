@@ -94,3 +94,66 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
 | `VALIDATION_ERROR` | 400 | Données invalides (format email, mot de passe trop faible, etc.) |
 
 ---
+
+### POST /auth/login — Se connecter
+
+**Body :**
+```json
+{
+  "email": "kofi.mensah@gmail.com",   // requis
+  "password": "Password123"           // requis
+}
+```
+
+**Réponse 200 ✅ — TEST 1.5 :**
+```json
+{
+  "success": true,
+  "message": "Connexion réussie",
+  "data": {
+    "user": {
+      "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+      "email": "kofi.mensah@gmail.com",
+      "name": "Kofi Mensah",
+      "phone": "+22961111111",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-03-28T16:16:25.640Z",
+      "updatedAt": "2026-03-28T16:16:25.640Z"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    },
+    "isProfileComplete": true
+  }
+}
+```
+
+> **Gestion des tokens côté app mobile :**
+> - Stocker le `accessToken` en mémoire (ou secure storage) — utilisé dans le header `Authorization: Bearer {accessToken}` de chaque requête protégée
+> - Stocker le `refreshToken` en secure storage — utilisé pour renouveler le `accessToken` quand il expire (toutes les 15 minutes)
+> - Vérifier `isProfileComplete` à chaque login — si `false`, rediriger vers l'écran de complétion de profil avant tout
+
+**Réponse 401 ❌ — Mauvais mot de passe (TEST 1.8) :**
+```json
+{
+  "success": false,
+  "message": "Email ou mot de passe incorrect",
+  "error": {
+    "code": "INVALID_CREDENTIALS"
+  }
+}
+```
+
+> Note de sécurité : le message d'erreur est volontairement identique que ce soit l'email ou le mot de passe qui soit incorrect — pour ne pas indiquer à un attaquant si un email existe en base.
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `INVALID_CREDENTIALS` | 401 | Email ou mot de passe incorrect |
+| `ACCOUNT_SUSPENDED` | 403 | Compte suspendu ou banni |
+| `VALIDATION_ERROR` | 400 | Format des données invalide |
+
+---
