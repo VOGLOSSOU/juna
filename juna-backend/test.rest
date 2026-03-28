@@ -7,15 +7,15 @@
 # ============================================
 # TOKENS ET IDS — À mettre à jour au fur et à mesure
 # ============================================
-@user1Token =
-@user2Token =
-@user3Token =
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4Nzc4MjQzZC1jMzFlLTQwMDAtYWEyMS0xMGJhOGFhNTY3ZDgiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzE0NTg1LCJleHAiOjE3NzQ3MTU0ODV9.JHKhKBWHzmw8G236z854FKCiAqkwGznYrZi2sgD6LyU
+@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjNDc5N2I3Yi0wYWM2LTRiMjYtYmVkOC0wYTY3NmI5YTMwNjgiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzQ3MTQ2OTYsImV4cCI6MTc3NDcxNTU5Nn0.V2kTVpTz7Akls9DaSI6a2hrFZgI0slmjgL5jHuQWzgE
+@user3Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5NmY3Nzc0Yi02ZDE5LTRlNTMtOGNmOS0xZGIzN2I5OGFmZTciLCJlbWFpbCI6InNlbmEuYWtwb3ZpQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzE0NzY3LCJleHAiOjE3NzQ3MTU2Njd9.IbjIF3T91SlZO5-S7ExgEtYTBbYblror4igd6O7kU6c
 @adminToken =
 @providerToken =
 
-@user1Id =
-@user2Id =
-@user3Id =
+@user1Id = 8778243d-c31e-4000-aa21-10ba8aa567d8
+@user2Id = c4797b7b-0ac6-4b26-bed8-0a676b9a3068
+@user3Id = 6f7774b-6d19-4e53-8cf9-1db37b98afe7
 @adminId =
 
 @providerId =

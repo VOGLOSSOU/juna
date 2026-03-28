@@ -68,6 +68,7 @@ export class AuthService {
     return {
       user: userWithoutPassword,
       tokens,
+      isProfileComplete: !!user.phone,
     };
   }
 
@@ -110,6 +111,7 @@ export class AuthService {
     return {
       user: userWithoutPassword,
       tokens,
+      isProfileComplete: !!user.phone,
     };
   }
 

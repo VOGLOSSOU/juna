@@ -40,6 +40,7 @@ export interface AuthResponse {
     accessToken: string;
     refreshToken: string;
   };
+  isProfileComplete: boolean;
 }
 
 export interface JwtPayload {
