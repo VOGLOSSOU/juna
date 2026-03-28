@@ -497,3 +497,292 @@ Retourne la liste des prestataires qui ont soumis une candidature et attendent v
 > Cet endpoint sera utilisé dans le flux de validation (Partie 5) : après qu'un user soumet sa candidature provider via `POST /providers/register`, elle apparaît ici avec le statut `PENDING`. L'admin peut ensuite approuver ou rejeter via les endpoints dédiés.
 
 ---
+
+## PARTIE 5 — CANDIDATURE PROVIDER
+
+Le flux complet pour qu'un user devienne provider se déroule en 3 étapes :
+1. **L'user uploade son logo** via `POST /upload/providers` → récupère une URL Cloudinary
+2. **L'user soumet sa candidature** via `POST /providers/register` avec le logo et toutes les infos
+3. **L'admin valide** via `PUT /admin/providers/:id/approve` → le rôle de l'user passe de `USER` à `PROVIDER`
+
+---
+
+### POST /providers/register — Soumettre une candidature
+
+**Headers requis :** `Authorization: Bearer {accessToken}` (rôle USER)
+
+**Body :**
+```json
+{
+  "businessName": "Chez Mariam",                           // requis — min 2 caractères
+  "description": "Cuisine africaine authentique...",        // optionnel
+  "businessAddress": "Rue du Port, Quartier Gbeto...",     // requis — min 3 caractères
+  "logo": "https://res.cloudinary.com/...",                // requis — URL valide (upload préalable via POST /upload/providers)
+  "city": "Cotonou",                                        // requis — min 2 caractères
+  "country": "BJ",                                          // requis — code ISO 2 lettres
+  "acceptsDelivery": true,                                  // requis — true/false
+  "acceptsPickup": true,                                    // requis — true/false
+  "deliveryZones": [                                        // requis si acceptsDelivery=true
+    { "city": "Cotonou", "country": "BJ", "cost": 500 },
+    { "city": "Abomey-Calavi", "country": "BJ", "cost": 800 },
+    { "city": "Ouidah", "country": "BJ", "cost": 1500 }
+  ]
+}
+```
+
+> **Règles de validation :**
+> - Au moins un mode de réception doit être activé (`acceptsDelivery` ou `acceptsPickup` à `true`)
+> - Si `acceptsDelivery: true`, le tableau `deliveryZones` doit contenir au moins une zone
+> - Le `logo` est **obligatoire** — uploader d'abord via `POST /upload/providers`, puis inclure l'URL ici
+> - Le `cost` dans `deliveryZones` représente le coût de livraison **par jour** d'abonnement. Le coût total sera calculé à la commande : `cost × nombre_de_jours`
+
+**Réponse 201 ✅ — TEST 5.1 :**
+```json
+{
+  "success": true,
+  "message": "Demande soumise, en attente de validation",
+  "data": {
+    "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+    "businessName": "Chez Mariam",
+    "status": "PENDING",
+    "message": "Votre demande a ete enregistree. En attente de validation par l'admin."
+  }
+}
+```
+
+> La candidature est créée avec le statut `PENDING`. L'user reste avec le rôle `USER` jusqu'à validation de l'admin. Son token actuel ne change pas — il devra se reconnecter après approbation pour obtenir un token avec le rôle `PROVIDER`.
+
+**Réponse 400 ❌ — Logo manquant (TEST 5.2) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"logo\",\"message\":\"Required\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Réponse 400 ❌ — Aucun mode de réception (TEST 5.3) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"\",\"message\":\"Vous devez proposer au moins un mode de réception (livraison ou retrait sur place)\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Réponse 400 ❌ — Livraison activée sans zones (TEST 5.4) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"\",\"message\":\"Vous devez définir au moins une zone de livraison si vous proposez la livraison\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `VALIDATION_ERROR` | 400 | Logo manquant, mode manquant, zones manquantes, données invalides |
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `PROVIDER_ALREADY_EXISTS` | 409 | Cet user a déjà soumis une candidature |
+
+---
+
+### GET /admin/providers/pending — Candidatures après soumission
+
+Après soumission, la candidature apparaît ici avec toutes les infos nécessaires à l'admin pour prendre sa décision.
+
+**Réponse 200 ✅ — TEST 5.5 :**
+```json
+{
+  "success": true,
+  "message": "Fournisseurs en attente",
+  "data": [
+    {
+      "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "businessName": "Chez Mariam",
+      "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+      "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+      "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+      "city": "Cotonou",
+      "country": "BJ",
+      "acceptsDelivery": true,
+      "acceptsPickup": true,
+      "deliveryZones": [
+        { "city": "Cotonou", "cost": 500, "country": "BJ" },
+        { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+        { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+      ],
+      "documentUrl": null,
+      "status": "PENDING",
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-03-28T17:29:57.680Z"
+    }
+  ]
+}
+```
+
+---
+
+### GET /admin/providers/:id — Détails complets d'un provider
+
+Retourne toutes les informations du provider **plus les infos du compte user associé** — permet à l'admin de voir qui est derrière la candidature.
+
+**Headers requis :** `Authorization: Bearer {adminToken}`
+
+**Réponse 200 ✅ — TEST 5.6 :**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+    "businessName": "Chez Mariam",
+    "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+    "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+    "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+    "city": "Cotonou",
+    "country": "BJ",
+    "acceptsDelivery": true,
+    "acceptsPickup": true,
+    "deliveryZones": [
+      { "city": "Cotonou", "cost": 500, "country": "BJ" },
+      { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+      { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+    ],
+    "documentUrl": null,
+    "status": "PENDING",
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-03-28T17:29:57.680Z",
+    "user": {
+      "id": "827786ab-6518-403d-a32c-b51ac643e288",
+      "email": "mariam.diallo@gmail.com",
+      "name": "Mariam Diallo"
+    }
+  }
+}
+```
+
+> **Différence avec `GET /admin/providers/pending` :** cet endpoint retourne un seul provider identifié par son `id`, et inclut le champ `user` avec les informations du compte associé. L'admin peut ainsi vérifier l'identité du candidat avant de valider.
+
+---
+
+### PUT /admin/providers/:id/approve — Approuver une candidature
+
+**Headers requis :** `Authorization: Bearer {adminToken}`
+
+**Body :**
+```json
+{
+  "message": "Dossier complet, bienvenue sur Juna !"  // optionnel — message pour le provider
+}
+```
+
+**Réponse 200 ✅ — TEST 5.7 :**
+```json
+{
+  "success": true,
+  "message": "Fournisseur approuve avec succes",
+  "data": {
+    "success": true,
+    "message": "Dossier complet, bienvenue sur Juna !",
+    "provider": {
+      "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "businessName": "Chez Mariam",
+      "status": "APPROVED"
+    }
+  }
+}
+```
+
+> **Ce qui se passe en arrière-plan :**
+> 1. Le statut du provider passe de `PENDING` à `APPROVED`
+> 2. Le rôle de l'user associé passe de `USER` à `PROVIDER`
+> 3. L'user doit **se reconnecter** pour obtenir un nouveau token avec le rôle `PROVIDER` — son token actuel reste `USER` jusqu'à expiration
+
+---
+
+### POST /auth/login — Reconnexion après approbation (TEST 5.8)
+
+Après approbation par l'admin, Mariam se reconnecte. Le `role` dans la réponse est maintenant `PROVIDER`.
+
+**Réponse 200 ✅ — TEST 5.8 :**
+```json
+{
+  "success": true,
+  "message": "Connexion réussie",
+  "data": {
+    "user": {
+      "id": "827786ab-6518-403d-a32c-b51ac643e288",
+      "email": "mariam.diallo@gmail.com",
+      "name": "Mariam Diallo",
+      "phone": "+22962222222",
+      "role": "PROVIDER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-03-28T17:13:07.286Z",
+      "updatedAt": "2026-03-28T17:36:33.332Z"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    },
+    "isProfileComplete": true
+  }
+}
+```
+
+> Le champ `updatedAt` a changé par rapport à `createdAt` — c'est le moment où l'admin a approuvé la candidature et mis à jour le rôle. C'est le seul indicateur visible côté login que quelque chose a changé sur le compte.
+
+---
+
+### GET /providers/me — Voir son profil provider
+
+Retourne le profil complet du provider connecté, incluant les zones de livraison, le statut et la liste de ses abonnements.
+
+**Headers requis :** `Authorization: Bearer {providerToken}` (rôle PROVIDER)
+
+**Réponse 200 ✅ — TEST 5.9 :**
+```json
+{
+  "success": true,
+  "message": "Profil fournisseur recupere avec succes",
+  "data": {
+    "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+    "businessName": "Chez Mariam",
+    "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+    "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+    "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+    "city": "Cotonou",
+    "country": "BJ",
+    "acceptsDelivery": true,
+    "acceptsPickup": true,
+    "deliveryZones": [
+      { "city": "Cotonou", "cost": 500, "country": "BJ" },
+      { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+      { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+    ],
+    "documentUrl": null,
+    "status": "APPROVED",
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-03-28T17:29:57.680Z",
+    "subscriptions": []
+  }
+}
+```
+
+> **Champs notables :**
+> - `status: "APPROVED"` — le provider est actif et visible par les users
+> - `subscriptions: []` — aucun abonnement créé pour l'instant. La liste se remplira après création via `POST /subscriptions`
+> - `rating` et `totalReviews` — initialisés à `0`, mis à jour via le système de notation (non encore implémenté)
+> - `documentUrl` — optionnel, pour attacher un document justificatif (RCCM, etc.)
+
+---
