@@ -786,3 +786,117 @@ Retourne le profil complet du provider connecté, incluant les zones de livraiso
 > - `documentUrl` — optionnel, pour attacher un document justificatif (RCCM, etc.)
 
 ---
+
+## PARTIE 6 — GESTION DES REPAS (PROVIDER)
+
+Les repas sont les plats proposés par le provider. Ils seront ensuite associés à des abonnements. Un repas appartient toujours à un seul provider — le `providerId` est automatiquement extrait du token, pas besoin de l'envoyer dans le body.
+
+### POST /meals — Créer un repas
+
+**Headers requis :** `Authorization: Bearer {providerToken}` (rôle PROVIDER)
+
+**Body :**
+```json
+{
+  "name": "Bouillie de mil avec beignets",   // requis — min 2 caractères
+  "description": "Bouillie de mil sucrée...", // requis
+  "price": 800,                               // requis — prix en FCFA
+  "mealType": "BREAKFAST",                    // requis — voir types ci-dessous
+  "imageUrl": "https://..."                   // optionnel — URL de la photo du plat
+}
+```
+
+> **Types de repas (`mealType`) :**
+> - `BREAKFAST` — petit-déjeuner
+> - `LUNCH` — déjeuner
+> - `DINNER` — dîner
+> - `SNACK` — collation
+
+**Réponse 201 ✅ — TEST 6.1 (petit-déjeuner) :**
+```json
+{
+  "success": true,
+  "message": "Repas créé avec succès",
+  "data": {
+    "id": "7c55e8ac-d08a-4bca-a05a-30aa470bfc4e",
+    "providerId": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+    "name": "Bouillie de mil avec beignets",
+    "description": "Bouillie de mil sucrée servie avec beignets frits dorés",
+    "price": 800,
+    "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554",
+    "mealType": "BREAKFAST",
+    "isActive": true,
+    "createdAt": "2026-03-28T18:23:04.016Z",
+    "updatedAt": "2026-03-28T18:23:04.016Z"
+  }
+}
+```
+
+> **`isActive`** — par défaut `true`. Un repas inactif n'apparaît plus dans les abonnements mais les commandes existantes qui l'incluent ne sont pas affectées.
+
+Les tests 6.2 et 6.3 ont créé les deux autres repas avec les mêmes champs :
+- **TEST 6.2** — `id: b0b6b8bd-4053-47ae-9dfe-593d1182e03b` — Riz sauce graine + poisson — `LUNCH` — 1500 FCFA
+- **TEST 6.3** — `id: 8aa1f0c4-6851-46dc-9394-1d96d96e6652` — Pâte de maïs sauce gombo — `DINNER` — 1200 FCFA
+
+---
+
+### GET /meals/me — Lister ses propres repas
+
+Retourne tous les repas créés par le provider connecté, triés du plus récent au plus ancien.
+
+**Headers requis :** `Authorization: Bearer {providerToken}`
+
+**Réponse 200 ✅ — TEST 6.4 :**
+```json
+{
+  "success": true,
+  "message": "Repas récupérés avec succès",
+  "data": [
+    {
+      "id": "8aa1f0c4-6851-46dc-9394-1d96d96e6652",
+      "providerId": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "name": "Pâte de maïs sauce gombo",
+      "description": "Pâte de maïs fraîche accompagnée de sauce gombo au poulet",
+      "price": 1200,
+      "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+      "mealType": "DINNER",
+      "isActive": true,
+      "createdAt": "2026-03-28T18:23:57.780Z",
+      "updatedAt": "2026-03-28T18:23:57.780Z"
+    },
+    {
+      "id": "b0b6b8bd-4053-47ae-9dfe-593d1182e03b",
+      "providerId": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "name": "Riz sauce graine + poisson",
+      "description": "Riz blanc avec sauce graine maison et poisson grillé",
+      "price": 1500,
+      "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445",
+      "mealType": "LUNCH",
+      "isActive": true,
+      "createdAt": "2026-03-28T18:23:33.359Z",
+      "updatedAt": "2026-03-28T18:23:33.359Z"
+    },
+    {
+      "id": "7c55e8ac-d08a-4bca-a05a-30aa470bfc4e",
+      "providerId": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "name": "Bouillie de mil avec beignets",
+      "description": "Bouillie de mil sucrée servie avec beignets frits dorés",
+      "price": 800,
+      "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554",
+      "mealType": "BREAKFAST",
+      "isActive": true,
+      "createdAt": "2026-03-28T18:23:04.016Z",
+      "updatedAt": "2026-03-28T18:23:04.016Z"
+    }
+  ]
+}
+```
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `FORBIDDEN` | 403 | Token non PROVIDER |
+| `VALIDATION_ERROR` | 400 | Données invalides (prix négatif, mealType inconnu, etc.) |
+
+---
