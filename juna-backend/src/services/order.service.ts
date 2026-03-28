@@ -303,8 +303,10 @@ export class OrderService {
       );
     }
 
-    // Vérifier si annulable
-    if (order.status === OrderStatus.DELIVERED || 
+    // Vérifier si annulable (seulement PENDING ou CONFIRMED)
+    if (order.status === OrderStatus.READY ||
+        order.status === OrderStatus.IN_DELIVERY ||
+        order.status === OrderStatus.DELIVERED ||
         order.status === OrderStatus.COMPLETED ||
         order.status === OrderStatus.CANCELLED) {
       throw new ConflictError(

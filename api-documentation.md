@@ -1355,3 +1355,110 @@ Une commande lie un user à un abonnement. Elle inclut le mode de livraison, le 
 | `NOT_FOUND` | 404 | Abonnement introuvable |
 
 ---
+
+## PARTIE 10 — UPLOAD
+
+Un seul endpoint couvre tous les cas d'upload d'images. Les fichiers sont envoyés en `multipart/form-data` avec le champ `image`, puis stockés sur **Cloudinary** dans le dossier `juna/{folder}`.
+
+### POST /upload/:folder — Uploader une image
+
+**Accès :** utilisateur connecté (tout rôle)
+
+**Paramètre d'URL :**
+| Paramètre | Valeurs acceptées | Description |
+|-----------|-------------------|-------------|
+| `folder` | `avatars` \| `meals` \| `subscriptions` \| `providers` \| `documents` | Dossier Cloudinary de destination |
+
+**Body :** `multipart/form-data`
+| Champ | Type | Requis | Description |
+|-------|------|--------|-------------|
+| `image` | fichier | oui | Image à uploader |
+
+**Contraintes :**
+- Formats acceptés : `JPG`, `JPEG`, `PNG`, `WEBP`
+- Taille maximum : **5 MB**
+- Optimisation automatique (qualité + format) appliquée par Cloudinary
+
+**Réponse 201 ✅ — TEST 10.1 (logo provider) :**
+```json
+{
+  "success": true,
+  "message": "Image uploadée avec succès",
+  "data": {
+    "url": "https://res.cloudinary.com/demo/image/upload/v1234567890/juna/providers/abc123.webp",
+    "publicId": "juna/providers/abc123",
+    "folder": "providers",
+    "size": 463,
+    "mimetype": "image/png"
+  }
+}
+```
+
+> L'URL retournée (`data.url`) est la valeur à passer dans les champs `logo`, `imageUrl`, ou `documentUrl` des autres endpoints.
+
+**Réponse 400 ❌ — Dossier invalide :**
+```json
+{
+  "success": false,
+  "message": "Dossier invalide. Valeurs acceptées : avatars, meals, subscriptions, providers, documents",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+**Réponse 400 ❌ — Aucun fichier fourni :**
+```json
+{
+  "success": false,
+  "message": "Aucun fichier fourni",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+**Réponse 400 ❌ — Format non supporté :**
+```json
+{
+  "success": false,
+  "message": "Format non supporté. Formats acceptés : JPG, PNG, WEBP",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+**Réponse 400 ❌ — Fichier trop volumineux :**
+```json
+{
+  "success": false,
+  "message": "Fichier trop volumineux. Taille maximum : 5MB",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `INVALID_INPUT` | 400 | Dossier invalide, fichier manquant, format non supporté, taille excessive |
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+
+**Cas d'usage par dossier :**
+| Dossier | Utilisé par |
+|---------|-------------|
+| `avatars` | `PUT /profile` → champ `avatar` |
+| `providers` | `POST /providers/register` → champ `logo` |
+| `meals` | `POST /providers/meals` → champ `imageUrl` |
+| `subscriptions` | `POST /providers/subscriptions` → champ `imageUrl` |
+| `documents` | `POST /providers/register` → champ `documentUrl` |
+
+**Flux type — Enregistrement d'un provider avec logo :**
+```
+1. POST /upload/providers    → { url: "https://res.cloudinary.com/..." }
+2. POST /providers/register  → body: { ..., logo: "https://res.cloudinary.com/..." }
+```
+
+---
