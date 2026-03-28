@@ -157,3 +157,91 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
 | `VALIDATION_ERROR` | 400 | Format des données invalide |
 
 ---
+
+## PARTIE 2 — LOCALISATION USER
+
+### PUT /users/me/location — Définir/mettre à jour la localisation
+
+Endpoint appelé par l'app mobile à chaque démarrage pour enregistrer la position de l'user. L'app récupère la ville et le pays via le GPS du téléphone puis affiche un écran de confirmation à l'user avant d'appeler cet endpoint.
+
+> **Quand appeler cet endpoint :**
+> 1. Au premier lancement de l'app après connexion
+> 2. À chaque démarrage si le GPS est activé et que la position a changé
+> 3. Quand l'user modifie manuellement sa ville depuis les paramètres
+
+**Headers requis :** `Authorization: Bearer {accessToken}`
+
+**Body :**
+```json
+{
+  "city": "Cotonou",      // requis — min 2 caractères
+  "country": "BJ",        // requis — code ISO 2 lettres OBLIGATOIREMENT (ex: BJ, TG, CI, SN)
+  "latitude": 6.3703,     // optionnel — coordonnées GPS
+  "longitude": 2.3912     // optionnel — coordonnées GPS
+}
+```
+
+> **Format du code pays :** toujours 2 lettres majuscules selon la norme ISO 3166-1 alpha-2.
+> Exemples : `BJ` (Bénin), `TG` (Togo), `CI` (Côte d'Ivoire), `SN` (Sénégal), `NG` (Nigeria), `GH` (Ghana), `CM` (Cameroun)
+
+**Réponse 200 ✅ — TEST 2.1 (Cotonou, BJ) :**
+```json
+{
+  "success": true,
+  "message": "Localisation mise à jour avec succès",
+  "data": {
+    "city": "Cotonou",
+    "country": "BJ",
+    "latitude": 6.3703,
+    "longitude": 2.3912
+  }
+}
+```
+
+**Réponse 200 ✅ — TEST 2.2 (Lomé, TG) :**
+```json
+{
+  "success": true,
+  "message": "Localisation mise à jour avec succès",
+  "data": {
+    "city": "Lomé",
+    "country": "TG",
+    "latitude": 6.1375,
+    "longitude": 1.2123
+  }
+}
+```
+
+**Réponse 400 ❌ — Code pays invalide (TEST 2.3) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"country\",\"message\":\"Le code pays doit être en format ISO 2 lettres (ex: BJ)\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Réponse 401 ❌ — Sans token (TEST 2.4) :**
+```json
+{
+  "success": false,
+  "message": "Token manquant",
+  "error": {
+    "code": "UNAUTHORIZED"
+  }
+}
+```
+
+> **Utilisation de la localisation dans l'app :**
+> Une fois enregistrée, cette valeur est utilisée pour filtrer les abonnements disponibles dans la ville de l'user (voir `GET /subscriptions?city=Cotonou&country=BJ`). C'est grâce à ça que l'user voit uniquement les prestataires proches de lui sur la page d'accueil.
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `VALIDATION_ERROR` | 400 | `country` invalide (pas 2 lettres ISO), `city` trop courte |
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `USER_NOT_FOUND` | 404 | Utilisateur introuvable |
+
+---
