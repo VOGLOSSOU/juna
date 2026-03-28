@@ -45,15 +45,15 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
   "message": "Compte créé avec succès",
   "data": {
     "user": {
-      "id": "<uuid>",
+      "id": "3928ed13-1887-4e27-b498-6246123218ab",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "<timestamp>",
-      "updatedAt": "<timestamp>"
+      "createdAt": "2026-03-28T17:06:35.443Z",
+      "updatedAt": "2026-03-28T17:06:35.443Z"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -112,15 +112,15 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
   "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "<uuid>",
+      "id": "3928ed13-1887-4e27-b498-6246123218ab",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "<timestamp>",
-      "updatedAt": "<timestamp>"
+      "createdAt": "2026-03-28T17:06:35.443Z",
+      "updatedAt": "2026-03-28T17:06:35.443Z"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
