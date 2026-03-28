@@ -356,15 +356,15 @@ L'admin se connecte via le même endpoint que les users. Le `role` dans la répo
   "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "<uuid>",
+      "id": "921fed65-cf15-4cf6-a1ca-d208982ce48f",
       "email": "admin@juna.app",
       "name": "Administrateur JUNA",
       "phone": "+22900000000",
       "role": "ADMIN",
       "isVerified": true,
       "isActive": true,
-      "createdAt": "<timestamp>",
-      "updatedAt": "<timestamp>"
+      "createdAt": "2026-03-28T16:55:17.594Z",
+      "updatedAt": "2026-03-28T16:55:17.594Z"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -432,44 +432,44 @@ Retourne tous les comptes de la plateforme, triés du plus récent au plus ancie
   "success": true,
   "data": [
     {
-      "id": "<uuid>",
-      "email": "admin@juna.app",
-      "name": "Administrateur JUNA",
-      "phone": "+22900000000",
-      "role": "ADMIN",
-      "isVerified": true,
-      "isActive": true,
-      "createdAt": "<timestamp>"
-    },
-    {
-      "id": "<uuid>",
+      "id": "bf58c88a-632d-4116-9a4e-9f8afe9079b6",
       "email": "sena.akpovi@gmail.com",
       "name": "Sena Akpovi",
       "phone": "+22963333333",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "<timestamp>"
+      "createdAt": "2026-03-28T17:13:33.028Z"
     },
     {
-      "id": "<uuid>",
+      "id": "827786ab-6518-403d-a32c-b51ac643e288",
       "email": "mariam.diallo@gmail.com",
       "name": "Mariam Diallo",
       "phone": "+22962222222",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "<timestamp>"
+      "createdAt": "2026-03-28T17:13:07.286Z"
     },
     {
-      "id": "<uuid>",
+      "id": "3928ed13-1887-4e27-b498-6246123218ab",
       "email": "kofi.mensah@gmail.com",
-      "name": "Kofi Mensah",
+      "name": "Kofi Mensah Junior",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "<timestamp>"
+      "createdAt": "2026-03-28T17:06:35.443Z"
+    },
+    {
+      "id": "921fed65-cf15-4cf6-a1ca-d208982ce48f",
+      "email": "admin@juna.app",
+      "name": "Administrateur JUNA",
+      "phone": "+22900000000",
+      "role": "ADMIN",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-03-28T16:55:17.594Z"
     }
   ]
 }
