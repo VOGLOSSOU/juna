@@ -534,6 +534,7 @@ GET {{apiUrl}}/subscriptions?search=africaine
 GET {{apiUrl}}/subscriptions/{{subscriptionId}}
 
 
+
 # ============================================
 # PARTIE 9 — COMMANDES (USER)
 # ============================================
