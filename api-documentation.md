@@ -45,15 +45,15 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
   "message": "Compte créé avec succès",
   "data": {
     "user": {
-      "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+      "id": "<uuid>",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "2026-03-28T16:16:25.640Z",
-      "updatedAt": "2026-03-28T16:16:25.640Z"
+      "createdAt": "<timestamp>",
+      "updatedAt": "<timestamp>"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -112,15 +112,15 @@ Crée un nouveau compte utilisateur. Le `phone` est optionnel à l'inscription m
   "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+      "id": "<uuid>",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "2026-03-28T16:16:25.640Z",
-      "updatedAt": "2026-03-28T16:16:25.640Z"
+      "createdAt": "<timestamp>",
+      "updatedAt": "<timestamp>"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -260,14 +260,14 @@ Retourne le profil complet de l'user connecté, incluant les infos de base et so
   "success": true,
   "message": "Profil récupéré avec succès",
   "data": {
-    "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+    "id": "<uuid>",
     "email": "kofi.mensah@gmail.com",
     "name": "Kofi Mensah",
     "phone": "+22961111111",
     "role": "USER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "2026-03-28T16:16:25.640Z",
+    "createdAt": "<timestamp>",
     "profile": {
       "avatar": null,          // null jusqu'à ce que l'user uploade une photo
       "address": null,         // adresse textuelle libre (ex: "Quartier Cadjehoun")
@@ -309,14 +309,14 @@ Permet de modifier le nom, le téléphone et/ou l'adresse. Tous les champs sont 
   "success": true,
   "message": "Profil mis à jour avec succès",
   "data": {
-    "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+    "id": "<uuid>",
     "email": "kofi.mensah@gmail.com",
     "name": "Kofi Mensah Junior",
     "phone": "+22961111111",
     "role": "USER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "2026-03-28T16:16:25.640Z",
+    "createdAt": "<timestamp>",
     "profile": {
       "avatar": null,
       "address": "Quartier Cadjehoun, Cotonou",
@@ -356,15 +356,15 @@ L'admin se connecte via le même endpoint que les users. Le `role` dans la répo
   "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "5227aea9-43ed-4809-be4d-6d056dde5602",
+      "id": "<uuid>",
       "email": "admin@juna.app",
       "name": "Administrateur JUNA",
       "phone": "+22900000000",
       "role": "ADMIN",
       "isVerified": true,
       "isActive": true,
-      "createdAt": "2026-03-28T16:38:30.284Z",
-      "updatedAt": "2026-03-28T16:38:30.284Z"
+      "createdAt": "<timestamp>",
+      "updatedAt": "<timestamp>"
     },
     "tokens": {
       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -391,20 +391,17 @@ Retourne une vue d'ensemble des métriques clés de la plateforme.
   "success": true,
   "data": {
     "overview": {
-      "totalUsers": 7,
-      "totalProviders": 1,
+      "totalUsers": 4,
+      "totalProviders": 0,
       "pendingProviders": 0,
-      "totalOrders": 2,
+      "totalOrders": 0,
       "completedOrders": 0,
-      "pendingOrders": 1,
+      "pendingOrders": 0,
       "totalRevenue": 0
     },
     "charts": {
       "ordersByDay": [],
-      "subscriptionsByCategory": [
-        { "category": "EUROPEAN", "count": 2 },
-        { "category": "AFRICAN", "count": 3 }
-      ]
+      "subscriptionsByCategory": []
     }
   }
 }
@@ -435,26 +432,45 @@ Retourne tous les comptes de la plateforme, triés du plus récent au plus ancie
   "success": true,
   "data": [
     {
-      "id": "5227aea9-43ed-4809-be4d-6d056dde5602",
+      "id": "<uuid>",
       "email": "admin@juna.app",
       "name": "Administrateur JUNA",
       "phone": "+22900000000",
       "role": "ADMIN",
       "isVerified": true,
       "isActive": true,
-      "createdAt": "2026-03-28T16:38:30.284Z"
+      "createdAt": "<timestamp>"
     },
     {
-      "id": "96f7774b-6d19-4e53-8cf9-1db37b98afe7",
+      "id": "<uuid>",
       "email": "sena.akpovi@gmail.com",
       "name": "Sena Akpovi",
       "phone": "+22963333333",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "createdAt": "2026-03-28T16:19:27.257Z"
+      "createdAt": "<timestamp>"
+    },
+    {
+      "id": "<uuid>",
+      "email": "mariam.diallo@gmail.com",
+      "name": "Mariam Diallo",
+      "phone": "+22962222222",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "<timestamp>"
+    },
+    {
+      "id": "<uuid>",
+      "email": "kofi.mensah@gmail.com",
+      "name": "Kofi Mensah",
+      "phone": "+22961111111",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "<timestamp>"
     }
-    // ... autres users
   ]
 }
 ```

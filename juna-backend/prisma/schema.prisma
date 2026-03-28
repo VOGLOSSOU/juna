@@ -225,6 +225,7 @@ model Provider {
   businessName    String
   description     String?         @db.Text
   businessAddress  String
+  logo             String
   city             String          @default("")
   country          String          @default("")
   acceptsDelivery  Boolean         @default(false)

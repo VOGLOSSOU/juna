@@ -7,16 +7,16 @@
 # ============================================
 # TOKENS ET IDS — À mettre à jour au fur et à mesure
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4Nzc4MjQzZC1jMzFlLTQwMDAtYWEyMS0xMGJhOGFhNTY3ZDgiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzE1MDAxLCJleHAiOjE3NzQ3MTU5MDF9.UAPux--m2UvcZmENy-JxQxvbBxlCuKVXR8lYnJCtQYU
-@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjNDc5N2I3Yi0wYWM2LTRiMjYtYmVkOC0wYTY3NmI5YTMwNjgiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzQ3MTUwODIsImV4cCI6MTc3NDcxNTk4Mn0.0yByRI4RXqs-I_99ht0FODLk7OchGwi5HGmANwwKjaA
-@user3Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5NmY3Nzc0Yi02ZDE5LTRlNTMtOGNmOS0xZGIzN2I5OGFmZTciLCJlbWFpbCI6InNlbmEuYWtwb3ZpQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzE1MTQ0LCJleHAiOjE3NzQ3MTYwNDR9.oko1K7GwwKNj-3GlqJZ2jHKPqPOYZ0ojHluZSP6PvtQ
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1MjI3YWVhOS00M2VkLTQ4MDktYmU0ZC02ZDA1NmRkZTU2MDIiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc0NzE1OTY3LCJleHAiOjE3NzQ3MTY4Njd9._FiuVP7ILR9TdqpYOG2tguDjCOLMVrNgglMamdZ2JHw
+@user1Token =
+@user2Token =
+@user3Token =
+@adminToken =
 @providerToken =
 
-@user1Id = 8778243d-c31e-4000-aa21-10ba8aa567d8
-@user2Id = c4797b7b-0ac6-4b26-bed8-0a676b9a3068
-@user3Id = 6f7774b-6d19-4e53-8cf9-1db37b98afe7
-@adminId = 5227aea9-43ed-4809-be4d-6d056dde5602
+@user1Id =
+@user2Id =
+@user3Id =
+@adminId = 921fed65-cf15-4cf6-a1ca-d208982ce48f
 
 @providerId =
 @meal1Id =
@@ -227,7 +227,23 @@ Authorization: Bearer {{adminToken}}
 # ============================================
 
 ###
+# TEST 5.0 — Upload logo provider (avant la candidature)
+# Utiliser un fichier image local (.jpg, .png, .webp — max 5MB)
+# → copier l'URL retournée dans le champ "logo" du TEST 5.1
+POST {{apiUrl}}/upload/providers
+Authorization: Bearer {{user2Token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="logo.jpg"
+Content-Type: image/jpeg
+
+< ./test-assets/logo.jpg
+------FormBoundary--
+
+###
 # TEST 5.1 — User 2 s'inscrit comme provider (livraison + retrait)
+# Remplacer "logo" par l'URL retournée par TEST 5.0
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 Authorization: Bearer {{user2Token}}
@@ -236,6 +252,7 @@ Authorization: Bearer {{user2Token}}
   "businessName": "Chez Mariam",
   "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
   "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
   "city": "Cotonou",
   "country": "BJ",
   "acceptsDelivery": true,
@@ -248,7 +265,26 @@ Authorization: Bearer {{user2Token}}
 }
 
 ###
-# TEST 5.2 — Candidature sans mode de réception (ERREUR attendue)
+# TEST 5.2 — Candidature sans logo (ERREUR attendue)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user3Token}}
+
+{
+  "businessName": "Sans logo",
+  "description": "Description test minimum requis ici.",
+  "businessAddress": "Adresse test",
+  "city": "Cotonou",
+  "country": "BJ",
+  "acceptsDelivery": true,
+  "acceptsPickup": true,
+  "deliveryZones": [
+    { "city": "Cotonou", "country": "BJ", "cost": 500 }
+  ]
+}
+
+###
+# TEST 5.3 — Candidature sans mode de réception (ERREUR attendue)
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 Authorization: Bearer {{user3Token}}
@@ -257,6 +293,7 @@ Authorization: Bearer {{user3Token}}
   "businessName": "Sans mode",
   "description": "Description test minimum requis ici.",
   "businessAddress": "Adresse test",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
   "city": "Cotonou",
   "country": "BJ",
   "acceptsDelivery": false,
@@ -264,7 +301,7 @@ Authorization: Bearer {{user3Token}}
 }
 
 ###
-# TEST 5.3 — Livraison cochée mais sans zones (ERREUR attendue)
+# TEST 5.4 — Livraison cochée mais sans zones (ERREUR attendue)
 POST {{apiUrl}}/providers/register
 Content-Type: application/json
 Authorization: Bearer {{user3Token}}
@@ -273,6 +310,7 @@ Authorization: Bearer {{user3Token}}
   "businessName": "Sans zones",
   "description": "Description test minimum requis ici.",
   "businessAddress": "Adresse test",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
   "city": "Cotonou",
   "country": "BJ",
   "acceptsDelivery": true,
@@ -281,17 +319,17 @@ Authorization: Bearer {{user3Token}}
 }
 
 ###
-# TEST 5.4 — Lister providers en attente (doit avoir Mariam)
+# TEST 5.5 — Lister providers en attente (doit avoir Mariam)
 GET {{apiUrl}}/admin/providers/pending
 Authorization: Bearer {{adminToken}}
 
 ###
-# TEST 5.5 — Voir détails provider (remplacer :id par @providerId)
+# TEST 5.6 — Voir détails provider (remplacer :id par @providerId)
 GET {{apiUrl}}/admin/providers/{{providerId}}
 Authorization: Bearer {{adminToken}}
 
 ###
-# TEST 5.6 — Admin approuve le provider → User 2 devient PROVIDER
+# TEST 5.7 — Admin approuve le provider → User 2 devient PROVIDER
 PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
@@ -301,7 +339,7 @@ Authorization: Bearer {{adminToken}}
 }
 
 ###
-# TEST 5.7 — User 2 se reconnecte pour avoir un token avec rôle PROVIDER
+# TEST 5.8 — User 2 se reconnecte pour avoir un token avec rôle PROVIDER
 # → copier dans @providerToken
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
@@ -312,7 +350,7 @@ Content-Type: application/json
 }
 
 ###
-# TEST 5.8 — Voir profil provider
+# TEST 5.9 — Voir profil provider
 GET {{apiUrl}}/providers/me
 Authorization: Bearer {{providerToken}}
 

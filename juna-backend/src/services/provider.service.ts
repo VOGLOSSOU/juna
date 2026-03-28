@@ -40,6 +40,7 @@ export class ProviderService {
       businessName: data.businessName,
       description: data.description,
       businessAddress: data.businessAddress,
+      logo: data.logo,
       city: data.city,
       country: data.country,
       acceptsDelivery: data.acceptsDelivery,
@@ -74,6 +75,7 @@ export class ProviderService {
       businessName: provider.businessName,
       description: provider.description,
       businessAddress: provider.businessAddress,
+      logo: provider.logo,
       city: provider.city,
       country: provider.country,
       acceptsDelivery: provider.acceptsDelivery,
@@ -112,6 +114,7 @@ export class ProviderService {
     if (data.businessName) updateData.businessName = data.businessName;
     if (data.description) updateData.description = data.description;
     if (data.businessAddress) updateData.businessAddress = data.businessAddress;
+    if (data.logo) updateData.logo = data.logo;
     if (data.city) updateData.city = data.city;
     if (data.country) updateData.country = data.country;
     if (data.acceptsDelivery !== undefined) updateData.acceptsDelivery = data.acceptsDelivery;
@@ -126,6 +129,7 @@ export class ProviderService {
       businessName: updatedProvider.businessName,
       description: updatedProvider.description,
       businessAddress: updatedProvider.businessAddress,
+      logo: updatedProvider.logo,
       city: updatedProvider.city,
       country: updatedProvider.country,
       acceptsDelivery: updatedProvider.acceptsDelivery,
@@ -219,6 +223,7 @@ export class ProviderService {
       businessName: provider.businessName,
       description: provider.description,
       businessAddress: provider.businessAddress,
+      logo: provider.logo,
       city: provider.city,
       country: provider.country,
       acceptsDelivery: provider.acceptsDelivery,
@@ -253,6 +258,7 @@ export class ProviderService {
       businessName: provider.businessName,
       description: provider.description,
       businessAddress: provider.businessAddress,
+      logo: provider.logo,
       city: provider.city,
       country: provider.country,
       acceptsDelivery: provider.acceptsDelivery,
