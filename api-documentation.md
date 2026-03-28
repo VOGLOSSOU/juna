@@ -900,3 +900,107 @@ Retourne tous les repas créés par le provider connecté, triés du plus récen
 | `VALIDATION_ERROR` | 400 | Données invalides (prix négatif, mealType inconnu, etc.) |
 
 ---
+
+## PARTIE 7 — CRÉATION D'ABONNEMENTS (PROVIDER)
+
+Un abonnement est une offre commerciale du provider : il regroupe des repas, une durée, un prix et des conditions de disponibilité. C'est ce que les users voient et achètent.
+
+### POST /subscriptions — Créer un abonnement
+
+**Headers requis :** `Authorization: Bearer {providerToken}` (rôle PROVIDER)
+
+**Body :**
+```json
+{
+  "name": "Formule Semaine Africaine",     // requis
+  "description": "...",                    // requis
+  "price": 25000,                          // requis — prix total en FCFA
+  "junaCommissionPercent": 10,             // optionnel — % commission JUNA (défaut: 0)
+  "type": "FULL_DAY",                      // requis — BREAKFAST | LUNCH | DINNER | FULL_DAY
+  "category": "AFRICAN",                   // requis — catégorie culinaire
+  "duration": "WORK_WEEK",                 // requis — durée de l'abonnement
+  "isPublic": true,                        // optionnel — visible par les users (défaut: true)
+  "isImmediate": false,                    // requis — true = dispo immédiatement, false = délai de préparation
+  "preparationHours": 24,                  // requis si isImmediate=false — délai en heures avant le premier repas
+  "imageUrl": "https://...",               // optionnel
+  "mealIds": ["<uuid>", "<uuid>", "<uuid>"] // requis — IDs des repas inclus (doivent appartenir au provider)
+}
+```
+
+> **Durées disponibles (`duration`) :**
+> | Valeur | Jours couverts | Description |
+> |--------|----------------|-------------|
+> | `DAY` | 1 | Une journée |
+> | `THREE_DAYS` | 3 | 3 jours |
+> | `WORK_WEEK` | 5 | Semaine de travail (lun-ven) |
+> | `WEEK` | 7 | Une semaine complète |
+> | `TWO_WEEKS` | 14 | Deux semaines |
+> | `WORK_WEEK_2` | 10 | Deux semaines de travail |
+> | `WORK_MONTH` | 20 | Mois de travail |
+> | `MONTH` | 30 | Un mois |
+> | `WEEKEND` | 2 | Week-end |
+
+> **`isImmediate` et `preparationHours` :**
+> - `isImmediate: true` → l'abonnement peut démarrer immédiatement après commande. `preparationHours` est automatiquement mis à `0`
+> - `isImmediate: false` → le provider a besoin d'un délai avant de commencer. `preparationHours` est obligatoire et doit être > 0
+> - Ce délai impacte le calcul de `scheduledFor` à la commande : date de début = maintenant + `preparationHours`
+
+**Réponse 201 ✅ — TEST 7.1 (`isImmediate: false`, 24h de délai) :**
+```json
+{
+  "success": true,
+  "message": "Abonnement créé avec succès",
+  "data": {
+    "id": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+    "providerId": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+    "name": "Formule Semaine Africaine",
+    "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi...",
+    "price": 25000,
+    "junaCommissionPercent": 10,
+    "type": "FULL_DAY",
+    "category": "AFRICAN",
+    "duration": "WORK_WEEK",
+    "isActive": true,
+    "isPublic": true,
+    "isImmediate": false,
+    "preparationHours": 24,
+    "deliveryZones": null,
+    "pickupLocations": null,
+    "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-03-28T18:28:14.481Z",
+    "updatedAt": "2026-03-28T18:28:14.481Z"
+  }
+}
+```
+
+**Réponse 201 ✅ — TEST 7.1b (`isImmediate: true`) :**
+```json
+{
+  "success": true,
+  "message": "Abonnement créé avec succès",
+  "data": {
+    "id": "24d12a2a-f9a7-4206-be4b-0c5eec5261d9",
+    "name": "Formule Express Déjeuner",
+    "type": "LUNCH",
+    "duration": "WORK_WEEK",
+    "isImmediate": true,
+    "preparationHours": 0,
+    "price": 8000,
+    "createdAt": "2026-03-28T18:29:09.003Z"
+  }
+}
+```
+
+> Quand `isImmediate: true`, le serveur force `preparationHours` à `0` même si une valeur est envoyée — le champ est ignoré.
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `VALIDATION_ERROR` | 400 | `preparationHours` manquant quand `isImmediate=false`, repas invalides, champs requis manquants |
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `FORBIDDEN` | 403 | Token non PROVIDER ou provider non approuvé |
+
+---
