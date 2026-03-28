@@ -1093,3 +1093,149 @@ Retourne tous les abonnements du provider connecté, actifs ou non, publics ou p
 ```
 
 ---
+
+## PARTIE 8 — DÉCOUVERTE DES ABONNEMENTS (USER)
+
+Ces endpoints sont publics (pas de token requis) — ils permettent aux users de parcourir l'offre disponible avant même de se connecter.
+
+### GET /subscriptions — Lister les abonnements publics
+
+Retourne tous les abonnements actifs et publics. Accepte plusieurs filtres combinables en query params.
+
+**Query params disponibles :**
+| Paramètre | Type | Exemple | Description |
+|-----------|------|---------|-------------|
+| `city` | string | `Cotonou` | Filtre par ville du provider |
+| `country` | string | `BJ` | Filtre par pays (code ISO) — à utiliser avec `city` |
+| `category` | string | `AFRICAN` | Catégorie culinaire |
+| `type` | string | `FULL_DAY` | Type de repas |
+| `duration` | string | `WORK_WEEK` | Durée de l'abonnement |
+| `search` | string | `africaine` | Recherche dans le nom et la description |
+
+**Réponse 200 ✅ — TEST 8.1 (tous les abonnements) :**
+```json
+{
+  "success": true,
+  "message": "Abonnements récupérés avec succès",
+  "data": [
+    {
+      "id": "24d12a2a-f9a7-4206-be4b-0c5eec5261d9",
+      "name": "Formule Express Déjeuner",
+      "price": 8000,
+      "type": "LUNCH",
+      "category": "AFRICAN",
+      "duration": "WORK_WEEK",
+      "isImmediate": true,
+      "preparationHours": 0,
+      "provider": {
+        "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+        "businessName": "Chez Mariam",
+        "rating": 0
+      }
+    },
+    {
+      "id": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+      "name": "Formule Semaine Africaine",
+      "price": 25000,
+      "type": "FULL_DAY",
+      "category": "AFRICAN",
+      "duration": "WORK_WEEK",
+      "isImmediate": false,
+      "preparationHours": 24,
+      "provider": {
+        "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+        "businessName": "Chez Mariam",
+        "rating": 0
+      }
+    }
+  ]
+}
+```
+
+> **Résumé des filtres testés :**
+> - **TEST 8.2** `?city=Cotonou&country=BJ` → 2 résultats (le provider est basé à Cotonou)
+> - **TEST 8.3** `?category=AFRICAN` → 2 résultats (les deux abonnements sont AFRICAN)
+> - **TEST 8.4** `?type=FULL_DAY` → 1 résultat (seule la "Formule Semaine Africaine" est FULL_DAY)
+> - **TEST 8.5** `?duration=WORK_WEEK` → 2 résultats (les deux ont la durée WORK_WEEK)
+> - **TEST 8.6** `?search=africaine` → 1 résultat (recherche insensible à la casse dans nom + description)
+
+---
+
+### GET /subscriptions/:id — Détails complets d'un abonnement
+
+Retourne l'abonnement avec toutes les infos du provider et la liste complète des repas inclus. C'est la page de détail qu'un user consulte avant d'acheter.
+
+**Réponse 200 ✅ — TEST 8.7 :**
+```json
+{
+  "success": true,
+  "message": "Abonnement récupéré avec succès",
+  "data": {
+    "id": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+    "name": "Formule Semaine Africaine",
+    "price": 25000,
+    "type": "FULL_DAY",
+    "category": "AFRICAN",
+    "duration": "WORK_WEEK",
+    "isImmediate": false,
+    "preparationHours": 24,
+    "provider": {
+      "id": "673b79e0-25a7-4511-92a5-8ac2c2ad4ff4",
+      "businessName": "Chez Mariam",
+      "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+      "city": "Cotonou",
+      "country": "BJ",
+      "acceptsDelivery": true,
+      "acceptsPickup": true,
+      "deliveryZones": [
+        { "city": "Cotonou", "cost": 500, "country": "BJ" },
+        { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+        { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+      ],
+      "rating": 0,
+      "totalReviews": 0,
+      "status": "APPROVED"
+    },
+    "mealsInSubscriptions": [
+      {
+        "id": "69787625-3cb4-4e3d-aaa1-089b3e999127",
+        "mealId": "7c55e8ac-d08a-4bca-a05a-30aa470bfc4e",
+        "quantity": 1,
+        "meal": {
+          "name": "Bouillie de mil avec beignets",
+          "price": 800,
+          "mealType": "BREAKFAST"
+        }
+      },
+      {
+        "id": "93227025-ef40-4ba2-be76-4abded4f1238",
+        "mealId": "b0b6b8bd-4053-47ae-9dfe-593d1182e03b",
+        "quantity": 1,
+        "meal": {
+          "name": "Riz sauce graine + poisson",
+          "price": 1500,
+          "mealType": "LUNCH"
+        }
+      },
+      {
+        "id": "109d7dda-520b-4b01-bb37-c8a966928bd9",
+        "mealId": "8aa1f0c4-6851-46dc-9394-1d96d96e6652",
+        "quantity": 1,
+        "meal": {
+          "name": "Pâte de maïs sauce gombo",
+          "price": 1200,
+          "mealType": "DINNER"
+        }
+      }
+    ]
+  }
+}
+```
+
+> **Utilisation côté app :**
+> - `provider.deliveryZones` → permet d'afficher le coût de livraison selon la ville de l'user avant commande
+> - `provider.acceptsDelivery` / `provider.acceptsPickup` → détermine les options disponibles sur l'écran de commande
+> - `mealsInSubscriptions` → permet d'afficher la carte des repas inclus sur la page de détail
+> - `preparationHours` → affiché à l'user pour qu'il sache à partir de quand son abonnement peut démarrer
+
+---
