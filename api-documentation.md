@@ -996,11 +996,100 @@ Un abonnement est une offre commerciale du provider : il regroupe des repas, une
 
 > Quand `isImmediate: true`, le serveur force `preparationHours` à `0` même si une valeur est envoyée — le champ est ignoré.
 
+**Réponse 400 ❌ — `isImmediate: false` sans `preparationHours` (TEST 7.1c) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"preparationHours\",\"message\":\"Le délai de préparation est requis si l'abonnement n'est pas immédiat\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
+**Réponse 400 ❌ — Aucun repas associé (TEST 7.2) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"mealIds\",\"message\":\"Au moins un repas requis\"}]",
+  "error": {
+    "code": "VALIDATION_ERROR"
+  }
+}
+```
+
 **Codes d'erreur possibles :**
 | Code | HTTP | Description |
 |------|------|-------------|
-| `VALIDATION_ERROR` | 400 | `preparationHours` manquant quand `isImmediate=false`, repas invalides, champs requis manquants |
+| `VALIDATION_ERROR` | 400 | `preparationHours` manquant quand `isImmediate=false`, aucun repas, champs requis manquants |
 | `UNAUTHORIZED` | 401 | Token manquant ou expiré |
 | `FORBIDDEN` | 403 | Token non PROVIDER ou provider non approuvé |
+
+---
+
+### PUT /subscriptions/:id/public — Publier/dépublier un abonnement
+
+Bascule la visibilité de l'abonnement. Un abonnement `isPublic: false` n'apparaît pas dans les résultats de recherche des users.
+
+**Headers requis :** `Authorization: Bearer {providerToken}`
+
+**Réponse 200 ✅ — TEST 7.3 :**
+```json
+{
+  "success": true,
+  "message": "Statut de l'abonnement mis à jour",
+  "data": {
+    "id": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+    "isPublic": true,
+    "updatedAt": "2026-03-28T18:33:35.416Z"
+    // ... autres champs
+  }
+}
+```
+
+> Cet endpoint est un toggle — si `isPublic` était `true`, il passe à `false` et vice-versa. Utile quand le provider veut retirer temporairement une offre sans la supprimer.
+
+---
+
+### GET /subscriptions/me — Voir ses abonnements
+
+Retourne tous les abonnements du provider connecté, actifs ou non, publics ou privés.
+
+**Headers requis :** `Authorization: Bearer {providerToken}`
+
+**Réponse 200 ✅ — TEST 7.4 :**
+```json
+{
+  "success": true,
+  "message": "Abonnements récupérés avec succès",
+  "data": [
+    {
+      "id": "24d12a2a-f9a7-4206-be4b-0c5eec5261d9",
+      "name": "Formule Express Déjeuner",
+      "type": "LUNCH",
+      "duration": "WORK_WEEK",
+      "price": 8000,
+      "isPublic": true,
+      "isImmediate": true,
+      "preparationHours": 0,
+      "subscriberCount": 0,
+      "createdAt": "2026-03-28T18:29:09.003Z"
+    },
+    {
+      "id": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+      "name": "Formule Semaine Africaine",
+      "type": "FULL_DAY",
+      "duration": "WORK_WEEK",
+      "price": 25000,
+      "isPublic": true,
+      "isImmediate": false,
+      "preparationHours": 24,
+      "subscriberCount": 0,
+      "createdAt": "2026-03-28T18:28:14.481Z",
+      "updatedAt": "2026-03-28T18:33:35.416Z"
+    }
+  ]
+}
+```
 
 ---
