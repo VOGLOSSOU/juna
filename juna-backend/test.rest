@@ -594,6 +594,63 @@ PUT {{apiUrl}}/orders/{{orderId}}/ready
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.9 — User annule une commande (ERREUR car déjà READY)
+# TEST 9.11 — User annule une commande (ERREUR car déjà READY)
 DELETE {{apiUrl}}/orders/{{orderId}}
 Authorization: Bearer {{user1Token}}
+
+
+# ============================================
+# PARTIE 10 — UPLOAD IMAGES (CLOUDINARY)
+# ============================================
+
+###
+# TEST 10.1 — Upload photo de repas (multipart/form-data)
+# Choisir un fichier image local dans l'interface REST Client
+POST {{apiUrl}}/upload/meals
+Authorization: Bearer {{providerToken}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="meal.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------FormBoundary--
+
+###
+# TEST 10.2 — Upload avatar user
+POST {{apiUrl}}/upload/avatars
+Authorization: Bearer {{user1Token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------FormBoundary--
+
+###
+# TEST 10.3 — Dossier invalide (ERREUR attendue)
+POST {{apiUrl}}/upload/invalid_folder
+Authorization: Bearer {{user1Token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------FormBoundary--
+
+###
+# TEST 10.4 — Sans token (ERREUR attendue)
+POST {{apiUrl}}/upload/meals
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="test.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------FormBoundary--

@@ -7,6 +7,7 @@ import mealRoutes from './meal.routes';
 import subscriptionRoutes from './subscription.routes';
 import reviewRoutes from './review.routes';
 import orderRoutes from './order.routes';
+import uploadRoutes from './upload.routes';
 // Import des autres routes ici plus tard
 // import proposalRoutes from './proposal.routes';
 // import ticketRoutes from './ticket.routes';
@@ -24,6 +25,7 @@ router.use('/meals', mealRoutes);
 router.use('/subscriptions', subscriptionRoutes);
 router.use('/reviews', reviewRoutes);
 router.use('/orders', orderRoutes);
+router.use('/upload', uploadRoutes);
 
 // Plus tard, ajouter les autres routes
 // router.use('/proposals', proposalRoutes);
