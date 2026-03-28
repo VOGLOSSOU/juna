@@ -245,3 +245,96 @@ Endpoint appelé par l'app mobile à chaque démarrage pour enregistrer la posit
 | `USER_NOT_FOUND` | 404 | Utilisateur introuvable |
 
 ---
+
+## PARTIE 3 — PROFIL USER
+
+### GET /users/me — Voir son profil
+
+Retourne le profil complet de l'user connecté, incluant les infos de base et son profil détaillé (localisation, avatar, adresse, préférences).
+
+**Headers requis :** `Authorization: Bearer {accessToken}`
+
+**Réponse 200 ✅ — TEST 3.1 :**
+```json
+{
+  "success": true,
+  "message": "Profil récupéré avec succès",
+  "data": {
+    "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+    "email": "kofi.mensah@gmail.com",
+    "name": "Kofi Mensah",
+    "phone": "+22961111111",
+    "role": "USER",
+    "isVerified": false,
+    "isActive": true,
+    "createdAt": "2026-03-28T16:16:25.640Z",
+    "profile": {
+      "avatar": null,          // null jusqu'à ce que l'user uploade une photo
+      "address": null,         // adresse textuelle libre (ex: "Quartier Cadjehoun")
+      "city": "Cotonou",       // définie via PUT /users/me/location
+      "country": "BJ",         // code ISO 2 lettres
+      "latitude": 6.3703,      // coordonnées GPS — null si non renseignées
+      "longitude": 2.3912,
+      "preferences": null      // préférences alimentaires — voir PUT /users/me/preferences
+    }
+  }
+}
+```
+
+> **Structure du profil :**
+> - Les champs du `profile` sont tous optionnels sauf `city` et `country` qui sont définis via `PUT /users/me/location`
+> - `avatar` : URL Cloudinary de la photo de profil — `null` par défaut. Uploader d'abord via `POST /upload/avatars`, puis mettre à jour ici
+> - `preferences` : objet JSON pour stocker les restrictions alimentaires, catégories favorites, préférences de notifications — géré via `PUT /users/me/preferences`
+
+---
+
+### PUT /users/me — Mettre à jour son profil
+
+Permet de modifier le nom, le téléphone et/ou l'adresse. Tous les champs sont optionnels — envoyer uniquement ce qui doit être modifié.
+
+**Headers requis :** `Authorization: Bearer {accessToken}`
+
+**Body (tous les champs sont optionnels) :**
+```json
+{
+  "name": "Kofi Mensah Junior",            // optionnel — min 2 caractères
+  "phone": "+22961111112",                 // optionnel — doit être unique
+  "address": "Quartier Cadjehoun, Cotonou" // optionnel — adresse textuelle libre
+}
+```
+
+**Réponse 200 ✅ — TEST 3.2 :**
+```json
+{
+  "success": true,
+  "message": "Profil mis à jour avec succès",
+  "data": {
+    "id": "8778243d-c31e-4000-aa21-10ba8aa567d8",
+    "email": "kofi.mensah@gmail.com",
+    "name": "Kofi Mensah Junior",
+    "phone": "+22961111111",
+    "role": "USER",
+    "isVerified": false,
+    "isActive": true,
+    "createdAt": "2026-03-28T16:16:25.640Z",
+    "profile": {
+      "avatar": null,
+      "address": "Quartier Cadjehoun, Cotonou",
+      "city": "Cotonou",
+      "country": "BJ",
+      "latitude": 6.3703,
+      "longitude": 2.3912,
+      "preferences": null
+    }
+  }
+}
+```
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `PHONE_ALREADY_EXISTS` | 409 | Numéro de téléphone déjà utilisé par un autre compte |
+| `VALIDATION_ERROR` | 400 | Données invalides |
+
+---
