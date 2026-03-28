@@ -1239,3 +1239,119 @@ Retourne l'abonnement avec toutes les infos du provider et la liste complète de
 > - `preparationHours` → affiché à l'user pour qu'il sache à partir de quand son abonnement peut démarrer
 
 ---
+
+## PARTIE 9 — COMMANDES (USER)
+
+Une commande lie un user à un abonnement. Elle inclut le mode de livraison, le calcul du coût total et la date de début planifiée.
+
+### POST /orders — Créer une commande
+
+**Headers requis :** `Authorization: Bearer {accessToken}` (rôle USER)
+
+**Body :**
+```json
+{
+  "subscriptionId": "<uuid>",              // requis — ID de l'abonnement
+  "deliveryMethod": "DELIVERY",            // requis — DELIVERY ou PICKUP
+  "deliveryCity": "Cotonou",               // requis si deliveryMethod=DELIVERY
+  "deliveryAddress": "Quartier Cadjehoun...", // requis si deliveryMethod=DELIVERY
+  "startAsap": true,                       // requis — true = dès que possible, false = date choisie
+  "requestedStartDate": "2026-03-30T08:00:00.000Z" // requis si startAsap=false
+}
+```
+
+> **Calcul du montant total :**
+> - `deliveryCost` = coût de la zone de livraison × nombre de jours couverts par la durée
+> - Exemple : zone Cotonou = 500 FCFA/jour × 5 jours (WORK_WEEK) = **2500 FCFA**
+> - `amount` = prix de l'abonnement + deliveryCost = 25 000 + 2 500 = **27 500 FCFA**
+
+> **Calcul de `scheduledFor` :**
+> - Si `startAsap: true` → `scheduledFor` = maintenant + `preparationHours` de l'abonnement
+> - Si `startAsap: false` → `scheduledFor` = `requestedStartDate` (doit être ≥ maintenant + preparationHours)
+> - Le serveur calcule et valide cette date — l'app mobile ne la calcule pas elle-même
+
+**Réponse 201 ✅ — TEST 9.1 (`startAsap: true`, livraison Cotonou) :**
+```json
+{
+  "success": true,
+  "message": "Commande créée avec succès",
+  "data": {
+    "id": "3cdce1bb-a984-4b33-aec3-cf7c1bfc0593",
+    "userId": "3928ed13-1887-4e27-b498-6246123218ab",
+    "subscriptionId": "5a4fc4e7-84f0-4403-b1c2-34f67ef35821",
+    "orderNumber": "ORD-202603-00001",
+    "amount": 27500,
+    "status": "PENDING",
+    "deliveryMethod": "DELIVERY",
+    "deliveryAddress": "Quartier Cadjehoun, immeuble bleu face école primaire",
+    "deliveryCity": "Cotonou",
+    "deliveryCost": 2500,
+    "pickupLocation": null,
+    "scheduledFor": "2026-03-29T19:23:33.489Z",
+    "completedAt": null,
+    "qrCode": "JUNA-3F2B3296",
+    "metadata": null,
+    "createdAt": "2026-03-28T19:23:33.499Z",
+    "updatedAt": "2026-03-28T19:23:33.499Z"
+  }
+}
+```
+
+> **Champs notables :**
+> - `orderNumber` : numéro lisible généré automatiquement, format `ORD-YYYYMM-NNNNN`
+> - `scheduledFor` : date calculée côté serveur = maintenant + 24h (preparationHours de cet abonnement)
+> - `qrCode` : code unique généré pour chaque commande — utilisé pour la confirmation de livraison
+> - `status: "PENDING"` : la commande attend la confirmation du paiement (non encore implémenté)
+> - `amount: 27500` = 25 000 (abonnement) + 2 500 (livraison Cotonou × 5 jours)
+
+**Réponse 201 ✅ — TEST 9.2 (date choisie : `requestedStartDate`) :**
+```json
+{
+  "success": true,
+  "message": "Commande créée avec succès",
+  "data": {
+    "id": "6a40df08-028c-4257-9c68-e0ccab83604b",
+    "orderNumber": "ORD-202603-00002",
+    "amount": 27500,
+    "deliveryCost": 2500,
+    "scheduledFor": "2026-03-30T08:00:00.000Z",
+    "qrCode": "JUNA-D8462A2E",
+    "status": "PENDING"
+  }
+}
+```
+
+> `scheduledFor` correspond exactement à la date demandée par l'user (2026-03-30T08:00:00.000Z), car elle respecte le délai minimum de 24h.
+
+**Réponse 400 ❌ — Date trop proche (TEST 9.3) :**
+```json
+{
+  "success": false,
+  "message": "La date de début doit être au moins 24h après maintenant (au plus tôt le 2026-03-29T19:24:19.835Z)",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+> Le message d'erreur indique dynamiquement la date minimale acceptée — l'app mobile peut parser ce message pour afficher un datepicker à partir de la bonne date.
+
+**Réponse 400 ❌ — Ville de livraison non couverte (TEST 9.4) :**
+```json
+{
+  "success": false,
+  "message": "Le prestataire ne livre pas à Lagos",
+  "error": {
+    "code": "INVALID_INPUT"
+  }
+}
+```
+
+**Codes d'erreur possibles :**
+| Code | HTTP | Description |
+|------|------|-------------|
+| `INVALID_INPUT` | 400 | Date trop proche, ville non couverte, mode de livraison non supporté |
+| `UNAUTHORIZED` | 401 | Token manquant ou expiré |
+| `NOT_FOUND` | 404 | Abonnement introuvable |
+
+---
