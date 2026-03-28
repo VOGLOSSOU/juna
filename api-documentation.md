@@ -260,14 +260,14 @@ Retourne le profil complet de l'user connecté, incluant les infos de base et so
   "success": true,
   "message": "Profil récupéré avec succès",
   "data": {
-    "id": "<uuid>",
+    "id": "3928ed13-1887-4e27-b498-6246123218ab",
     "email": "kofi.mensah@gmail.com",
     "name": "Kofi Mensah",
     "phone": "+22961111111",
     "role": "USER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "<timestamp>",
+    "createdAt": "2026-03-28T17:06:35.443Z",
     "profile": {
       "avatar": null,          // null jusqu'à ce que l'user uploade une photo
       "address": null,         // adresse textuelle libre (ex: "Quartier Cadjehoun")
@@ -309,14 +309,14 @@ Permet de modifier le nom, le téléphone et/ou l'adresse. Tous les champs sont 
   "success": true,
   "message": "Profil mis à jour avec succès",
   "data": {
-    "id": "<uuid>",
+    "id": "3928ed13-1887-4e27-b498-6246123218ab",
     "email": "kofi.mensah@gmail.com",
     "name": "Kofi Mensah Junior",
     "phone": "+22961111111",
     "role": "USER",
     "isVerified": false,
     "isActive": true,
-    "createdAt": "<timestamp>",
+    "createdAt": "2026-03-28T17:06:35.443Z",
     "profile": {
       "avatar": null,
       "address": "Quartier Cadjehoun, Cotonou",
