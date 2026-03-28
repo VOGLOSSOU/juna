@@ -338,3 +338,146 @@ Permet de modifier le nom, le téléphone et/ou l'adresse. Tous les champs sont 
 | `VALIDATION_ERROR` | 400 | Données invalides |
 
 ---
+
+## PARTIE 4 — ADMIN
+
+> **Accès réservé :** tous les endpoints `/admin/*` nécessitent un token avec `role: ADMIN` ou `role: SUPER_ADMIN`. Un token USER ou PROVIDER retournera une erreur 403.
+
+> **Compte admin par défaut :** créé via `npx ts-node prisma/seed.ts`. Email : `admin@juna.app`, mot de passe : `ChangeMe123!`. À changer en production via les variables d'env `ADMIN_EMAIL` et `ADMIN_PASSWORD`.
+
+### POST /auth/login — Connexion admin
+
+L'admin se connecte via le même endpoint que les users. Le `role` dans la réponse permet à l'app de détecter qu'il s'agit d'un admin et de l'orienter vers l'interface d'administration.
+
+**Réponse 200 ✅ — TEST 4.1 :**
+```json
+{
+  "success": true,
+  "message": "Connexion réussie",
+  "data": {
+    "user": {
+      "id": "5227aea9-43ed-4809-be4d-6d056dde5602",
+      "email": "admin@juna.app",
+      "name": "Administrateur JUNA",
+      "phone": "+22900000000",
+      "role": "ADMIN",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-03-28T16:38:30.284Z",
+      "updatedAt": "2026-03-28T16:38:30.284Z"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    },
+    "isProfileComplete": true
+  }
+}
+```
+
+> **Gestion côté app :** vérifier le champ `role` après chaque login. Si `role === "ADMIN"` ou `role === "SUPER_ADMIN"`, rediriger vers l'interface admin. Les rôles possibles sont : `USER`, `PROVIDER`, `ADMIN`, `SUPER_ADMIN`.
+
+---
+
+### GET /admin/dashboard — Tableau de bord
+
+Retourne une vue d'ensemble des métriques clés de la plateforme.
+
+**Headers requis :** `Authorization: Bearer {adminToken}`
+
+**Réponse 200 ✅ — TEST 4.2 :**
+```json
+{
+  "success": true,
+  "data": {
+    "overview": {
+      "totalUsers": 7,
+      "totalProviders": 1,
+      "pendingProviders": 0,
+      "totalOrders": 2,
+      "completedOrders": 0,
+      "pendingOrders": 1,
+      "totalRevenue": 0
+    },
+    "charts": {
+      "ordersByDay": [],
+      "subscriptionsByCategory": [
+        { "category": "EUROPEAN", "count": 2 },
+        { "category": "AFRICAN", "count": 3 }
+      ]
+    }
+  }
+}
+```
+
+> **Champs `overview` :**
+> - `totalUsers` : nombre total de comptes inscrits (tous rôles confondus, admin inclus)
+> - `totalProviders` : providers dont le statut est `APPROVED`
+> - `pendingProviders` : candidatures en attente de validation
+> - `totalOrders` / `completedOrders` / `pendingOrders` : statistiques commandes
+> - `totalRevenue` : revenus totaux — `0` tant que le paiement n'est pas implémenté
+
+> **Champs `charts` :**
+> - `ordersByDay` : évolution des commandes par jour (vide si aucune commande récente)
+> - `subscriptionsByCategory` : répartition des abonnements par catégorie culinaire
+
+---
+
+### GET /admin/users — Lister tous les utilisateurs
+
+Retourne tous les comptes de la plateforme, triés du plus récent au plus ancien.
+
+**Headers requis :** `Authorization: Bearer {adminToken}`
+
+**Réponse 200 ✅ — TEST 4.3 :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "5227aea9-43ed-4809-be4d-6d056dde5602",
+      "email": "admin@juna.app",
+      "name": "Administrateur JUNA",
+      "phone": "+22900000000",
+      "role": "ADMIN",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-03-28T16:38:30.284Z"
+    },
+    {
+      "id": "96f7774b-6d19-4e53-8cf9-1db37b98afe7",
+      "email": "sena.akpovi@gmail.com",
+      "name": "Sena Akpovi",
+      "phone": "+22963333333",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-03-28T16:19:27.257Z"
+    }
+    // ... autres users
+  ]
+}
+```
+
+> **Utilisation :** permet à l'admin de consulter tous les comptes, vérifier les rôles, et identifier les users à suspendre si nécessaire. Le champ `isActive: false` indique un compte suspendu — ces users ne peuvent plus se connecter (erreur `ACCOUNT_SUSPENDED`).
+
+---
+
+### GET /admin/providers/pending — Candidatures en attente
+
+Retourne la liste des prestataires qui ont soumis une candidature et attendent validation.
+
+**Headers requis :** `Authorization: Bearer {adminToken}`
+
+**Réponse 200 ✅ — TEST 4.4 (aucune candidature pour l'instant) :**
+```json
+{
+  "success": true,
+  "message": "Fournisseurs en attente",
+  "data": []
+}
+```
+
+> Cet endpoint sera utilisé dans le flux de validation (Partie 5) : après qu'un user soumet sa candidature provider via `POST /providers/register`, elle apparaît ici avec le statut `PENDING`. L'admin peut ensuite approuver ou rejeter via les endpoints dédiés.
+
+---
