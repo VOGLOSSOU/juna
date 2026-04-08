@@ -28,7 +28,7 @@ export class UploadController {
 
       uploadService.validateFileSize(req.file.size);
 
-      const result = await uploadService.uploadImage(req.file.buffer, folder);
+      const result = await uploadService.uploadImage(req.file.buffer, folder, undefined, req.file.mimetype);
 
       sendSuccess(res, 'Image uploadée avec succès', {
         url: result.url,

@@ -1,5 +1,15 @@
 console.log('=== SERVER.TS STARTING ===');
 
+process.on('unhandledRejection', (reason: any) => {
+  console.error('⚠️ unhandledRejection (non fatal):', reason?.message ?? reason);
+  // On log mais on ne crash pas
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('💥 uncaughtException (fatal):', err.message);
+  process.exit(1);
+});
+
 (async () => {
   try {
     console.log('1. Importing app...');

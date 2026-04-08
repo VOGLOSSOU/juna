@@ -14,39 +14,36 @@ export class UploadService {
   async uploadImage(
     fileBuffer: Buffer,
     folder: UploadFolder,
-    filename?: string
+    filename?: string,
+    mimetype: string = 'image/jpeg'
   ): Promise<{ url: string; publicId: string }> {
-    return new Promise((resolve, reject) => {
-      const uploadOptions: any = {
-        folder: `juna/${folder}`,
-        allowed_formats: ALLOWED_FORMATS,
-        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+    const uploadOptions: any = {
+      folder: `juna/${folder}`,
+      allowed_formats: ALLOWED_FORMATS,
+      transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+      resource_type: 'image',
+    };
+
+    if (filename) {
+      uploadOptions.public_id = filename;
+      uploadOptions.overwrite = true;
+    }
+
+    const dataUri = `data:${mimetype};base64,${fileBuffer.toString('base64')}`;
+
+    try {
+      const result = await cloudinary.uploader.upload(dataUri, uploadOptions);
+      return {
+        url: result.secure_url,
+        publicId: result.public_id,
       };
-
-      if (filename) {
-        uploadOptions.public_id = filename;
-        uploadOptions.overwrite = true;
-      }
-
-      const uploadStream = cloudinary.uploader.upload_stream(
-        uploadOptions,
-        (error, result) => {
-          if (error) {
-            reject(new ValidationError(
-              'Erreur lors de l\'upload de l\'image',
-              ERROR_CODES.INVALID_INPUT
-            ));
-            return;
-          }
-          resolve({
-            url: result!.secure_url,
-            publicId: result!.public_id,
-          });
-        }
+    } catch (error: any) {
+      console.error('Cloudinary upload error:', JSON.stringify(error));
+      throw new ValidationError(
+        error?.message ?? 'Erreur lors de l\'upload de l\'image',
+        ERROR_CODES.INVALID_INPUT
       );
-
-      uploadStream.end(fileBuffer);
-    });
+    }
   }
 
   /**

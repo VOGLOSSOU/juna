@@ -43,6 +43,7 @@ export class ProviderRepository {
             name: true,
           },
         },
+        city: { include: { country: true } },
       },
     });
   }
@@ -55,6 +56,7 @@ export class ProviderRepository {
       where: { userId },
       include: {
         subscriptions: true,
+        city: { include: { country: true } },
       },
     });
   }
@@ -110,6 +112,7 @@ export class ProviderRepository {
             name: true,
           },
         },
+        city: { include: { country: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
