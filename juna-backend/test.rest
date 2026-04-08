@@ -7,23 +7,92 @@
 # ============================================
 # TOKENS ET IDS — À mettre à jour au fur et à mesure
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIzOTI4ZWQxMy0xODg3LTRlMjctYjQ5OC02MjQ2MTIzMjE4YWIiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzI1NzIyLCJleHAiOjE3NzQ3MjY2MjJ9.Tbl42RKOJmoTkZveuOj-jxQyFnWo2uLRKyVXhbQktwY
-@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4Mjc3ODZhYi02NTE4LTQwM2QtYTMyYy1iNTFhYzY0M2UyODgiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzc0NzI2OTY2LCJleHAiOjE3NzQ3Mjc4NjZ9.mVEs7SAKo86XL17UgjCKK11q_UPjGnkFDyQ1h5jAKbQ
-@user3Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJiZjU4Yzg4YS02MzJkLTQxMTYtOWE0ZS05ZjhhZmU5MDc5YjYiLCJlbWFpbCI6InNlbmEuYWtwb3ZpQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc0NzI2MDAwLCJleHAiOjE3NzQ3MjY5MDB9.cPcQwDb1nxmKII7PBVdEb-XZqu3CHu2FfH1eFpbDRiU
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MjFmZWQ2NS1jZjE1LTRjZjYtYTFjYS1kMjA4OTgyY2U0OGYiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc0NzE4NzAyLCJleHAiOjE3NzQ3MTk2MDJ9.42y0KIJW5Iuiq8Hz5KtJHBKBqBaccnzcLUiKIWTsm54
-@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI4Mjc3ODZhYi02NTE4LTQwM2QtYTMyYy1iNTFhYzY0M2UyODgiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzc0NzI2OTY2LCJleHAiOjE3NzQ3Mjc4NjZ9.mVEs7SAKo86XL17UgjCKK11q_UPjGnkFDyQ1h5jAKbQ
+@user1Token =
+@user2Token =
+@user3Token =
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhZjExNjkxYy1lM2Y0LTQ1MTctOTdlMi1lNWY4Nzg5MDMzYjAiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc1Njg2Njc2LCJleHAiOjE3NzU2ODc1NzZ9.kTDYeplBW-1nv52Tsg8_bctPYTg56gHsXYDNdQuc28w
+@providerToken =
 
-@user1Id = 3928ed13-1887-4e27-b498-6246123218ab
-@user2Id = 827786ab-6518-403d-a32c-b51ac643e288
-@user3Id = bf58c88a-632d-4116-9a4e-9f8afe9079b6
-@adminId = 921fed65-cf15-4cf6-a1ca-d208982ce48f
+@user1Id =
+@user2Id =
+@user3Id =
+@adminId =
 
-@providerId = 673b79e0-25a7-4511-92a5-8ac2c2ad4ff4
-@meal1Id = 7c55e8ac-d08a-4bca-a05a-30aa470bfc4e
-@meal2Id = b0b6b8bd-4053-47ae-9dfe-593d1182e03b
-@meal3Id = 8aa1f0c4-6851-46dc-9394-1d96d96e6652
-@subscriptionId = 5a4fc4e7-84f0-4403-b1c2-34f67ef35821
-@orderId = 3cdce1bb-a984-4b33-aec3-cf7c1bfc0593
+@providerId =
+@meal1Id =
+@meal2Id =
+@meal3Id =
+@subscriptionId =
+@orderId =
+
+# IDs géographie (récupérés via GET /countries et GET /countries/BJ/cities)
+@countryIdBJ = 8b60ac9a-c04b-45d6-acea-ad5cf1a340f6
+@cityIdCotonou = 101a6a8c-ad3b-4071-b399-ba5cd5afed0c
+@cityIdLokossa = d9617182-b28b-4988-81ec-1bcf68c61b14
+@landmarkIdIUT = fdd37c8b-67d6-46f3-9078-befcf2ceb085
+
+
+# ============================================
+# PARTIE 0 — GÉOGRAPHIE (Récupérer les IDs)
+# ============================================
+
+###
+# TEST 0.0 — Login Admin → copier dans @adminToken
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@juna.app",
+  "password": "ChangeMe123!"
+}
+
+###
+# TEST 0.1 — Lister tous les pays
+GET {{apiUrl}}/countries
+
+###
+# TEST 0.2 — Villes du Bénin → copier l'ID de Cotonou dans @cityIdCotonou
+GET {{apiUrl}}/countries/BJ/cities
+
+###
+# TEST 0.3 — Landmarks de Lokossa → copier l'ID de l'IUT dans @landmarkIdIUT
+GET {{apiUrl}}/cities/{{cityIdLokossa}}/landmarks
+
+###
+# TEST 0.4 — Admin crée un nouveau landmark (exemple)
+POST {{apiUrl}}/admin/landmarks
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Campus IUT Lokossa",
+  "cityId": "{{cityIdLokossa}}"
+}
+
+###
+# TEST 0.5 — Admin crée une nouvelle ville
+POST {{apiUrl}}/admin/cities
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Lokossa",
+  "countryId": "{{countryIdBJ}}"
+}
+
+###
+# TEST 0.6 — Admin crée un nouveau pays
+POST {{apiUrl}}/admin/countries
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "code": "BJ",
+  "translations": {
+    "fr": "Bénin",
+    "en": "Benin"
+  }
+}
 
 
 # ============================================
@@ -78,7 +147,23 @@ Content-Type: application/json
 }
 
 ###
-# TEST 1.5 — Login User 1 → copier le token dans @user1Token
+# TEST 1.5 — Mot de passe trop faible (ERREUR attendue)
+POST {{apiUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "nouveau@gmail.com",
+  "password": "abc",
+  "name": "Nouveau"
+}
+
+
+# ============================================
+# PARTIE 2 — LOCALISATION
+# ============================================
+
+###
+# TEST 2.1 — Login User 1 → copier token dans @user1Token
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
@@ -88,87 +173,29 @@ Content-Type: application/json
 }
 
 ###
-# TEST 1.6 — Login User 2 (futur provider) → copier dans @user2Token
-POST {{apiUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "mariam.diallo@gmail.com",
-  "password": "Password456"
-}
-
-###
-# TEST 1.7 — Login User 3 → copier dans @user3Token
-POST {{apiUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "sena.akpovi@gmail.com",
-  "password": "Password789"
-}
-
-###
-# TEST 1.8 — Mauvais mot de passe (ERREUR attendue)
-POST {{apiUrl}}/auth/login
-Content-Type: application/json
-
-{
-  "email": "kofi.mensah@gmail.com",
-  "password": "WrongPassword"
-}
-
-
-# ============================================
-# PARTIE 2 — LOCALISATION USERS
-# ============================================
-
-###
-# TEST 2.1 — Définir localisation User 1 (Cotonou)
-PUT {{apiUrl}}/users/me/location
+# TEST 2.2 — User 1 définit sa localisation (cityId de Cotonou)
+PUT {{apiUrl}}/users/location
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
 {
-  "city": "Cotonou",
-  "country": "BJ",
-  "latitude": 6.3703,
-  "longitude": 2.3912
+  "cityId": "{{cityIdCotonou}}"
 }
 
 ###
-# TEST 2.2 — Définir localisation User 3 (Lomé)
-PUT {{apiUrl}}/users/me/location
-Content-Type: application/json
-Authorization: Bearer {{user3Token}}
-
-{
-  "city": "Lomé",
-  "country": "TG",
-  "latitude": 6.1375,
-  "longitude": 1.2123
-}
-
-###
-# TEST 2.3 — Code pays invalide (ERREUR attendue)
-PUT {{apiUrl}}/users/me/location
+# TEST 2.3 — Ville introuvable (ERREUR attendue)
+PUT {{apiUrl}}/users/location
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
 {
-  "city": "Cotonou",
-  "country": "BENIN"
+  "cityId": "00000000-0000-0000-0000-000000000000"
 }
 
 ###
-# TEST 2.4 — Sans token (ERREUR attendue)
-PUT {{apiUrl}}/users/me/location
-Content-Type: application/json
-
-{
-  "city": "Cotonou",
-  "country": "BJ"
-}
-
+# TEST 2.4 — Voir le profil (ville doit apparaître)
+GET {{apiUrl}}/users/me
+Authorization: Bearer {{user1Token}}
 
 
 # ============================================
@@ -176,21 +203,20 @@ Content-Type: application/json
 # ============================================
 
 ###
-# TEST 3.1 — Voir profil User 1
-GET {{apiUrl}}/users/me
-Authorization: Bearer {{user1Token}}
-
-###
-# TEST 3.2 — Mettre à jour profil User 1
-PUT {{apiUrl}}/users/me
+# TEST 3.1 — Mettre à jour le profil
+PUT {{apiUrl}}/users/profile
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
 {
-  "name": "Kofi Mensah Junior",
+  "name": "Kofi Mensah Jr",
   "address": "Quartier Cadjehoun, Cotonou"
 }
 
+###
+# TEST 3.2 — Voir le profil mis à jour
+GET {{apiUrl}}/users/me
+Authorization: Bearer {{user1Token}}
 
 
 # ============================================
@@ -199,7 +225,6 @@ Authorization: Bearer {{user1Token}}
 
 ###
 # TEST 4.1 — Login Admin → copier dans @adminToken
-# (Utiliser les credentials admin définis en DB ou seed)
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
@@ -230,7 +255,6 @@ Authorization: Bearer {{adminToken}}
 
 ###
 # TEST 5.0 — Upload logo provider (avant la candidature)
-# Utiliser un fichier image local (.jpg, .png, .webp — max 5MB)
 # → copier l'URL retournée dans le champ "logo" du TEST 5.1
 POST {{apiUrl}}/upload/providers
 Authorization: Bearer {{user2Token}}
@@ -244,105 +268,7 @@ Content-Type: image/png
 ------FormBoundary--
 
 ###
-# TEST 5.1 — User 2 s'inscrit comme provider (livraison + retrait)
-# Remplacer "logo" par l'URL retournée par TEST 5.0
-POST {{apiUrl}}/providers/register
-Content-Type: application/json
-Authorization: Bearer {{user2Token}}
-
-{
-  "businessName": "Chez Mariam",
-  "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
-  "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
-  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
-  "city": "Cotonou",
-  "country": "BJ",
-  "acceptsDelivery": true,
-  "acceptsPickup": true,
-  "deliveryZones": [
-    { "city": "Cotonou", "country": "BJ", "cost": 500 },
-    { "city": "Abomey-Calavi", "country": "BJ", "cost": 800 },
-    { "city": "Ouidah", "country": "BJ", "cost": 1500 }
-  ]
-}
-
-###
-# TEST 5.2 — Candidature sans logo (ERREUR attendue)
-POST {{apiUrl}}/providers/register
-Content-Type: application/json
-Authorization: Bearer {{user3Token}}
-
-{
-  "businessName": "Sans logo",
-  "description": "Description test minimum requis ici.",
-  "businessAddress": "Adresse test",
-  "city": "Cotonou",
-  "country": "BJ",
-  "acceptsDelivery": true,
-  "acceptsPickup": true,
-  "deliveryZones": [
-    { "city": "Cotonou", "country": "BJ", "cost": 500 }
-  ]
-}
-
-###
-# TEST 5.3 — Candidature sans mode de réception (ERREUR attendue)
-POST {{apiUrl}}/providers/register
-Content-Type: application/json
-Authorization: Bearer {{user3Token}}
-
-{
-  "businessName": "Sans mode",
-  "description": "Description test minimum requis ici.",
-  "businessAddress": "Adresse test",
-  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
-  "city": "Cotonou",
-  "country": "BJ",
-  "acceptsDelivery": false,
-  "acceptsPickup": false
-}
-
-###
-# TEST 5.4 — Livraison cochée mais sans zones (ERREUR attendue)
-POST {{apiUrl}}/providers/register
-Content-Type: application/json
-Authorization: Bearer {{user3Token}}
-
-{
-  "businessName": "Sans zones",
-  "description": "Description test minimum requis ici.",
-  "businessAddress": "Adresse test",
-  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
-  "city": "Cotonou",
-  "country": "BJ",
-  "acceptsDelivery": true,
-  "acceptsPickup": false,
-  "deliveryZones": []
-}
-
-###
-# TEST 5.5 — Lister providers en attente (doit avoir Mariam)
-GET {{apiUrl}}/admin/providers/pending
-Authorization: Bearer {{adminToken}}
-
-###
-# TEST 5.6 — Voir détails provider (remplacer :id par @providerId)
-GET {{apiUrl}}/admin/providers/{{providerId}}
-Authorization: Bearer {{adminToken}}
-
-###
-# TEST 5.7 — Admin approuve le provider → User 2 devient PROVIDER
-PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
-Content-Type: application/json
-Authorization: Bearer {{adminToken}}
-
-{
-  "message": "Dossier complet, bienvenue sur Juna !"
-}
-
-###
-# TEST 5.8 — User 2 se reconnecte pour avoir un token avec rôle PROVIDER
-# → copier dans @providerToken
+# TEST 5.1 — Login User 2 → copier token dans @user2Token
 POST {{apiUrl}}/auth/login
 Content-Type: application/json
 
@@ -352,7 +278,112 @@ Content-Type: application/json
 }
 
 ###
-# TEST 5.9 — Voir profil provider
+# TEST 5.2 — User 2 s'inscrit comme provider (livraison + retrait)
+# Remplacer cityId par l'ID de Cotonou récupéré en TEST 0.2
+# Remplacer landmarkIds par les IDs récupérés en TEST 0.3
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user2Token}}
+
+{
+  "businessName": "Chez Mariam",
+  "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+  "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+  "cityId": "{{cityIdCotonou}}",
+  "acceptsDelivery": true,
+  "acceptsPickup": true,
+  "deliveryZones": [
+    { "city": "Cotonou", "country": "BJ", "cost": 500 },
+    { "city": "Abomey-Calavi", "country": "BJ", "cost": 800 },
+    { "city": "Ouidah", "country": "BJ", "cost": 1500 }
+  ],
+  "landmarkIds": []
+}
+
+###
+# TEST 5.3 — Candidature sans logo (ERREUR attendue)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user3Token}}
+
+{
+  "businessName": "Sans logo",
+  "description": "Description test minimum requis ici.",
+  "businessAddress": "Adresse test",
+  "cityId": "{{cityIdCotonou}}",
+  "acceptsDelivery": true,
+  "acceptsPickup": true,
+  "deliveryZones": [
+    { "city": "Cotonou", "country": "BJ", "cost": 500 }
+  ]
+}
+
+###
+# TEST 5.4 — Candidature sans mode de réception (ERREUR attendue)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user3Token}}
+
+{
+  "businessName": "Sans mode",
+  "description": "Description test minimum requis ici.",
+  "businessAddress": "Adresse test",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+  "cityId": "{{cityIdCotonou}}",
+  "acceptsDelivery": false,
+  "acceptsPickup": false
+}
+
+###
+# TEST 5.5 — Livraison cochée mais sans zones (ERREUR attendue)
+POST {{apiUrl}}/providers/register
+Content-Type: application/json
+Authorization: Bearer {{user3Token}}
+
+{
+  "businessName": "Sans zones",
+  "description": "Description test minimum requis ici.",
+  "businessAddress": "Adresse test",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1/juna/providers/logo_test.jpg",
+  "cityId": "{{cityIdCotonou}}",
+  "acceptsDelivery": true,
+  "acceptsPickup": false,
+  "deliveryZones": []
+}
+
+###
+# TEST 5.6 — Lister providers en attente (doit avoir Mariam)
+GET {{apiUrl}}/admin/providers/pending
+Authorization: Bearer {{adminToken}}
+
+###
+# TEST 5.7 — Voir détails provider → copier l'ID dans @providerId
+GET {{apiUrl}}/admin/providers/{{providerId}}
+Authorization: Bearer {{adminToken}}
+
+###
+# TEST 5.8 — Admin approuve le provider → User 2 devient PROVIDER
+PUT {{apiUrl}}/admin/providers/{{providerId}}/approve
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "message": "Dossier complet, bienvenue sur Juna !"
+}
+
+###
+# TEST 5.9 — User 2 se reconnecte → copier dans @providerToken
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "mariam.diallo@gmail.com",
+  "password": "Password456"
+}
+
+###
+# TEST 5.10 — Voir profil provider (doit inclure city)
 GET {{apiUrl}}/providers/me
 Authorization: Bearer {{providerToken}}
 
@@ -362,7 +393,7 @@ Authorization: Bearer {{providerToken}}
 # ============================================
 
 ###
-# TEST 6.1 — Créer repas 1 (petit-déjeuner)
+# TEST 6.1 — Créer repas 1 (petit-déjeuner) → copier ID dans @meal1Id
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -376,7 +407,7 @@ Authorization: Bearer {{providerToken}}
 }
 
 ###
-# TEST 6.2 — Créer repas 2 (déjeuner)
+# TEST 6.2 — Créer repas 2 (déjeuner) → copier ID dans @meal2Id
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -390,7 +421,7 @@ Authorization: Bearer {{providerToken}}
 }
 
 ###
-# TEST 6.3 — Créer repas 3 (dîner)
+# TEST 6.3 — Créer repas 3 (dîner) → copier ID dans @meal3Id
 POST {{apiUrl}}/meals
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -414,8 +445,7 @@ Authorization: Bearer {{providerToken}}
 # ============================================
 
 ###
-# TEST 7.1 — Créer un abonnement semaine de travail (disponible sous 24h)
-# (remplacer les meal IDs par @meal1Id, @meal2Id, @meal3Id)
+# TEST 7.1 — Créer abonnement semaine → copier ID dans @subscriptionId
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -436,7 +466,7 @@ Authorization: Bearer {{providerToken}}
 }
 
 ###
-# TEST 7.1b — Créer un abonnement disponible immédiatement (isImmediate = true)
+# TEST 7.2 — Créer abonnement express (isImmediate = true)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -456,25 +486,7 @@ Authorization: Bearer {{providerToken}}
 }
 
 ###
-# TEST 7.1c — Abonnement non immédiat sans preparationHours (ERREUR attendue)
-POST {{apiUrl}}/subscriptions
-Content-Type: application/json
-Authorization: Bearer {{providerToken}}
-
-{
-  "name": "Formule invalide",
-  "description": "Description suffisamment longue pour passer la validation basique.",
-  "price": 10000,
-  "type": "LUNCH",
-  "category": "AFRICAN",
-  "duration": "WEEK",
-  "isImmediate": false,
-  "imageUrl": "https://images.unsplash.com/photo-1504674900247",
-  "mealIds": ["{{meal1Id}}"]
-}
-
-###
-# TEST 7.2 — Abonnement sans repas (ERREUR attendue)
+# TEST 7.3 — Abonnement sans repas (ERREUR attendue)
 POST {{apiUrl}}/subscriptions
 Content-Type: application/json
 Authorization: Bearer {{providerToken}}
@@ -491,11 +503,6 @@ Authorization: Bearer {{providerToken}}
 }
 
 ###
-# TEST 7.3 — Publier l'abonnement (si isPublic pas mis à true lors de la création)
-PUT {{apiUrl}}/subscriptions/{{subscriptionId}}/public
-Authorization: Bearer {{providerToken}}
-
-###
 # TEST 7.4 — Voir mes abonnements
 GET {{apiUrl}}/subscriptions/me
 Authorization: Bearer {{providerToken}}
@@ -510,29 +517,32 @@ Authorization: Bearer {{providerToken}}
 GET {{apiUrl}}/subscriptions
 
 ###
-# TEST 8.2 — Filtrer par ville (Cotonou)
-GET {{apiUrl}}/subscriptions?city=Cotonou&country=BJ
+# TEST 8.2 — Filtrer par ville (nom)
+GET {{apiUrl}}/subscriptions?city=Cotonou
 
 ###
-# TEST 8.3 — Filtrer par catégorie (AFRICAN)
+# TEST 8.3 — Filtrer par landmark (IUT de Lokossa)
+GET {{apiUrl}}/subscriptions?landmarkId={{landmarkIdIUT}}
+
+###
+# TEST 8.4 — Filtrer par catégorie (AFRICAN)
 GET {{apiUrl}}/subscriptions?category=AFRICAN
 
 ###
-# TEST 8.4 — Filtrer par type (FULL_DAY)
+# TEST 8.5 — Filtrer par type (FULL_DAY)
 GET {{apiUrl}}/subscriptions?type=FULL_DAY
 
 ###
-# TEST 8.5 — Filtrer par durée (WORK_WEEK)
+# TEST 8.6 — Filtrer par durée (WORK_WEEK)
 GET {{apiUrl}}/subscriptions?duration=WORK_WEEK
 
 ###
-# TEST 8.6 — Recherche par mot clé
+# TEST 8.7 — Recherche par mot clé
 GET {{apiUrl}}/subscriptions?search=africaine
 
 ###
-# TEST 8.7 — Voir détails abonnement avec infos provider complètes
+# TEST 8.8 — Voir détails abonnement
 GET {{apiUrl}}/subscriptions/{{subscriptionId}}
-
 
 
 # ============================================
@@ -540,7 +550,17 @@ GET {{apiUrl}}/subscriptions/{{subscriptionId}}
 # ============================================
 
 ###
-# TEST 9.1 — User 1 commande avec livraison à Cotonou, dès que possible
+# TEST 9.1 — Login User 3 → copier dans @user3Token
+POST {{apiUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "sena.akpovi@gmail.com",
+  "password": "Password789"
+}
+
+###
+# TEST 9.2 — User 1 commande avec livraison à Cotonou, dès que possible → copier ID dans @orderId
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
@@ -554,7 +574,7 @@ Authorization: Bearer {{user1Token}}
 }
 
 ###
-# TEST 9.2 — User 1 commande avec date de début choisie (dans 3 jours)
+# TEST 9.3 — User 1 commande avec date choisie
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
@@ -565,11 +585,11 @@ Authorization: Bearer {{user1Token}}
   "deliveryCity": "Cotonou",
   "deliveryAddress": "Quartier Cadjehoun, immeuble bleu face école primaire",
   "startAsap": false,
-  "requestedStartDate": "2026-03-30T08:00:00.000Z"
+  "requestedStartDate": "2026-04-15T08:00:00.000Z"
 }
 
 ###
-# TEST 9.3 — Date trop proche (ERREUR attendue — délai 24h non respecté)
+# TEST 9.4 — Date trop proche (ERREUR attendue)
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
@@ -580,15 +600,14 @@ Authorization: Bearer {{user1Token}}
   "deliveryCity": "Cotonou",
   "deliveryAddress": "Quelque part",
   "startAsap": false,
-  "requestedStartDate": "2026-03-27T10:00:00.000Z"
+  "requestedStartDate": "2026-04-08T10:00:00.000Z"
 }
 
 ###
-# TEST 9.4 — Livraison dans une ville non couverte (ERREUR attendue)
+# TEST 9.5 — Livraison dans une ville non couverte (ERREUR attendue)
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
-
 
 {
   "subscriptionId": "{{subscriptionId}}",
@@ -599,7 +618,7 @@ Authorization: Bearer {{user1Token}}
 }
 
 ###
-# TEST 9.5 — User 3 commande avec retrait sur place, dès que possible
+# TEST 9.6 — User 3 commande avec retrait sur place
 POST {{apiUrl}}/orders
 Content-Type: application/json
 Authorization: Bearer {{user3Token}}
@@ -611,32 +630,37 @@ Authorization: Bearer {{user3Token}}
 }
 
 ###
-# TEST 9.6 — User 1 voit ses commandes
+# TEST 9.7 — User 1 voit ses commandes
 GET {{apiUrl}}/orders/me
 Authorization: Bearer {{user1Token}}
 
 ###
-# TEST 9.7 — Voir détails d'une commande (startDate, montant, QR code)
+# TEST 9.8 — Voir détails d'une commande
 GET {{apiUrl}}/orders/{{orderId}}
 Authorization: Bearer {{user1Token}}
 
 ###
-# TEST 9.8 — Provider voit ses commandes reçues
+# TEST 9.9 — Provider voit ses commandes reçues
 GET {{apiUrl}}/orders/provider/me
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.9 — Provider confirme la commande
+# TEST 9.10 — Provider confirme la commande
 PUT {{apiUrl}}/orders/{{orderId}}/confirm
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.10 — Provider marque la commande comme prête
+# TEST 9.11 — Provider marque la commande comme prête
 PUT {{apiUrl}}/orders/{{orderId}}/ready
 Authorization: Bearer {{providerToken}}
 
 ###
-# TEST 9.11 — User annule une commande (ERREUR car déjà READY)
+# TEST 9.12 — User annule la commande (ERREUR car déjà READY)
+DELETE {{apiUrl}}/orders/{{orderId}}
+Authorization: Bearer {{user1Token}}
+
+###
+# TEST 9.13 — User annule une commande encore PENDING
 DELETE {{apiUrl}}/orders/{{orderId}}
 Authorization: Bearer {{user1Token}}
 
@@ -646,8 +670,20 @@ Authorization: Bearer {{user1Token}}
 # ============================================
 
 ###
-# TEST 10.1 — Upload photo de repas (multipart/form-data)
-# Choisir un fichier image local dans l'interface REST Client
+# TEST 10.1 — Upload logo provider
+POST {{apiUrl}}/upload/providers
+Authorization: Bearer {{user2Token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="image"; filename="logo.png"
+Content-Type: image/png
+
+< ./test-assets/logo.png
+------FormBoundary--
+
+###
+# TEST 10.2 — Upload photo de repas
 POST {{apiUrl}}/upload/meals
 Authorization: Bearer {{providerToken}}
 Content-Type: multipart/form-data; boundary=----FormBoundary
@@ -656,11 +692,11 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="image"; filename="meal.jpg"
 Content-Type: image/jpeg
 
-< ./test-image.jpg
+< ./test-assets/logo.png
 ------FormBoundary--
 
 ###
-# TEST 10.2 — Upload avatar user
+# TEST 10.3 — Upload avatar user
 POST {{apiUrl}}/upload/avatars
 Authorization: Bearer {{user1Token}}
 Content-Type: multipart/form-data; boundary=----FormBoundary
@@ -669,11 +705,11 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="image"; filename="avatar.jpg"
 Content-Type: image/jpeg
 
-< ./test-image.jpg
+< ./test-assets/logo.png
 ------FormBoundary--
 
 ###
-# TEST 10.3 — Dossier invalide (ERREUR attendue)
+# TEST 10.4 — Dossier invalide (ERREUR attendue)
 POST {{apiUrl}}/upload/invalid_folder
 Authorization: Bearer {{user1Token}}
 Content-Type: multipart/form-data; boundary=----FormBoundary
@@ -682,11 +718,11 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="image"; filename="test.jpg"
 Content-Type: image/jpeg
 
-< ./test-image.jpg
+< ./test-assets/logo.png
 ------FormBoundary--
 
 ###
-# TEST 10.4 — Sans token (ERREUR attendue)
+# TEST 10.5 — Sans token (ERREUR attendue)
 POST {{apiUrl}}/upload/meals
 Content-Type: multipart/form-data; boundary=----FormBoundary
 
@@ -694,5 +730,5 @@ Content-Type: multipart/form-data; boundary=----FormBoundary
 Content-Disposition: form-data; name="image"; filename="test.jpg"
 Content-Type: image/jpeg
 
-< ./test-image.jpg
+< ./test-assets/logo.png
 ------FormBoundary--

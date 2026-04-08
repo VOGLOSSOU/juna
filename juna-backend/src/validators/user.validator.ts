@@ -7,10 +7,7 @@ export const updateProfileSchema = z.object({
   name: z.string().min(2, 'Le nom doit contenir au moins 2 caractères').optional(),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Format de téléphone invalide').optional(),
   address: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
+  cityId: z.string().uuid('ID ville invalide').optional(),
 });
 
 export type UpdateProfileDTO = z.infer<typeof updateProfileSchema>;
@@ -44,10 +41,7 @@ export type DeleteAccountDTO = z.infer<typeof deleteAccountSchema>;
  * Schéma pour la mise à jour de la localisation
  */
 export const updateLocationSchema = z.object({
-  city: z.string().min(2, 'Ville invalide').trim(),
-  country: z.string().length(2, 'Le code pays doit être en format ISO 2 lettres (ex: BJ)').toUpperCase().trim(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
+  cityId: z.string().uuid('ID ville invalide'),
 });
 
 export type UpdateLocationDTO = z.infer<typeof updateLocationSchema>;

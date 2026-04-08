@@ -18,12 +18,12 @@ export const registerProviderSchema = z.object({
   description: z.string().optional(),
   businessAddress: z.string().trim().min(3, 'L\'adresse doit contenir au moins 3 caractères'),
   logo: z.string().url('Le logo doit être une URL valide'),
-  city: z.string().min(2, 'La ville est requise').trim(),
-  country: z.string().length(2, 'Code pays invalide (ex: BJ)').toUpperCase().trim(),
+  cityId: z.string().uuid('ID ville invalide'),
   acceptsDelivery: z.boolean({ required_error: 'Précisez si vous proposez la livraison' }),
   acceptsPickup: z.boolean({ required_error: 'Précisez si vous acceptez le retrait sur place' }),
   deliveryZones: z.array(deliveryZoneSchema).optional(),
   documentUrl: z.string().optional(),
+  landmarkIds: z.array(z.string().uuid('ID lieu invalide')).optional(),
 }).refine(
   (data) => data.acceptsDelivery || data.acceptsPickup,
   { message: 'Vous devez proposer au moins un mode de réception (livraison ou retrait sur place)' }
@@ -42,12 +42,12 @@ export const updateProviderSchema = z.object({
   description: z.string().optional(),
   businessAddress: z.string().trim().min(3).optional(),
   logo: z.string().url().optional(),
-  city: z.string().min(2).trim().optional(),
-  country: z.string().length(2).toUpperCase().trim().optional(),
+  cityId: z.string().uuid('ID ville invalide').optional(),
   acceptsDelivery: z.boolean().optional(),
   acceptsPickup: z.boolean().optional(),
   deliveryZones: z.array(deliveryZoneSchema).optional(),
   documentUrl: z.string().optional(),
+  landmarkIds: z.array(z.string().uuid('ID lieu invalide')).optional(),
 }).refine(
   (data) => {
     // Si les deux sont explicitement définis à false, c'est invalide

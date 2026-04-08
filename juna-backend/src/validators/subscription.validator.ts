@@ -145,6 +145,7 @@ export const subscriptionFiltersSchema = z.object({
   isPublic: z.boolean().optional(),
   city: z.string().optional(),
   country: z.string().length(2).toUpperCase().optional(),
+  landmarkId: z.string().uuid('ID lieu invalide').optional(),
 });
 
 /**

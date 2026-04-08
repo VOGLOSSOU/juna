@@ -205,16 +205,14 @@ model UserProfile {
   userId      String    @unique @db.Uuid
   avatar      String?
   address     String?
-  latitude    Float?
-  longitude   Float?
-  city        String?
-  country     String?
+  cityId      String?   @db.Uuid
   preferences Json?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   // Relations
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city        City?     @relation(fields: [cityId], references: [id])
 
   @@map("user_profiles")
 }
@@ -224,15 +222,14 @@ model Provider {
   userId          String          @unique @db.Uuid
   businessName    String
   description     String?         @db.Text
-  businessAddress  String
-  logo             String
-  city             String          @default("")
-  country          String          @default("")
-  acceptsDelivery  Boolean         @default(false)
-  acceptsPickup    Boolean         @default(false)
-  deliveryZones    Json?
-  documentUrl      String?
-  status           ProviderStatus  @default(PENDING)
+  businessAddress String
+  logo            String
+  cityId          String          @db.Uuid
+  acceptsDelivery Boolean         @default(false)
+  acceptsPickup   Boolean         @default(false)
+  deliveryZones   Json?
+  documentUrl     String?
+  status          ProviderStatus  @default(PENDING)
   rating          Float           @default(0)
   totalReviews    Int             @default(0)
   createdAt       DateTime        @default(now())
@@ -240,10 +237,13 @@ model Provider {
 
   // Relations
   user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city            City            @relation(fields: [cityId], references: [id])
   subscriptions   Subscription[]
   meals           Meal[]
+  landmarks       ProviderLandmark[]
 
   @@index([status])
+  @@index([cityId])
   @@map("providers")
 }
 
@@ -386,8 +386,7 @@ model CustomProposal {
   mealType              MealType
   budget                Float
   zone                  String
-  city                  String
-  country               String
+  cityId                String         @db.Uuid
   details               String?        @db.Text
   isPublic              Boolean        @default(false)
   status                ProposalStatus @default(PENDING)
@@ -400,9 +399,11 @@ model CustomProposal {
   // Relations
   user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   subscription          Subscription?  @relation(fields: [assignedSubscriptionId], references: [id])
+  city                  City           @relation(fields: [cityId], references: [id])
 
   @@index([userId])
   @@index([status])
+  @@index([cityId])
   @@map("custom_proposals")
 }
 
@@ -537,6 +538,70 @@ model Admin {
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admins")
+}
+
+// ============================================
+// GÉOGRAPHIE — Pays, Villes, Landmarks
+// ============================================
+
+model Country {
+  id           String   @id @default(uuid()) @db.Uuid
+  code         String   @unique              // "BJ", "CI", "SN"
+  translations Json                          // { "fr": "Bénin", "en": "Benin" }
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  cities       City[]
+
+  @@map("countries")
+}
+
+model City {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String                            // "Lokossa", "Cotonou"
+  countryId String   @db.Uuid
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relations
+  country      Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  landmarks    Landmark[]
+  providers    Provider[]
+  userProfiles UserProfile[]
+  proposals    CustomProposal[]
+
+  @@unique([name, countryId])
+  @@index([countryId])
+  @@map("cities")
+}
+
+model Landmark {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String                            // "IUT de Lokossa", "Mairie de Lokossa"
+  cityId    String   @db.Uuid
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  // Relations
+  city      City               @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  providers ProviderLandmark[]
+
+  @@unique([name, cityId])
+  @@index([cityId])
+  @@map("landmarks")
+}
+
+model ProviderLandmark {
+  providerId  String   @db.Uuid
+  landmarkId  String   @db.Uuid
+
+  // Relations
+  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  landmark    Landmark @relation(fields: [landmarkId], references: [id], onDelete: Cascade)
+
+  @@id([providerId, landmarkId])
+  @@map("provider_landmarks")
 }
 
 // ============================================

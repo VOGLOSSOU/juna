@@ -41,13 +41,17 @@ export class ProviderService {
       description: data.description,
       businessAddress: data.businessAddress,
       logo: data.logo,
-      city: data.city,
-      country: data.country,
+      city: { connect: { id: data.cityId } },
       acceptsDelivery: data.acceptsDelivery,
       acceptsPickup: data.acceptsPickup,
       deliveryZones: data.deliveryZones ?? [],
       documentUrl: data.documentUrl,
       status: 'PENDING',
+      ...(data.landmarkIds && data.landmarkIds.length > 0 && {
+        landmarks: {
+          create: data.landmarkIds.map((landmarkId) => ({ landmarkId })),
+        },
+      }),
     });
 
     return {
@@ -76,8 +80,7 @@ export class ProviderService {
       description: provider.description,
       businessAddress: provider.businessAddress,
       logo: provider.logo,
-      city: provider.city,
-      country: provider.country,
+      city: (provider as any).city ?? null,
       acceptsDelivery: provider.acceptsDelivery,
       acceptsPickup: provider.acceptsPickup,
       deliveryZones: provider.deliveryZones,
@@ -115,12 +118,21 @@ export class ProviderService {
     if (data.description) updateData.description = data.description;
     if (data.businessAddress) updateData.businessAddress = data.businessAddress;
     if (data.logo) updateData.logo = data.logo;
-    if (data.city) updateData.city = data.city;
-    if (data.country) updateData.country = data.country;
+    if (data.cityId) updateData.cityId = data.cityId;
     if (data.acceptsDelivery !== undefined) updateData.acceptsDelivery = data.acceptsDelivery;
     if (data.acceptsPickup !== undefined) updateData.acceptsPickup = data.acceptsPickup;
     if (data.deliveryZones !== undefined) updateData.deliveryZones = data.deliveryZones;
     if (data.documentUrl) updateData.documentUrl = data.documentUrl;
+
+    // Mettre à jour les landmarks si fournis (remplacement complet)
+    if (data.landmarkIds !== undefined) {
+      updateData.landmarks = {
+        deleteMany: {},
+        ...(data.landmarkIds.length > 0 && {
+          create: data.landmarkIds.map((landmarkId) => ({ landmarkId })),
+        }),
+      };
+    }
 
     const updatedProvider = await providerRepository.update(provider.id, updateData);
 
@@ -130,8 +142,7 @@ export class ProviderService {
       description: updatedProvider.description,
       businessAddress: updatedProvider.businessAddress,
       logo: updatedProvider.logo,
-      city: updatedProvider.city,
-      country: updatedProvider.country,
+      cityId: updatedProvider.cityId,
       acceptsDelivery: updatedProvider.acceptsDelivery,
       acceptsPickup: updatedProvider.acceptsPickup,
       deliveryZones: updatedProvider.deliveryZones,
@@ -224,8 +235,7 @@ export class ProviderService {
       description: provider.description,
       businessAddress: provider.businessAddress,
       logo: provider.logo,
-      city: provider.city,
-      country: provider.country,
+      city: (provider as any).city ?? null,
       acceptsDelivery: provider.acceptsDelivery,
       acceptsPickup: provider.acceptsPickup,
       deliveryZones: provider.deliveryZones,
@@ -259,8 +269,7 @@ export class ProviderService {
       description: provider.description,
       businessAddress: provider.businessAddress,
       logo: provider.logo,
-      city: provider.city,
-      country: provider.country,
+      city: (provider as any).city ?? null,
       acceptsDelivery: provider.acceptsDelivery,
       acceptsPickup: provider.acceptsPickup,
       deliveryZones: provider.deliveryZones,

@@ -84,8 +84,8 @@ export class SubscriptionRepository {
             id: true,
             businessName: true,
             businessAddress: true,
-            city: true,
-            country: true,
+            cityId: true,
+            city: { include: { country: true } },
             acceptsDelivery: true,
             acceptsPickup: true,
             deliveryZones: true,
@@ -227,6 +227,7 @@ export class SubscriptionRepository {
     search?: string;
     city?: string;
     country?: string;
+    landmarkId?: string;
   }): Promise<Subscription[]> {
     const where: Prisma.SubscriptionWhereInput = {
       isPublic: true,
@@ -262,12 +263,19 @@ export class SubscriptionRepository {
       ];
     }
 
-    if (filters?.city || filters?.country) {
+    if (filters?.city || filters?.country || filters?.landmarkId) {
       where.provider = {
         is: {
-          ...(filters.city && { city: { equals: filters.city, mode: 'insensitive' } }),
-          ...(filters.country && { country: filters.country }),
-        },
+          ...(filters.city && {
+            city: { is: { name: { equals: filters.city, mode: 'insensitive' } } },
+          }),
+          ...(filters.country && {
+            city: { is: { country: { is: { code: filters.country } } } },
+          }),
+          ...(filters.landmarkId && {
+            landmarks: { some: { landmarkId: filters.landmarkId } },
+          }),
+        } as any,
       };
     }
 
