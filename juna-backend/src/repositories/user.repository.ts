@@ -44,7 +44,15 @@ export class UserRepository {
   async findByIdWithProfile(id: string): Promise<(User & { profile: UserProfile | null }) | null> {
     return prisma.user.findUnique({
       where: { id },
-      include: { profile: true },
+      include: {
+        profile: {
+          include: {
+            city: {
+              include: { country: true },
+            },
+          },
+        },
+      },
     });
   }
 

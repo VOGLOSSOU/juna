@@ -7,15 +7,15 @@
 # ============================================
 # TOKENS ET IDS — À mettre à jour au fur et à mesure
 # ============================================
-@user1Token =
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYzYzN2ZhYi1kZTRlLTQzMDMtYTM1Yy1iNzg1NjYzNWQwNTMiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc1Njg3MzE1LCJleHAiOjE3NzU2ODgyMTV9.NeiGrcEKzMEmwuhJk3ybJuFSqIU6ExaC2yapfIhdW-Q
 @user2Token =
 @user3Token =
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhZjExNjkxYy1lM2Y0LTQ1MTctOTdlMi1lNWY4Nzg5MDMzYjAiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc1Njg2Njc2LCJleHAiOjE3NzU2ODc1NzZ9.kTDYeplBW-1nv52Tsg8_bctPYTg56gHsXYDNdQuc28w
 @providerToken =
 
-@user1Id =
-@user2Id =
-@user3Id =
+@user1Id = 2c637fab-de4e-4303-a35c-b7856635d053
+@user2Id = 9efa1ffa-3f39-49fe-bc8e-288d396dca25
+@user3Id = 9169212a-3200-451b-80d0-daf1c22715ee
 @adminId =
 
 @providerId =
@@ -174,7 +174,7 @@ Content-Type: application/json
 
 ###
 # TEST 2.2 — User 1 définit sa localisation (cityId de Cotonou)
-PUT {{apiUrl}}/users/location
+PUT {{apiUrl}}/users/me/location
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 
@@ -184,7 +184,7 @@ Authorization: Bearer {{user1Token}}
 
 ###
 # TEST 2.3 — Ville introuvable (ERREUR attendue)
-PUT {{apiUrl}}/users/location
+PUT {{apiUrl}}/users/me/location
 Content-Type: application/json
 Authorization: Bearer {{user1Token}}
 

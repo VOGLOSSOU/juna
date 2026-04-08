@@ -251,18 +251,21 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "message": "Compte créé avec succès",
   "data": {
     "user": {
-      "id": "<uuid>",
+      "id": "2c637fab-de4e-4303-a35c-b7856635d053",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
       "phone": "+22961111111",
       "role": "USER",
       "isVerified": false,
       "isActive": true,
-      "isProfileComplete": false,
-      "createdAt": "<timestamp>"
+      "createdAt": "2026-04-08T22:23:33.884Z",
+      "updatedAt": "2026-04-08T22:23:33.884Z"
     },
-    "accessToken": "<jwt>",
-    "refreshToken": "<jwt>"
+    "tokens": {
+      "accessToken": "<jwt>",
+      "refreshToken": "<jwt>"
+    },
+    "isProfileComplete": true
   }
 }
 ```
@@ -280,7 +283,7 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": false,
-  "message": "Validation failed: ...",
+  "message": "Validation failed: [{\"field\":\"password\",\"message\":\"Minimum 8 caractères\"},{\"field\":\"password\",\"message\":\"Le mot de passe doit contenir au moins une majuscule\"},{\"field\":\"password\",\"message\":\"Le mot de passe doit contenir au moins un chiffre\"}]",
   "error": { "code": "VALIDATION_ERROR" }
 }
 ```
@@ -356,7 +359,7 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 ## PARTIE 2 — LOCALISATION
 
-### PUT /users/location — Définir sa ville
+### PUT /users/me/location — Définir sa ville
 
 **Accès :** utilisateur connecté
 
