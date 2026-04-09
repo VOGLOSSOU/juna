@@ -27,8 +27,12 @@ process.on('uncaughtException', (err) => {
     await connectDatabase();
     
     console.log('5. Checking Redis...');
-    await redis.ping();
-    console.log('✅ Redis connected');
+    try {
+      await redis.ping();
+      console.log('✅ Redis connected');
+    } catch (redisError) {
+      console.warn('⚠️ Redis unavailable — cache disabled, continuing without it');
+    }
     
     console.log('6. Starting server...');
     const server = app.listen(env.port, () => {
