@@ -7,29 +7,29 @@
 # ============================================
 # TOKENS ET IDS — À mettre à jour au fur et à mesure
 # ============================================
-@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyYzYzN2ZhYi1kZTRlLTQzMDMtYTM1Yy1iNzg1NjYzNWQwNTMiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc1Njg3MzE1LCJleHAiOjE3NzU2ODgyMTV9.NeiGrcEKzMEmwuhJk3ybJuFSqIU6ExaC2yapfIhdW-Q
-@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5ZWZhMWZmYS0zZjM5LTQ5ZmUtYmM4ZS0yODhkMzk2ZGNhMjUiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzc1NjkxNjMzLCJleHAiOjE3NzU2OTI1MzN9.B5Nfx2uDVFCFbXwk2a0bi6e_SP_sgfchM2kuu8zVq54
-@user3Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MTY5MjEyYS0zMjAwLTQ1MWItODBkMC1kYWYxYzIyNzE1ZWUiLCJlbWFpbCI6InNlbmEuYWtwb3ZpQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc1NjkxMDA1LCJleHAiOjE3NzU2OTE5MDV9.stmB71ryAlun0eVTQaQPMJIeyYtWB56mSgiQltOZ53U
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhZjExNjkxYy1lM2Y0LTQ1MTctOTdlMi1lNWY4Nzg5MDMzYjAiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc1NjkxMjM4LCJleHAiOjE3NzU2OTIxMzh9.RRAvhRqzPhtHLNiKV51jNsmfU3GEu-AapqV22qD6TFI
-@providerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5ZWZhMWZmYS0zZjM5LTQ5ZmUtYmM4ZS0yODhkMzk2ZGNhMjUiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlBST1ZJREVSIiwiaWF0IjoxNzc1NjkxNjMzLCJleHAiOjE3NzU2OTI1MzN9.B5Nfx2uDVFCFbXwk2a0bi6e_SP_sgfchM2kuu8zVq54
+@user1Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmNWU0M2U5MS0zZjE3LTRhYTUtYjJiZi1kYjY4ZGUxZjBjYWYiLCJlbWFpbCI6ImtvZmkubWVuc2FoQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc1NzMxMDI2LCJleHAiOjE3NzU3MzE5MjZ9.z0HO9ypxMijkDfXSaNzuypNyNzFHUulEpgcGalUahz0
+@user2Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxNmFiZjQyZS05NWY1LTQwNGUtYmMwMC1kMjAxYWY0MDRjODQiLCJlbWFpbCI6Im1hcmlhbS5kaWFsbG9AZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzU3MzI0ODIsImV4cCI6MTc3NTczMzM4Mn0.lu0ZWxmh-J8QFxUFzqD_Ox7ZDthDTD5xLPwwbr_41x0
+@user3Token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0Y2M5OTkyNy0zYmZkLTQ5YjMtODY2NC0zMDU4ZjdhYzMzODgiLCJlbWFpbCI6InNlbmEuYWtwb3ZpQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzc1NzMzMDQ0LCJleHAiOjE3NzU3MzM5NDR9.TucnGDHzmmKVfjE2XzwAtMqPpuSCGAbMMg_SbBksMjs
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ZTEwMzkzMi05YjUxLTRlMjItOTRkZC00YjZhNWJhYzAwZTUiLCJlbWFpbCI6ImFkbWluQGp1bmEuYXBwIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc1NzMzMTEyLCJleHAiOjE3NzU3MzQwMTJ9.SGbpuvqwLNzZdZz3-s3PhLEK25sEEHbsn-oBdoqnws4
+@providerToken =
 
-@user1Id = 2c637fab-de4e-4303-a35c-b7856635d053
-@user2Id = 9efa1ffa-3f39-49fe-bc8e-288d396dca25
-@user3Id = 9169212a-3200-451b-80d0-daf1c22715ee
-@adminId =
+@user1Id = f5e43e91-3f17-4aa5-b2bf-db68de1f0caf
+@user2Id = 16abf42e-95f5-404e-bc00-d201af404c84
+@user3Id = 4cc99927-3bfd-49b3-8664-3058f7ac3388
+@adminId = 7e103932-9b51-4e22-94dd-4b6a5bac00e5
 
-@providerId = 1d3103f3-930d-45be-b7ca-0041a10a9b9f
-@meal1Id = f2368718-6aa9-4d4a-b7fe-5d3d50d38eb4
-@meal2Id = 429c9fb3-97be-436e-81cb-a37bc92334f1
-@meal3Id = 31f23337-4f8e-4f02-80a0-a6bc595dd2c4
-@subscriptionId = 9f46ad3b-d02d-406c-a78c-525a34acf628
+@providerId =
+@meal1Id =
+@meal2Id =
+@meal3Id =
+@subscriptionId =
 @orderId =
 
-# IDs géographie (récupérés via GET /countries et GET /countries/BJ/cities)
-@countryIdBJ = 8b60ac9a-c04b-45d6-acea-ad5cf1a340f6
-@cityIdCotonou = 101a6a8c-ad3b-4071-b399-ba5cd5afed0c
-@cityIdLokossa = d9617182-b28b-4988-81ec-1bcf68c61b14
-@landmarkIdIUT = fdd37c8b-67d6-46f3-9078-befcf2ceb085
+# IDs géographie (récupérés via tests 0.x)
+@countryIdBJ = 6bf5d9ac-08a8-4774-b6e8-b08af709349d
+@cityIdCotonou = 228cb1e5-25e5-4d93-bdea-fa05f246bbac
+@cityIdLokossa = f48380b5-36d3-4dfe-8e11-0512eef18a9b
+@landmarkIdIUT = f10505bb-2f0c-4da0-b529-d30f57f91eed
 
 
 # ============================================
@@ -77,6 +77,17 @@ Authorization: Bearer {{adminToken}}
 
 {
   "name": "Lokossa",
+  "countryId": "{{countryIdBJ}}"
+}
+
+###
+# TEST 0.5.b — Admin crée une nouvelle ville - Cotonou
+POST {{apiUrl}}/admin/cities
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Cotonou",
   "countryId": "{{countryIdBJ}}"
 }
 
@@ -289,8 +300,8 @@ Authorization: Bearer {{user2Token}}
   "businessName": "Chez Mariam",
   "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
   "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
-  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
-  "cityId": "{{cityIdCotonou}}",
+  "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775732528/juna/providers/vcmcewqrpownranlzody.jp",
+  "cityId": "{{cityIdLokossa}}",
   "acceptsDelivery": true,
   "acceptsPickup": true,
   "deliveryZones": [
@@ -298,7 +309,7 @@ Authorization: Bearer {{user2Token}}
     { "city": "Abomey-Calavi", "country": "BJ", "cost": 800 },
     { "city": "Ouidah", "country": "BJ", "cost": 1500 }
   ],
-  "landmarkIds": []
+  "landmarkIds": ["{{landmarkIdIUT}}"]
 }
 
 ###

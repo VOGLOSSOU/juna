@@ -613,15 +613,22 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "message": "Fournisseurs en attente",
   "data": [
     {
-      "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "id": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
       "businessName": "Chez Mariam",
       "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
       "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
-      "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+      "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775732528/juna/providers/vcmcewqrpownranlzody.jp",
       "city": {
-        "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
-        "name": "Cotonou",
-        "country": { "code": "BJ", "translations": { "fr": "Bénin", "en": "Benin" } }
+        "id": "f48380b5-36d3-4dfe-8e11-0512eef18a9b",
+        "name": "Lokossa",
+        "countryId": "6bf5d9ac-08a8-4774-b6e8-b08af709349d",
+        "isActive": true,
+        "country": {
+          "id": "6bf5d9ac-08a8-4774-b6e8-b08af709349d",
+          "code": "BJ",
+          "translations": { "en": "Benin", "fr": "Bénin" },
+          "isActive": true
+        }
       },
       "acceptsDelivery": true,
       "acceptsPickup": true,
@@ -630,11 +637,22 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
         { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
         { "city": "Ouidah", "cost": 1500, "country": "BJ" }
       ],
+      "landmarks": [
+        {
+          "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+          "landmarkId": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+          "landmark": {
+            "id": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+            "name": "Campus IUT Lokossa",
+            "cityId": "f48380b5-36d3-4dfe-8e11-0512eef18a9b"
+          }
+        }
+      ],
       "documentUrl": null,
       "status": "PENDING",
       "rating": 0,
       "totalReviews": 0,
-      "createdAt": "2026-04-08T23:24:14.150Z"
+      "createdAt": "2026-04-09T11:09:57.557Z"
     }
   ]
 }
@@ -1068,7 +1086,13 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
     "name": "Formule Semaine Africaine",
     "price": 25000,
     "meals": [ { "id": "<uuid>", "name": "Bouillie de mil", "mealType": "BREAKFAST" } ],
-    "provider": { "businessName": "Chez Mariam", "deliveryZones": [ { "city": "Cotonou", "cost": 500 } ] }
+    "provider": {
+      "businessName": "Chez Mariam",
+      "acceptsDelivery": true,
+      "acceptsPickup": true,
+      "deliveryZones": [ { "city": "Cotonou", "cost": 500, "country": "BJ" } ],
+      "landmarks": [ { "landmark": { "id": "<uuid>", "name": "Campus IUT Lokossa" } } ]
+    }
   }
 }
 ```
