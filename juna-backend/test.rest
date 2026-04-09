@@ -22,7 +22,7 @@
 @meal1Id = f2368718-6aa9-4d4a-b7fe-5d3d50d38eb4
 @meal2Id = 429c9fb3-97be-436e-81cb-a37bc92334f1
 @meal3Id = 31f23337-4f8e-4f02-80a0-a6bc595dd2c4
-@subscriptionId =
+@subscriptionId = 9f46ad3b-d02d-406c-a78c-525a34acf628
 @orderId =
 
 # IDs géographie (récupérés via GET /countries et GET /countries/BJ/cities)

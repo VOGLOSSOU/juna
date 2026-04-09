@@ -307,13 +307,21 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "message": "Connexion réussie",
   "data": {
     "user": {
-      "id": "<uuid>",
+      "id": "2c637fab-de4e-4303-a35c-b7856635d053",
       "email": "kofi.mensah@gmail.com",
       "name": "Kofi Mensah",
-      "role": "USER"
+      "phone": "+22961111111",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-04-08T22:23:33.884Z",
+      "updatedAt": "2026-04-08T22:23:33.884Z"
     },
-    "accessToken": "<jwt>",
-    "refreshToken": "<jwt>"
+    "tokens": {
+      "accessToken": "<jwt>",
+      "refreshToken": "<jwt>"
+    },
+    "isProfileComplete": false
   }
 }
 ```
@@ -427,7 +435,7 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 ---
 
-### PUT /users/profile — Mettre à jour le profil
+### PUT /users/me — Mettre à jour le profil
 
 **Body :**
 ```json
@@ -441,8 +449,35 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Profil mis à jour",
-  "data": { "..." }
+  "message": "Profil mis à jour avec succès",
+  "data": {
+    "id": "2c637fab-de4e-4303-a35c-b7856635d053",
+    "email": "kofi.mensah@gmail.com",
+    "name": "Kofi Mensah Jr",
+    "phone": "+22961111111",
+    "role": "USER",
+    "isVerified": false,
+    "isActive": true,
+    "createdAt": "2026-04-08T22:23:33.884Z",
+    "isProfileComplete": true,
+    "profile": {
+      "avatar": null,
+      "address": "Quartier Cadjehoun, Cotonou",
+      "city": {
+        "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
+        "name": "Cotonou",
+        "countryId": "8b60ac9a-c04b-45d6-acea-ad5cf1a340f6",
+        "isActive": true,
+        "country": {
+          "id": "8b60ac9a-c04b-45d6-acea-ad5cf1a340f6",
+          "code": "BJ",
+          "translations": { "en": "Benin", "fr": "Bénin" },
+          "isActive": true
+        }
+      },
+      "preferences": null
+    }
+  }
 }
 ```
 
@@ -496,12 +531,20 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Dashboard",
   "data": {
-    "totalUsers": "<number>",
-    "totalProviders": "<number>",
-    "pendingProviders": "<number>",
-    "totalOrders": "<number>"
+    "overview": {
+      "totalUsers": 4,
+      "totalProviders": 0,
+      "pendingProviders": 0,
+      "totalOrders": 0,
+      "completedOrders": 0,
+      "pendingOrders": 0,
+      "totalRevenue": 0
+    },
+    "charts": {
+      "ordersByDay": [],
+      "subscriptionsByCategory": []
+    }
   }
 }
 ```
@@ -514,8 +557,48 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Liste des utilisateurs",
-  "data": [ { "id": "<uuid>", "email": "...", "name": "...", "role": "USER" } ]
+  "data": [
+    {
+      "id": "9169212a-3200-451b-80d0-daf1c22715ee",
+      "email": "sena.akpovi@gmail.com",
+      "name": "Sena Akpovi",
+      "phone": "+22963333333",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-04-08T22:25:23.569Z"
+    },
+    {
+      "id": "9efa1ffa-3f39-49fe-bc8e-288d396dca25",
+      "email": "mariam.diallo@gmail.com",
+      "name": "Mariam Diallo",
+      "phone": "+22962222222",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-04-08T22:24:42.987Z"
+    },
+    {
+      "id": "2c637fab-de4e-4303-a35c-b7856635d053",
+      "email": "kofi.mensah@gmail.com",
+      "name": "Kofi Mensah Jr",
+      "phone": "+22961111111",
+      "role": "USER",
+      "isVerified": false,
+      "isActive": true,
+      "createdAt": "2026-04-08T22:23:33.884Z"
+    },
+    {
+      "id": "af11691c-e3f4-4517-97e2-e5f8789033b0",
+      "email": "admin@juna.app",
+      "name": "Administrateur JUNA",
+      "phone": "+22900000000",
+      "role": "ADMIN",
+      "isVerified": true,
+      "isActive": true,
+      "createdAt": "2026-04-08T16:29:39.814Z"
+    }
+  ]
 }
 ```
 
@@ -523,12 +606,37 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 ### GET /admin/providers/pending — Candidatures en attente
 
-**Réponse 200 ✅ — TEST 4.4 / 5.6 :**
+**Réponse 200 ✅ — TEST 5.6 :**
 ```json
 {
   "success": true,
   "message": "Fournisseurs en attente",
-  "data": [ { "id": "<uuid>", "businessName": "Chez Mariam", "status": "PENDING" } ]
+  "data": [
+    {
+      "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "businessName": "Chez Mariam",
+      "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+      "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+      "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+      "city": {
+        "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
+        "name": "Cotonou",
+        "country": { "code": "BJ", "translations": { "fr": "Bénin", "en": "Benin" } }
+      },
+      "acceptsDelivery": true,
+      "acceptsPickup": true,
+      "deliveryZones": [
+        { "city": "Cotonou", "cost": 500, "country": "BJ" },
+        { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+        { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+      ],
+      "documentUrl": null,
+      "status": "PENDING",
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-08T23:24:14.150Z"
+    }
+  ]
 }
 ```
 
@@ -574,7 +682,7 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": false,
-  "message": "Validation failed: [{\"field\":\"logo\",\"message\":\"Le logo doit être une URL valide\"}]",
+  "message": "Validation failed: [{\"field\":\"logo\",\"message\":\"Required\"}]",
   "error": { "code": "VALIDATION_ERROR" }
 }
 ```
@@ -605,11 +713,15 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Fournisseur approuvé",
+  "message": "Fournisseur approuve avec succes",
   "data": {
-    "id": "<uuid>",
-    "businessName": "Chez Mariam",
-    "status": "APPROVED"
+    "success": true,
+    "message": "Dossier complet, bienvenue sur Juna !",
+    "provider": {
+      "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "businessName": "Chez Mariam",
+      "status": "APPROVED"
+    }
   }
 }
 ```
@@ -622,19 +734,38 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Profil fournisseur",
+  "message": "Profil fournisseur recupere avec succes",
   "data": {
-    "id": "<uuid>",
+    "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
     "businessName": "Chez Mariam",
-    "logo": "https://res.cloudinary.com/.../logo.jpg",
-    "cityId": "<uuid>",
-    "city": { "id": "<uuid>", "name": "Cotonou", "country": { "code": "BJ" } },
+    "description": "Cuisine africaine authentique, faite maison avec des produits frais du marché.",
+    "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+    "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+    "city": {
+      "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
+      "name": "Cotonou",
+      "countryId": "8b60ac9a-c04b-45d6-acea-ad5cf1a340f6",
+      "isActive": true,
+      "country": {
+        "id": "8b60ac9a-c04b-45d6-acea-ad5cf1a340f6",
+        "code": "BJ",
+        "translations": { "en": "Benin", "fr": "Bénin" },
+        "isActive": true
+      }
+    },
     "acceptsDelivery": true,
     "acceptsPickup": true,
-    "deliveryZones": [ { "city": "Cotonou", "country": "BJ", "cost": 500 } ],
+    "deliveryZones": [
+      { "city": "Cotonou", "cost": 500, "country": "BJ" },
+      { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+      { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+    ],
+    "documentUrl": null,
     "status": "APPROVED",
     "rating": 0,
-    "totalReviews": 0
+    "totalReviews": 0,
+    "createdAt": "2026-04-08T23:24:14.150Z",
+    "subscriptions": []
   }
 }
 ```
@@ -660,13 +791,18 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Repas créé",
+  "message": "Repas créé avec succès",
   "data": {
-    "id": "<uuid>",
+    "id": "429c9fb3-97be-436e-81cb-a37bc92334f1",
+    "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
     "name": "Riz sauce graine + poisson",
+    "description": "Riz blanc avec sauce graine maison et poisson grillé",
     "price": 1500,
+    "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445",
     "mealType": "LUNCH",
-    "isActive": true
+    "isActive": true,
+    "createdAt": "2026-04-08T23:44:32.563Z",
+    "updatedAt": "2026-04-08T23:44:32.563Z"
   }
 }
 ```
@@ -679,8 +815,45 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Mes repas",
-  "data": [ { "id": "<uuid>", "name": "...", "price": 1500, "mealType": "LUNCH" } ]
+  "message": "Repas récupérés avec succès",
+  "data": [
+    {
+      "id": "31f23337-4f8e-4f02-80a0-a6bc595dd2c4",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "name": "Pâte de maïs sauce gombo",
+      "description": "Pâte de maïs fraîche accompagnée de sauce gombo au poulet",
+      "price": 1200,
+      "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+      "mealType": "DINNER",
+      "isActive": true,
+      "createdAt": "2026-04-08T23:46:51.243Z",
+      "updatedAt": "2026-04-08T23:46:51.243Z"
+    },
+    {
+      "id": "429c9fb3-97be-436e-81cb-a37bc92334f1",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "name": "Riz sauce graine + poisson",
+      "description": "Riz blanc avec sauce graine maison et poisson grillé",
+      "price": 1500,
+      "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445",
+      "mealType": "LUNCH",
+      "isActive": true,
+      "createdAt": "2026-04-08T23:44:32.563Z",
+      "updatedAt": "2026-04-08T23:44:32.563Z"
+    },
+    {
+      "id": "f2368718-6aa9-4d4a-b7fe-5d3d50d38eb4",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "name": "Bouillie de mil avec beignets",
+      "description": "Bouillie de mil sucrée servie avec beignets frits dorés",
+      "price": 800,
+      "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554",
+      "mealType": "BREAKFAST",
+      "isActive": true,
+      "createdAt": "2026-04-08T23:44:10.425Z",
+      "updatedAt": "2026-04-08T23:44:10.425Z"
+    }
+  ]
 }
 ```
 
@@ -712,16 +885,39 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Abonnement créé",
+  "message": "Abonnement créé avec succès",
   "data": {
-    "id": "<uuid>",
+    "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
+    "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
     "name": "Formule Semaine Africaine",
+    "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi. Cuisine africaine authentique préparée chaque jour avec des produits frais.",
     "price": 25000,
+    "junaCommissionPercent": 10,
     "type": "FULL_DAY",
+    "category": "AFRICAN",
     "duration": "WORK_WEEK",
     "isActive": true,
-    "isPublic": true
+    "isPublic": true,
+    "isImmediate": false,
+    "preparationHours": 24,
+    "deliveryZones": null,
+    "pickupLocations": null,
+    "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-04-08T23:49:17.605Z",
+    "updatedAt": "2026-04-08T23:49:17.605Z"
   }
+}
+```
+
+**Réponse 400 ❌ — Sans repas (TEST 7.3) :**
+```json
+{
+  "success": false,
+  "message": "Validation failed: [{\"field\":\"mealIds\",\"message\":\"Au moins un repas requis\"}]",
+  "error": { "code": "VALIDATION_ERROR" }
 }
 ```
 
@@ -733,8 +929,43 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Mes abonnements",
-  "data": [ { "id": "<uuid>", "name": "...", "price": 25000 } ]
+  "message": "Abonnements récupérés avec succès",
+  "data": [
+    {
+      "id": "e1580ed8-d2ab-40d8-96a7-9f0c30c07ec0",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "name": "Formule Express Déjeuner",
+      "price": 8000,
+      "type": "LUNCH",
+      "category": "AFRICAN",
+      "duration": "WORK_WEEK",
+      "isActive": true,
+      "isPublic": true,
+      "isImmediate": true,
+      "preparationHours": 0,
+      "subscriberCount": 0,
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-08T23:50:39.374Z"
+    },
+    {
+      "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "name": "Formule Semaine Africaine",
+      "price": 25000,
+      "type": "FULL_DAY",
+      "category": "AFRICAN",
+      "duration": "WORK_WEEK",
+      "isActive": true,
+      "isPublic": true,
+      "isImmediate": false,
+      "preparationHours": 24,
+      "subscriberCount": 0,
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-08T23:49:17.605Z"
+    }
+  ]
 }
 ```
 
@@ -937,16 +1168,16 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 **Contraintes :** formats JPG/PNG/WEBP, max 5MB
 
-**Réponse 201 ✅ — TEST 10.1 :**
+**Réponse 201 ✅ — TEST 5.0 :**
 ```json
 {
   "success": true,
   "message": "Image uploadée avec succès",
   "data": {
-    "url": "https://res.cloudinary.com/.../juna/providers/<id>.webp",
-    "publicId": "juna/providers/<id>",
+    "url": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+    "publicId": "juna/providers/fd5bgwpfrhg2wtz7hm5n",
     "folder": "providers",
-    "size": 463,
+    "size": 66446,
     "mimetype": "image/png"
   }
 }
