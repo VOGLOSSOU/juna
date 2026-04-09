@@ -887,22 +887,62 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 }
 ```
 
-**Réponse 201 ✅ — TEST 6.2 :**
+**Réponse 201 ✅ — TEST 6.1 (BREAKFAST) :**
 ```json
 {
   "success": true,
   "message": "Repas créé avec succès",
   "data": {
-    "id": "429c9fb3-97be-436e-81cb-a37bc92334f1",
-    "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+    "id": "c276cbd3-c979-4b02-8ab3-1205e0ce03c0",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+    "name": "Bouillie de mil avec beignets",
+    "description": "Bouillie de mil sucrée servie avec beignets frits dorés",
+    "price": 800,
+    "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554",
+    "mealType": "BREAKFAST",
+    "isActive": true,
+    "createdAt": "2026-04-09T11:31:54.848Z",
+    "updatedAt": "2026-04-09T11:31:54.848Z"
+  }
+}
+```
+
+**Réponse 201 ✅ — TEST 6.2 (LUNCH) :**
+```json
+{
+  "success": true,
+  "message": "Repas créé avec succès",
+  "data": {
+    "id": "64d3de0a-aa08-4802-861b-62e2c2263a60",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
     "name": "Riz sauce graine + poisson",
     "description": "Riz blanc avec sauce graine maison et poisson grillé",
     "price": 1500,
     "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445",
     "mealType": "LUNCH",
     "isActive": true,
-    "createdAt": "2026-04-08T23:44:32.563Z",
-    "updatedAt": "2026-04-08T23:44:32.563Z"
+    "createdAt": "2026-04-09T11:32:54.508Z",
+    "updatedAt": "2026-04-09T11:32:54.508Z"
+  }
+}
+```
+
+**Réponse 201 ✅ — TEST 6.3 (DINNER) :**
+```json
+{
+  "success": true,
+  "message": "Repas créé avec succès",
+  "data": {
+    "id": "d134670f-6db8-4a02-a78c-cf99cff0d819",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+    "name": "Pâte de maïs sauce gombo",
+    "description": "Pâte de maïs fraîche accompagnée de sauce gombo au poulet",
+    "price": 1200,
+    "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    "mealType": "DINNER",
+    "isActive": true,
+    "createdAt": "2026-04-09T11:33:37.387Z",
+    "updatedAt": "2026-04-09T11:33:37.387Z"
   }
 }
 ```

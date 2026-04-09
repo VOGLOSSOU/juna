@@ -19,9 +19,9 @@
 @adminId = 7e103932-9b51-4e22-94dd-4b6a5bac00e5
 
 @providerId = dc6b75af-3b82-4600-8816-6a3781a1c4cf
-@meal1Id =
-@meal2Id =
-@meal3Id =
+@meal1Id = c276cbd3-c979-4b02-8ab3-1205e0ce03c0
+@meal2Id = 64d3de0a-aa08-4802-861b-62e2c2263a60
+@meal3Id = d134670f-6db8-4a02-a78c-cf99cff0d819
 @subscriptionId =
 @orderId =
 
