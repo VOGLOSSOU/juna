@@ -18,8 +18,7 @@ export class SubscriptionRepository {
     isPublic?: boolean;
     isImmediate?: boolean;
     preparationHours?: number;
-    deliveryZones?: any;
-    pickupLocations?: any;
+
     imageUrl: string;
     mealIds?: string[];
   }): Promise<Subscription> {
@@ -160,8 +159,7 @@ export class SubscriptionRepository {
     isPublic?: boolean;
     isImmediate?: boolean;
     preparationHours?: number;
-    deliveryZones?: any;
-    pickupLocations?: any;
+
     imageUrl?: string;
     mealIds?: string[];
   }): Promise<Subscription> {
@@ -286,7 +284,26 @@ export class SubscriptionRepository {
           select: {
             id: true,
             businessName: true,
+            logo: true,
             rating: true,
+            totalReviews: true,
+            acceptsDelivery: true,
+            acceptsPickup: true,
+            deliveryZones: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                country: {
+                  select: { code: true, translations: true },
+                },
+              },
+            },
+            landmarks: {
+              include: {
+                landmark: { select: { id: true, name: true, cityId: true } },
+              },
+            },
           },
         },
       },

@@ -282,8 +282,6 @@ model Subscription {
   isPublic         Boolean            @default(true)
   isImmediate      Boolean            @default(true)
   preparationHours Int                @default(0)
-  deliveryZones    Json?
-  pickupLocations  Json?
   imageUrl         String
   subscriberCount  Int                @default(0)
   rating           Float              @default(0)

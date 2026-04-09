@@ -7,8 +7,6 @@ export interface CreateSubscriptionDTO {
   type: SubscriptionType;
   category: SubscriptionCategory;
   duration: SubscriptionDuration;
-  deliveryZones?: any;
-  pickupLocations?: any;
   imageUrl?: string;
   isPublic?: boolean;
   mealIds?: string[];
@@ -21,8 +19,6 @@ export interface UpdateSubscriptionDTO {
   type?: SubscriptionType;
   category?: SubscriptionCategory;
   duration?: SubscriptionDuration;
-  deliveryZones?: any;
-  pickupLocations?: any;
   imageUrl?: string;
   isActive?: boolean;
   isPublic?: boolean;
@@ -58,8 +54,6 @@ export interface SubscriptionWithMeals {
   duration: SubscriptionDuration;
   isActive: boolean;
   isPublic: boolean;
-  deliveryZones: any;
-  pickupLocations: any;
   imageUrl: string | null;
   subscriberCount: number;
   rating: number;

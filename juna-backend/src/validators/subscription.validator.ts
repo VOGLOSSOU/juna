@@ -66,8 +66,6 @@ export const createSubscriptionSchema = z.object({
   type: subscriptionTypeEnum,
   category: subscriptionCategoryEnum,
   duration: subscriptionDurationEnum,
-  deliveryZones: z.any().optional(),
-  pickupLocations: z.any().optional(),
   imageUrl: z
     .string({ required_error: 'URL de l\'image requise' })
     .url('URL invalide')
@@ -112,8 +110,6 @@ export const updateSubscriptionSchema = z.object({
   type: subscriptionTypeEnum.optional(),
   category: subscriptionCategoryEnum.optional(),
   duration: subscriptionDurationEnum.optional(),
-  deliveryZones: z.any().optional(),
-  pickupLocations: z.any().optional(),
   imageUrl: z
     .string()
     .url('URL invalide')

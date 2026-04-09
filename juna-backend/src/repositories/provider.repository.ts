@@ -44,6 +44,11 @@ export class ProviderRepository {
           },
         },
         city: { include: { country: true } },
+        landmarks: {
+          include: {
+            landmark: { select: { id: true, name: true, cityId: true } },
+          },
+        },
       },
     });
   }
@@ -57,6 +62,11 @@ export class ProviderRepository {
       include: {
         subscriptions: true,
         city: { include: { country: true } },
+        landmarks: {
+          include: {
+            landmark: { select: { id: true, name: true, cityId: true } },
+          },
+        },
       },
     });
   }
@@ -113,6 +123,11 @@ export class ProviderRepository {
           },
         },
         city: { include: { country: true } },
+        landmarks: {
+          include: {
+            landmark: { select: { id: true, name: true, cityId: true } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });

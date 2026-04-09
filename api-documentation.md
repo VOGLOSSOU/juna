@@ -991,19 +991,45 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Abonnements disponibles",
+  "message": "Abonnements récupérés avec succès",
   "data": [
     {
-      "id": "<uuid>",
+      "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
+      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
       "name": "Formule Semaine Africaine",
+      "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi...",
       "price": 25000,
+      "junaCommissionPercent": 10,
       "type": "FULL_DAY",
+      "category": "AFRICAN",
       "duration": "WORK_WEEK",
+      "isActive": true,
+      "isPublic": true,
+      "isImmediate": false,
+      "preparationHours": 24,
+      "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
+      "subscriberCount": 0,
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-08T23:49:17.605Z",
       "provider": {
-        "id": "<uuid>",
+        "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
         "businessName": "Chez Mariam",
-        "city": { "name": "Cotonou", "country": { "code": "BJ" } },
-        "rating": 0
+        "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+        "rating": 0,
+        "totalReviews": 0,
+        "acceptsDelivery": true,
+        "acceptsPickup": true,
+        "deliveryZones": [
+          { "city": "Cotonou", "cost": 500, "country": "BJ" },
+          { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+          { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+        ],
+        "city": {
+          "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
+          "name": "Cotonou",
+          "country": { "code": "BJ", "translations": { "en": "Benin", "fr": "Bénin" } }
+        }
       }
     }
   ]
