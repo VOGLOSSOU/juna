@@ -4,9 +4,11 @@ export interface CreateOrderDTO {
   subscriptionId: string;
   deliveryMethod: DeliveryMethod;
   deliveryAddress?: string;
-  pickupLocation?: any;
-  scheduledFor?: Date;
-  paymentMethod: PaymentMethod;
+  deliveryCity?: string;
+  pickupLocation?: string;
+  startAsap?: boolean;
+  requestedStartDate?: string;
+  paymentMethod?: PaymentMethod;
 }
 
 export interface UpdateOrderStatusDTO {

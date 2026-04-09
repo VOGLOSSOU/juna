@@ -760,6 +760,15 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
       { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
       { "city": "Ouidah", "cost": 1500, "country": "BJ" }
     ],
+    "landmarks": [
+      {
+        "landmark": {
+          "id": "<uuid>",
+          "name": "Campus IUT Lokossa",
+          "cityId": "<uuid>"
+        }
+      }
+    ],
     "documentUrl": null,
     "status": "APPROVED",
     "rating": 0,
@@ -769,6 +778,8 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   }
 }
 ```
+
+> `landmarks` = liste des lieux de référence configurés par le provider. L'app mobile utilise ces IDs pour le filtre `GET /subscriptions?landmarkId=<uuid>`
 
 ---
 
@@ -900,8 +911,6 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
     "isPublic": true,
     "isImmediate": false,
     "preparationHours": 24,
-    "deliveryZones": null,
-    "pickupLocations": null,
     "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
     "subscriberCount": 0,
     "rating": 0,
@@ -1029,12 +1038,19 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
           "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
           "name": "Cotonou",
           "country": { "code": "BJ", "translations": { "en": "Benin", "fr": "Bénin" } }
-        }
+        },
+        "landmarks": [
+          {
+            "landmark": { "id": "<uuid>", "name": "Campus IUT Lokossa", "cityId": "<uuid>" }
+          }
+        ]
       }
     }
   ]
 }
 ```
+
+> Les champs `deliveryZones`, `acceptsDelivery`, `acceptsPickup` et `landmarks` sont portés par le **provider**, pas par l'abonnement. Tous les abonnements d'un provider héritent de ces infos.
 
 > **TEST 8.3** — `GET /subscriptions?landmarkId=<uuid>` → retourne uniquement les providers qui ont coché ce landmark
 

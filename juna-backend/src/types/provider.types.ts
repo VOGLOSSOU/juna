@@ -4,6 +4,12 @@ export interface RegisterProviderDTO {
   businessName: string;
   description?: string;
   businessAddress: string;
+  logo: string;
+  cityId: string;
+  acceptsDelivery: boolean;
+  acceptsPickup: boolean;
+  deliveryZones?: Array<{ city: string; country: string; cost: number }>;
+  landmarkIds?: string[];
   documentUrl?: string;
 }
 
@@ -11,6 +17,12 @@ export interface UpdateProviderDTO {
   businessName?: string;
   description?: string;
   businessAddress?: string;
+  logo?: string;
+  cityId?: string;
+  acceptsDelivery?: boolean;
+  acceptsPickup?: boolean;
+  deliveryZones?: Array<{ city: string; country: string; cost: number }>;
+  landmarkIds?: string[];
   documentUrl?: string;
 }
 

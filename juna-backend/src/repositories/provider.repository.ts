@@ -17,6 +17,14 @@ export class ProviderRepository {
   async findById(id: string): Promise<Provider | null> {
     return prisma.provider.findUnique({
       where: { id },
+      include: {
+        city: { include: { country: true } },
+        landmarks: {
+          include: {
+            landmark: { select: { id: true, name: true, cityId: true } },
+          },
+        },
+      },
     });
   }
 
@@ -26,6 +34,14 @@ export class ProviderRepository {
   async findByUserId(userId: string): Promise<Provider | null> {
     return prisma.provider.findUnique({
       where: { userId },
+      include: {
+        city: { include: { country: true } },
+        landmarks: {
+          include: {
+            landmark: { select: { id: true, name: true, cityId: true } },
+          },
+        },
+      },
     });
   }
 

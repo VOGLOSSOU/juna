@@ -6,8 +6,7 @@ export interface CreateProposalDTO {
   mealType: MealType;
   budget: number;
   zone: string;
-  city: string;
-  country: string;
+  cityId: string;
   details?: string;
   isPublic: boolean;
 }
@@ -18,8 +17,7 @@ export interface UpdateProposalDTO {
   mealType?: MealType;
   budget?: number;
   zone?: string;
-  city?: string;
-  country?: string;
+  cityId?: string;
   details?: string;
   isPublic?: boolean;
 }
@@ -36,6 +34,5 @@ export interface ProposalFilters {
   status?: ProposalStatus;
   userId?: string;
   isPublic?: boolean;
-  city?: string;
-  country?: string;
+  cityId?: string;
 }
