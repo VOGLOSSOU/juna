@@ -7,10 +7,12 @@ const redisConfig = {
   port: env.redisPort,
   password: env.redisPassword,
   retryStrategy: (times: number) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
+    if (times > 3) return null; // stop retrying
+    return Math.min(times * 50, 2000);
   },
-  maxRetriesPerRequest: 3,
+  maxRetriesPerRequest: 1,
+  enableOfflineQueue: false,
+  lazyConnect: true,
 };
 
 // Instance Redis
