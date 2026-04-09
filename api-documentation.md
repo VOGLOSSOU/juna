@@ -1021,14 +1021,14 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 }
 ```
 
-**Réponse 201 ✅ — TEST 7.1 :**
+**Réponse 201 ✅ — TEST 7.1 (Formule Semaine Africaine) :**
 ```json
 {
   "success": true,
   "message": "Abonnement créé avec succès",
   "data": {
-    "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
-    "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+    "id": "ce1ddb4f-bc45-4ac1-95c3-d8e012f6ca89",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
     "name": "Formule Semaine Africaine",
     "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi. Cuisine africaine authentique préparée chaque jour avec des produits frais.",
     "price": 25000,
@@ -1044,8 +1044,37 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
     "subscriberCount": 0,
     "rating": 0,
     "totalReviews": 0,
-    "createdAt": "2026-04-08T23:49:17.605Z",
-    "updatedAt": "2026-04-08T23:49:17.605Z"
+    "createdAt": "2026-04-09T11:38:29.056Z",
+    "updatedAt": "2026-04-09T11:38:29.056Z"
+  }
+}
+```
+
+**Réponse 201 ✅ — TEST 7.2 (Formule Express Déjeuner) :**
+```json
+{
+  "success": true,
+  "message": "Abonnement créé avec succès",
+  "data": {
+    "id": "e0b8c11c-8bba-4a25-97d6-d1f373648200",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+    "name": "Formule Express Déjeuner",
+    "description": "Déjeuner africain prêt à emporter ou livré rapidement, disponible tous les jours.",
+    "price": 8000,
+    "junaCommissionPercent": 10,
+    "type": "LUNCH",
+    "category": "AFRICAN",
+    "duration": "WORK_WEEK",
+    "isActive": true,
+    "isPublic": true,
+    "isImmediate": true,
+    "preparationHours": 0,
+    "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-04-09T11:39:33.151Z",
+    "updatedAt": "2026-04-09T11:39:33.151Z"
   }
 }
 ```
@@ -1070,10 +1099,12 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "message": "Abonnements récupérés avec succès",
   "data": [
     {
-      "id": "e1580ed8-d2ab-40d8-96a7-9f0c30c07ec0",
-      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "id": "e0b8c11c-8bba-4a25-97d6-d1f373648200",
+      "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
       "name": "Formule Express Déjeuner",
+      "description": "Déjeuner africain prêt à emporter ou livré rapidement, disponible tous les jours.",
       "price": 8000,
+      "junaCommissionPercent": 10,
       "type": "LUNCH",
       "category": "AFRICAN",
       "duration": "WORK_WEEK",
@@ -1081,16 +1112,20 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
       "isPublic": true,
       "isImmediate": true,
       "preparationHours": 0,
+      "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
       "subscriberCount": 0,
       "rating": 0,
       "totalReviews": 0,
-      "createdAt": "2026-04-08T23:50:39.374Z"
+      "createdAt": "2026-04-09T11:39:33.151Z",
+      "updatedAt": "2026-04-09T11:39:33.151Z"
     },
     {
-      "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
-      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "id": "ce1ddb4f-bc45-4ac1-95c3-d8e012f6ca89",
+      "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
       "name": "Formule Semaine Africaine",
+      "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi. Cuisine africaine authentique préparée chaque jour avec des produits frais.",
       "price": 25000,
+      "junaCommissionPercent": 10,
       "type": "FULL_DAY",
       "category": "AFRICAN",
       "duration": "WORK_WEEK",
@@ -1098,10 +1133,12 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
       "isPublic": true,
       "isImmediate": false,
       "preparationHours": 24,
+      "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
       "subscriberCount": 0,
       "rating": 0,
       "totalReviews": 0,
-      "createdAt": "2026-04-08T23:49:17.605Z"
+      "createdAt": "2026-04-09T11:38:29.056Z",
+      "updatedAt": "2026-04-09T11:38:29.056Z"
     }
   ]
 }
@@ -1132,10 +1169,10 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "message": "Abonnements récupérés avec succès",
   "data": [
     {
-      "id": "9f46ad3b-d02d-406c-a78c-525a34acf628",
-      "providerId": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+      "id": "ce1ddb4f-bc45-4ac1-95c3-d8e012f6ca89",
+      "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
       "name": "Formule Semaine Africaine",
-      "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi...",
+      "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi. Cuisine africaine authentique préparée chaque jour avec des produits frais.",
       "price": 25000,
       "junaCommissionPercent": 10,
       "type": "FULL_DAY",
@@ -1149,11 +1186,12 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
       "subscriberCount": 0,
       "rating": 0,
       "totalReviews": 0,
-      "createdAt": "2026-04-08T23:49:17.605Z",
+      "createdAt": "2026-04-09T11:38:29.056Z",
+      "updatedAt": "2026-04-09T11:38:29.056Z",
       "provider": {
-        "id": "1d3103f3-930d-45be-b7ca-0041a10a9b9f",
+        "id": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
         "businessName": "Chez Mariam",
-        "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775688932/juna/providers/fd5bgwpfrhg2wtz7hm5n.jpg",
+        "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775732528/juna/providers/vcmcewqrpownranlzody.jp",
         "rating": 0,
         "totalReviews": 0,
         "acceptsDelivery": true,
@@ -1164,13 +1202,70 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
           { "city": "Ouidah", "cost": 1500, "country": "BJ" }
         ],
         "city": {
-          "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
-          "name": "Cotonou",
+          "id": "f48380b5-36d3-4dfe-8e11-0512eef18a9b",
+          "name": "Lokossa",
           "country": { "code": "BJ", "translations": { "en": "Benin", "fr": "Bénin" } }
         },
         "landmarks": [
           {
-            "landmark": { "id": "<uuid>", "name": "Campus IUT Lokossa", "cityId": "<uuid>" }
+            "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+            "landmarkId": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+            "landmark": {
+              "id": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+              "name": "Campus IUT Lokossa",
+              "cityId": "f48380b5-36d3-4dfe-8e11-0512eef18a9b"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "e0b8c11c-8bba-4a25-97d6-d1f373648200",
+      "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+      "name": "Formule Express Déjeuner",
+      "description": "Déjeuner africain prêt à emporter ou livré rapidement, disponible tous les jours.",
+      "price": 8000,
+      "junaCommissionPercent": 10,
+      "type": "LUNCH",
+      "category": "AFRICAN",
+      "duration": "WORK_WEEK",
+      "isActive": true,
+      "isPublic": true,
+      "isImmediate": true,
+      "preparationHours": 0,
+      "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+      "subscriberCount": 0,
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-09T11:39:33.151Z",
+      "updatedAt": "2026-04-09T11:39:33.151Z",
+      "provider": {
+        "id": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+        "businessName": "Chez Mariam",
+        "logo": "https://res.cloudinary.com/dm9561wpm/image/upload/v1775732528/juna/providers/vcmcewqrpownranlzody.jp",
+        "rating": 0,
+        "totalReviews": 0,
+        "acceptsDelivery": true,
+        "acceptsPickup": true,
+        "deliveryZones": [
+          { "city": "Cotonou", "cost": 500, "country": "BJ" },
+          { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+          { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+        ],
+        "city": {
+          "id": "f48380b5-36d3-4dfe-8e11-0512eef18a9b",
+          "name": "Lokossa",
+          "country": { "code": "BJ", "translations": { "en": "Benin", "fr": "Bénin" } }
+        },
+        "landmarks": [
+          {
+            "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+            "landmarkId": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+            "landmark": {
+              "id": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+              "name": "Campus IUT Lokossa",
+              "cityId": "f48380b5-36d3-4dfe-8e11-0512eef18a9b"
+            }
           }
         ]
       }
@@ -1179,9 +1274,23 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 }
 ```
 
-> Les champs `deliveryZones`, `acceptsDelivery`, `acceptsPickup` et `landmarks` sont portés par le **provider**, pas par l'abonnement. Tous les abonnements d'un provider héritent de ces infos.
+> Les champs `deliveryZones`, `acceptsDelivery`, `acceptsPickup` et `landmarks` sont portés par le **provider**, pas par l'abonnement. Tous les abonnements d'un provider héritent de ces infos. Le mobile peut ainsi filtrer et afficher tout sans appels supplémentaires.
 
-> **TEST 8.3** — `GET /subscriptions?landmarkId=<uuid>` → retourne uniquement les providers qui ont coché ce landmark
+**Réponse 200 ✅ — TEST 8.2a — `GET /subscriptions?city=Lokossa` :**
+> Retourne les 2 abonnements de Chez Mariam (réponse identique à 8.1 — tous les providers sont à Lokossa dans ce jeu de données)
+
+**Réponse 200 ✅ — TEST 8.2b — `GET /subscriptions?city=Cotonou` :**
+```json
+{
+  "success": true,
+  "message": "Abonnements récupérés avec succès",
+  "data": []
+}
+```
+> Tableau vide attendu : aucun provider n'est basé à Cotonou. Chez Mariam est à Lokossa.
+
+**Réponse 200 ✅ — TEST 8.3 — `GET /subscriptions?landmarkId=f10505bb-2f0c-4da0-b529-d30f57f91eed` :**
+> Retourne les 2 abonnements de Chez Mariam — seul provider lié au landmark "Campus IUT Lokossa". Structure identique à 8.1. C'est le filtre clé pour le mobile : un étudiant de l'IUT voit tous les providers qui desservent son campus.
 
 ---
 
