@@ -13,6 +13,9 @@ import routes from '@/routes';
 
 const app: Application = express();
 
+// Trust Railway/proxy headers
+app.set('trust proxy', 1);
+
 // ============================================
 // MIDDLEWARES GLOBAUX
 // ============================================
