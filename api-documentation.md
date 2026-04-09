@@ -1300,22 +1300,91 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 ```json
 {
   "success": true,
-  "message": "Détails abonnement",
+  "message": "Abonnement récupéré avec succès",
   "data": {
-    "id": "<uuid>",
+    "id": "ce1ddb4f-bc45-4ac1-95c3-d8e012f6ca89",
+    "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
     "name": "Formule Semaine Africaine",
+    "description": "Petit-déjeuner + déjeuner + dîner du lundi au vendredi. Cuisine africaine authentique préparée chaque jour avec des produits frais.",
     "price": 25000,
-    "meals": [ { "id": "<uuid>", "name": "Bouillie de mil", "mealType": "BREAKFAST" } ],
+    "junaCommissionPercent": 10,
+    "type": "FULL_DAY",
+    "category": "AFRICAN",
+    "duration": "WORK_WEEK",
+    "isActive": true,
+    "isPublic": true,
+    "isImmediate": false,
+    "preparationHours": 24,
+    "imageUrl": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1",
+    "subscriberCount": 0,
+    "rating": 0,
+    "totalReviews": 0,
+    "createdAt": "2026-04-09T11:38:29.056Z",
+    "updatedAt": "2026-04-09T11:38:29.056Z",
     "provider": {
+      "id": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
       "businessName": "Chez Mariam",
+      "businessAddress": "Rue du Port, Quartier Gbeto, face à la pharmacie centrale",
+      "city": {
+        "id": "f48380b5-36d3-4dfe-8e11-0512eef18a9b",
+        "name": "Lokossa",
+        "country": { "code": "BJ", "translations": { "en": "Benin", "fr": "Bénin" } }
+      },
       "acceptsDelivery": true,
       "acceptsPickup": true,
-      "deliveryZones": [ { "city": "Cotonou", "cost": 500, "country": "BJ" } ],
-      "landmarks": [ { "landmark": { "id": "<uuid>", "name": "Campus IUT Lokossa" } } ]
-    }
+      "deliveryZones": [
+        { "city": "Cotonou", "cost": 500, "country": "BJ" },
+        { "city": "Abomey-Calavi", "cost": 800, "country": "BJ" },
+        { "city": "Ouidah", "cost": 1500, "country": "BJ" }
+      ],
+      "rating": 0,
+      "totalReviews": 0,
+      "landmarks": [
+        {
+          "providerId": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+          "landmarkId": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+          "landmark": {
+            "id": "f10505bb-2f0c-4da0-b529-d30f57f91eed",
+            "name": "Campus IUT Lokossa",
+            "cityId": "f48380b5-36d3-4dfe-8e11-0512eef18a9b"
+          }
+        }
+      ]
+    },
+    "meals": [
+      {
+        "id": "c276cbd3-c979-4b02-8ab3-1205e0ce03c0",
+        "name": "Bouillie de mil avec beignets",
+        "description": "Bouillie de mil sucrée servie avec beignets frits dorés",
+        "price": 800,
+        "imageUrl": "https://images.unsplash.com/photo-1547592180-85f173990554",
+        "mealType": "BREAKFAST",
+        "quantity": 1
+      },
+      {
+        "id": "64d3de0a-aa08-4802-861b-62e2c2263a60",
+        "name": "Riz sauce graine + poisson",
+        "description": "Riz blanc avec sauce graine maison et poisson grillé",
+        "price": 1500,
+        "imageUrl": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445",
+        "mealType": "LUNCH",
+        "quantity": 1
+      },
+      {
+        "id": "d134670f-6db8-4a02-a78c-cf99cff0d819",
+        "name": "Pâte de maïs sauce gombo",
+        "description": "Pâte de maïs fraîche accompagnée de sauce gombo au poulet",
+        "price": 1200,
+        "imageUrl": "https://images.unsplash.com/photo-1504674900247-0877df9cc836",
+        "mealType": "DINNER",
+        "quantity": 1
+      }
+    ]
   }
 }
 ```
+
+> La vue détail inclut en plus du listing : `businessAddress` du provider et la liste complète `meals` (repas du jour avec description, prix, type).
 
 ---
 

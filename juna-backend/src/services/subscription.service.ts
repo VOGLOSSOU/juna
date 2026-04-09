@@ -89,7 +89,14 @@ export class SubscriptionService {
     if (!subscription) {
       throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
     }
-    return subscription;
+    const { mealsInSubscriptions, ...rest } = subscription as any;
+    return {
+      ...rest,
+      meals: mealsInSubscriptions.map((m: any) => ({
+        ...m.meal,
+        quantity: m.quantity,
+      })),
+    };
   }
 
   /**

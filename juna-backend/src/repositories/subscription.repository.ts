@@ -83,14 +83,23 @@ export class SubscriptionRepository {
             id: true,
             businessName: true,
             businessAddress: true,
-            cityId: true,
-            city: { include: { country: true } },
+            city: {
+              select: {
+                id: true,
+                name: true,
+                country: { select: { code: true, translations: true } },
+              },
+            },
             acceptsDelivery: true,
             acceptsPickup: true,
             deliveryZones: true,
             rating: true,
             totalReviews: true,
-            status: true,
+            landmarks: {
+              include: {
+                landmark: { select: { id: true, name: true, cityId: true } },
+              },
+            },
           },
         },
         mealsInSubscriptions: {
