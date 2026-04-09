@@ -84,6 +84,7 @@ export class ProviderService {
       acceptsDelivery: provider.acceptsDelivery,
       acceptsPickup: provider.acceptsPickup,
       deliveryZones: provider.deliveryZones,
+      landmarks: (provider as any).landmarks ?? [],
       documentUrl: provider.documentUrl,
       status: provider.status,
       rating: provider.rating,
