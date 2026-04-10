@@ -27,6 +27,40 @@ http://localhost:5000/api/v1
 - Les tokens expirent : `accessToken` → 15 minutes, `refreshToken` → 7 jours
 - Tous les endpoints `/admin/*` requièrent le rôle `ADMIN` ou `SUPER_ADMIN`
 
+## Toutes les routes disponibles pour le panel
+
+### Routes disponibles maintenant
+
+| Méthode | Route | Accès | Description |
+|---------|-------|-------|-------------|
+| `POST` | `/auth/login` | public | Connexion admin |
+| `POST` | `/auth/refresh` | public | Rafraîchir le token |
+| `POST` | `/auth/logout` | auth | Déconnexion |
+| `GET` | `/admin/dashboard` | ADMIN | Statistiques globales |
+| `GET` | `/countries` | public | Lister les pays |
+| `POST` | `/admin/countries` | ADMIN | Créer un pays |
+| `GET` | `/countries/:code/cities` | public | Villes d'un pays |
+| `POST` | `/admin/cities` | ADMIN | Créer une ville |
+| `GET` | `/cities/:cityId/landmarks` | public | Landmarks d'une ville |
+| `POST` | `/admin/landmarks` | ADMIN | Créer un landmark |
+| `GET` | `/admin/users` | ADMIN | Lister tous les utilisateurs |
+| `GET` | `/admin/providers` | ADMIN | Lister tous les fournisseurs |
+| `GET` | `/admin/providers/pending` | ADMIN | Candidatures en attente |
+| `GET` | `/admin/providers/:id` | ADMIN | Détails d'un fournisseur |
+| `PUT` | `/admin/providers/:id/approve` | ADMIN | Approuver un fournisseur |
+| `PUT` | `/admin/providers/:id/reject` | ADMIN | Rejeter un fournisseur |
+| `GET` | `/subscriptions` | public | Lister tous les abonnements |
+
+### Routes NON disponibles (à ne pas appeler)
+
+| Route appelée par erreur | Statut | Route correcte à utiliser |
+|--------------------------|--------|--------------------------|
+| ~~`GET /admin/countries`~~ | 404 | `GET /countries` |
+| ~~`GET /admin/cities`~~ | 404 | `GET /countries/:code/cities` |
+| ~~`GET /admin/landmarks`~~ | 404 | `GET /cities/:cityId/landmarks` |
+| ~~`GET /admin/subscriptions`~~ | 404 | `GET /subscriptions` |
+| ~~`GET /admin/orders`~~ | 404 | non implémentée — ne pas appeler |
+
 ---
 
 ## 1. AUTHENTIFICATION ADMIN
@@ -404,6 +438,30 @@ http://localhost:5000/api/v1
 ---
 
 ## 5. FOURNISSEURS
+
+### GET /admin/providers — Lister tous les fournisseurs
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "dc6b75af-3b82-4600-8816-6a3781a1c4cf",
+      "businessName": "Chez Mariam",
+      "status": "APPROVED",
+      "city": { "name": "Lokossa", "country": { "code": "BJ" } },
+      "rating": 0,
+      "totalReviews": 0,
+      "createdAt": "2026-04-09T11:09:57.557Z"
+    }
+  ]
+}
+```
+
+---
 
 ### GET /admin/providers/pending — Candidatures en attente
 
