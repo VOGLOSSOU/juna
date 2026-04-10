@@ -1,6 +1,13 @@
 # Documentation API JUNA
 
 ## Base URL
+
+**Production :**
+```
+https://juna-app.up.railway.app/api/v1
+```
+
+**Local (développement) :**
 ```
 http://localhost:5000/api/v1
 ```
