@@ -120,7 +120,12 @@ export class AuthService {
    */
   async refreshAccessToken(data: RefreshTokenDTO): Promise<{ accessToken: string }> {
     // Vérifier le refresh token
-    const payload = verifyRefreshToken(data.refreshToken);
+    let payload;
+    try {
+      payload = verifyRefreshToken(data.refreshToken);
+    } catch {
+      throw new UnauthorizedError('Refresh token invalide ou expiré', ERROR_CODES.INVALID_TOKEN);
+    }
 
     // Vérifier si le token existe en DB et n'est pas révoqué
     const tokenRecord = await userRepository.findRefreshToken(data.refreshToken);
