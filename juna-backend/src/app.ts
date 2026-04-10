@@ -24,14 +24,16 @@ app.set('trust proxy', 1);
 app.use(helmet());
 
 // CORS
+const corsOrigin = env.corsOrigin.includes('*') ? '*' : env.corsOrigin;
 app.use(
   cors({
-    origin: env.corsOrigin,
-    credentials: true,
+    origin: corsOrigin,
+    credentials: corsOrigin !== '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+app.options('*', cors());
 
 // Compression des réponses
 app.use(compression());
