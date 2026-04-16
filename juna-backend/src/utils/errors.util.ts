@@ -20,8 +20,14 @@ export class AppError extends Error {
  * Erreur de validation (400)
  */
 export class ValidationError extends AppError {
-  constructor(message: string = 'Erreur de validation', code: string = 'VALIDATION_ERROR') {
-    super(message, 400, code);
+  public readonly messages: string[];
+
+  constructor(messages: string | string[] = 'Erreur de validation', code: string = 'VALIDATION_ERROR') {
+    const messageArray = Array.isArray(messages) ? messages : [messages];
+    const messageString = messageArray.length === 1 ? messageArray[0] : messageArray.join(', ');
+
+    super(messageString, 400, code);
+    this.messages = messageArray;
   }
 }
 

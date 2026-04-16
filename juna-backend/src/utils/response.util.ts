@@ -2,7 +2,7 @@ import { Response } from 'express';
 
 export interface ApiResponse<T = any> {
   success: boolean;
-  message: string;
+  message: string | string[];
   data?: T;
   error?: {
     code: string;
@@ -48,7 +48,7 @@ export const sendSuccess = <T>(
  */
 export const sendError = (
   res: Response,
-  message: string,
+  message: string | string[],
   statusCode: number = 400,
   errorCode?: string,
   details?: any

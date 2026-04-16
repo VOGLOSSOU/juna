@@ -19,7 +19,7 @@ export const validate = (schema: ZodSchema) => {
         }));
 
         next(
-          new ValidationError(`Validation failed: ${JSON.stringify(errors)}`, 'VALIDATION_ERROR')
+          new ValidationError(errors.map(err => err.message), 'VALIDATION_ERROR')
         );
       } else {
         next(error);
@@ -43,8 +43,7 @@ export const validateBody = (schema: ZodSchema) => {
           message: err.message,
         }));
 
-        const errorMessage = errors.map((e) => `${e.field}: ${e.message}`).join(', ');
-        next(new ValidationError(errorMessage, 'VALIDATION_ERROR'));
+        next(new ValidationError(errors.map((e) => `${e.field}: ${e.message}`), 'VALIDATION_ERROR'));
       } else {
         next(error);
       }
@@ -67,8 +66,7 @@ export const validateQuery = (schema: ZodSchema) => {
           message: err.message,
         }));
 
-        const errorMessage = errors.map((e) => `${e.field}: ${e.message}`).join(', ');
-        next(new ValidationError(errorMessage, 'VALIDATION_ERROR'));
+        next(new ValidationError(errors.map((e) => `${e.field}: ${e.message}`), 'VALIDATION_ERROR'));
       } else {
         next(error);
       }
@@ -91,8 +89,7 @@ export const validateParams = (schema: ZodSchema) => {
           message: err.message,
         }));
 
-        const errorMessage = errors.map((e) => `${e.field}: ${e.message}`).join(', ');
-        next(new ValidationError(errorMessage, 'VALIDATION_ERROR'));
+        next(new ValidationError(errors.map((e) => `${e.field}: ${e.message}`), 'VALIDATION_ERROR'));
       } else {
         next(error);
       }

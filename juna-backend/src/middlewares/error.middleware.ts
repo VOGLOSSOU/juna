@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '@/utils/errors.util';
+import { AppError, ValidationError } from '@/utils/errors.util';
 import { sendError } from '@/utils/response.util';
 import { logError } from '@/utils/logger.util';
 import { env } from '@/config/env';
@@ -19,7 +19,9 @@ export const errorHandler = (
 
   // Erreur personnalisée (AppError)
   if (err instanceof AppError) {
-    sendError(res, err.message, err.statusCode, err.code);
+    // Pour ValidationError, utiliser le tableau de messages si disponible
+    const message = err instanceof ValidationError ? err.messages : [err.message];
+    sendError(res, message, err.statusCode, err.code);
     return;
   }
 
