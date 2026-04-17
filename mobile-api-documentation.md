@@ -59,10 +59,14 @@ http://localhost:5000/api/v1
 | `PUT` | `/orders/:id/cancel` | auth | Annuler commande | Bouton annuler |
 | `POST` | `/reviews` | auth | Créer avis | Laisser avis commande |
 | `GET` | `/reviews/subscription/:id` | public | Avis abonnement | Page détail abonnement |
-| `POST` | `/upload/image` | auth | Upload image | Photo de profil |
+| `POST` | `/upload/:folder` | auth | Upload image | Photo de profil, logo, repas |
 | `GET` | `/notifications` | auth | Mes notifications | Page notifications |
 | `PUT` | `/notifications/:id/read` | auth | Marquer lu | Action notification |
 | `PUT` | `/notifications/read-all` | auth | Tout marquer lu | Bouton "Tout lire" |
+| `GET` | `/users/me` | auth | Mon profil complet | Affichage profil |
+| `PUT` | `/users/me` | auth | Update profil | Modification nom/téléphone |
+| `PUT` | `/users/me/location` | auth | Choisir ville | Paramètres géographiques |
+| `PUT` | `/users/me/preferences` | auth | Gérer préférences | Paramètres utilisateur |
 | `POST` | `/auth/provider/register` | public | Inscription provider | Formulaire prestataire |
 | `GET` | `/auth/provider/me` | auth | Infos prestataire | Profil provider |
 | `PUT` | `/auth/provider/me` | auth | Update profil provider | Modification profil |
@@ -148,7 +152,107 @@ Les pays, villes et landmarks sont utilisés pour la sélection géographique ob
 
 ---
 
-## PARTIE 1 — AUTHENTIFICATION (Mobile Critical)
+## PARTIE 1 — PROFIL UTILISATEUR (Mobile Core)
+
+Endpoints pour gérer le profil utilisateur mobile.
+
+### GET /users/me — Obtenir mon profil
+
+**Accès :** auth
+
+**Utilisation mobile :** Affichage profil, vérification données
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Profil récupéré",
+  "data": {
+    "id": "<uuid>",
+    "email": "user@example.com",
+    "name": "Jean Dupont",
+    "phone": "+22961111111",
+    "role": "USER",
+    "isVerified": false,
+    "isActive": true,
+    "profile": {
+      "avatar": null,
+      "address": "Quartier Cadjehoun",
+      "city": {
+        "id": "<uuid>",
+        "name": "Cotonou",
+        "country": { "code": "BJ", "translations": { "fr": "Bénin" } }
+      },
+      "preferences": {
+        "dietaryRestrictions": ["végétarien"],
+        "favoriteCategories": ["africain"],
+        "notifications": {
+          "email": true,
+          "push": true,
+          "sms": false
+        }
+      }
+    }
+  }
+}
+```
+
+### PUT /users/me — Mettre à jour le profil
+
+**Accès :** auth
+
+**Body :** (tous les champs optionnels)
+```json
+{
+  "name": "Jean Dupont Jr",           // Modifier nom
+  "phone": "+22962222222",            // Modifier téléphone
+  "address": "Nouvelle adresse",      // Modifier adresse
+  "cityId": "uuid-ville",             // Changer de ville
+  "avatarUrl": "https://..."          // Photo de profil
+}
+```
+
+**Utilisation mobile :** Formulaire modification profil + upload avatar
+
+### PUT /users/me/location — Choisir pays + ville
+
+**Accès :** auth
+
+**Body :**
+```json
+{
+  "cityId": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c"
+}
+```
+
+**Utilisation mobile :** Modal choix géographique dans les paramètres
+
+**Note :** Liste des pays depuis `GET /countries`, villes depuis `GET /countries/:code/cities`
+
+### PUT /users/me/preferences — Gérer les préférences
+
+**Accès :** auth
+
+**Body :**
+```json
+{
+  "dietaryRestrictions": ["végétarien", "halal"],
+  "favoriteCategories": ["africain", "fusion"],
+  "notifications": {
+    "email": true,
+    "push": false,
+    "sms": true
+  }
+}
+```
+
+**Utilisation mobile :** Paramètres utilisateur, filtres intelligents
+
+**Note :** La photo de profil se met à jour via `PUT /users/me` (après upload via `POST /upload/avatars`)
+
+---
+
+## PARTIE 2 — AUTHENTIFICATION (Mobile Critical)
 
 Endpoints essentiels pour l'authentification mobile.
 
@@ -226,7 +330,7 @@ Endpoints essentiels pour l'authentification mobile.
 
 ---
 
-## PARTIE 2 — ABONNEMENTS (Mobile Core)
+## PARTIE 3 — ABONNEMENTS (Mobile Core)
 
 Endpoints centraux pour la découverte et gestion des abonnements.
 
@@ -291,7 +395,7 @@ Endpoints centraux pour la découverte et gestion des abonnements.
 
 ---
 
-## PARTIE 3 — COMMANDES (Mobile Transaction)
+## PARTIE 4 — COMMANDES (Mobile Transaction)
 
 Endpoints pour le flow de commande complet.
 
@@ -337,7 +441,7 @@ Endpoints pour le flow de commande complet.
 
 ---
 
-## PARTIE 4 — AVIS & NOTIFICATIONS
+## PARTIE 5 — AVIS & NOTIFICATIONS
 
 ### POST /reviews — Créer un avis
 
@@ -367,15 +471,74 @@ Endpoints pour le flow de commande complet.
 
 ---
 
-## PARTIE 5 — UPLOAD & PROVIDER
+## PARTIE 6 — UPLOAD & PROVIDER
 
-### POST /upload/image — Upload image
+### POST /upload/:folder — Upload image
 
 **Accès :** auth
 
-**Content-Type :** multipart/form-data
+**Content-Type :** `multipart/form-data`
 
-**Utilisation mobile :** Photo de profil, logo provider
+**Utilisation mobile :** Photo de profil, logo provider, image repas
+
+**`:folder` — valeurs acceptées :**
+| Valeur | Usage |
+|--------|-------|
+| `avatars` | Photo de profil utilisateur |
+| `providers` | Logo fournisseur |
+| `meals` | Photo d'un repas |
+| `subscriptions` | Image d'un abonnement |
+| `documents` | Documents provider |
+
+**Champ du fichier :** `image` (pas `file`, pas `avatar` — exactement `image`)
+
+**Types MIME acceptés :** `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
+
+**Taille maximale :** 5 Mo (5 242 880 bytes)
+
+**Exemple :**
+```
+POST /api/v1/upload/avatars
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+image: <fichier binaire>
+```
+
+**Réponse 201 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Image uploadée avec succès",
+  "data": {
+    "url": "https://res.cloudinary.com/dm9561wpm/image/upload/v.../juna/avatars/xxxx.jpg",
+    "publicId": "juna/avatars/xxxx",
+    "folder": "avatars",
+    "size": 123456,
+    "mimetype": "image/jpeg"
+  }
+}
+```
+
+**Réponse 400 ❌ — Champ `image` absent :**
+```json
+{
+  "success": false,
+  "message": ["Aucun fichier fourni"],
+  "error": { "code": "INVALID_INPUT" }
+}
+```
+
+**Réponse 400 ❌ — Format non supporté :**
+```json
+{
+  "success": false,
+  "message": ["Format non supporté. Formats acceptés : JPG, PNG, WEBP"],
+  "error": { "code": "INVALID_INPUT" }
+}
+```
+
+> Après upload, utiliser `data.url` pour mettre à jour le profil via `PUT /users/me` ou `PUT /providers/me`.
 
 ### POST /auth/provider/register — Inscription prestataire
 
@@ -411,13 +574,15 @@ Endpoints pour le flow de commande complet.
 
 ```
 1. Premier lancement → GET /countries → sélection pays
-2. Sélection ville → GET /cities → choix ville
+2. Sélection ville → GET /countries/:code/cities → choix ville
 3. Page accueil → GET /subscriptions (filtres géographiques)
 4. Détail abonnement → GET /subscriptions/:id
 5. S'abonner → POST /auth/login si pas connecté
 6. Commande → POST /orders
 7. Suivi → GET /orders/me
-8. Notifications → GET /notifications
+8. Profil → GET /users/me, PUT /users/me/* pour personnalisation
+9. Paramètres → PUT /users/me/preferences, PUT /users/me/location
+10. Notifications → GET /notifications
 ```
 
 ---

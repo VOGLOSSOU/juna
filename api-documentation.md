@@ -444,11 +444,14 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 ### PUT /users/me — Mettre à jour le profil
 
-**Body :**
+**Body :** (tous les champs optionnels)
 ```json
 {
-  "name": "Kofi Mensah Jr",
-  "address": "Quartier Cadjehoun, Cotonou"
+  "name": "Kofi Mensah Jr",           // Nouveau nom
+  "phone": "+22962222222",            // Nouveau téléphone
+  "address": "Quartier Cadjehoun",    // Adresse personnelle
+  "cityId": "uuid-de-ville",          // Changement de ville
+  "avatarUrl": "https://..."          // Photo de profil (après upload)
 }
 ```
 
@@ -484,6 +487,100 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
       },
       "preferences": null
     }
+  }
+}
+```
+
+---
+
+### PUT /users/me/preferences — Mettre à jour les préférences
+
+**Body :**
+```json
+{
+  "dietaryRestrictions": ["végétarien", "sans-gluten"],
+  "favoriteCategories": ["africain", "fusion"],
+  "notifications": {
+    "email": true,
+    "push": true,
+    "sms": false
+  }
+}
+```
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Préférences mises à jour avec succès",
+  "data": {
+    "preferences": {
+      "dietaryRestrictions": ["végétarien", "sans-gluten"],
+      "favoriteCategories": ["africain", "fusion"],
+      "notifications": {
+        "email": true,
+        "push": true,
+        "sms": false
+      }
+    }
+  }
+}
+```
+
+---
+
+### PUT /users/me/location — Mettre à jour la localisation
+
+**Body :**
+```json
+{
+  "cityId": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c"
+}
+```
+
+**Note :** La `cityId` doit être une ville existante récupérée via `GET /countries/:code/cities`
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Localisation mise à jour avec succès",
+  "data": {
+    "city": {
+      "id": "101a6a8c-ad3b-4071-b399-ba5cd5afed0c",
+      "name": "Cotonou",
+      "country": {
+        "code": "BJ",
+        "translations": { "fr": "Bénin", "en": "Benin" }
+      }
+    }
+  }
+}
+```
+
+---
+
+**Note :** La photo de profil se met à jour via `PUT /users/me` avec le champ `avatarUrl` (après upload via `POST /upload/image`)
+
+---
+
+### DELETE /users/me — Supprimer le compte
+
+**Body :**
+```json
+{
+  "password": "CurrentPassword123",
+  "reason": "Plus besoin du service" // optionnel
+}
+```
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Compte supprimé avec succès",
+  "data": {
+    "deletedAt": "2026-04-16T18:31:56.000Z"
   }
 }
 ```
