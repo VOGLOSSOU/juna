@@ -8,6 +8,7 @@ export const updateProfileSchema = z.object({
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Format de téléphone invalide').optional(),
   address: z.string().optional(),
   cityId: z.string().uuid('ID ville invalide').optional(),
+  avatarUrl: z.string().url('URL avatar invalide').optional(),
 });
 
 export type UpdateProfileDTO = z.infer<typeof updateProfileSchema>;

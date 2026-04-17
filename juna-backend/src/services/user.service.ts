@@ -45,24 +45,22 @@ export class UserService {
     };
     await userRepository.update(userId, updateData);
 
-    if (data.address || data.cityId) {
+    const profileUpdate: Record<string, any> = {};
+    if (data.address !== undefined) profileUpdate.address = data.address;
+    if (data.cityId) profileUpdate.cityId = data.cityId;
+    if (data.avatarUrl) profileUpdate.avatar = data.avatarUrl;
+
+    if (Object.keys(profileUpdate).length > 0) {
       const userWithProfile = await userRepository.findByIdWithProfile(userId);
 
       if (userWithProfile?.profile) {
         await prisma.userProfile.update({
           where: { userId },
-          data: {
-            address: data.address,
-            ...(data.cityId && { cityId: data.cityId }),
-          },
+          data: profileUpdate,
         });
       } else {
         await prisma.userProfile.create({
-          data: {
-            userId,
-            address: data.address || '',
-            ...(data.cityId && { cityId: data.cityId }),
-          },
+          data: { userId, ...profileUpdate },
         });
       }
     }
