@@ -144,8 +144,8 @@ export const subscriptionFiltersSchema = z.object({
   country: z.string().length(2).toUpperCase().optional(),
   landmarkId: z.string().uuid('ID lieu invalide').optional(),
   sort: z.enum(['popular', 'recent', 'rating', 'price_asc', 'price_desc']).optional(),
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
+  page: z.coerce.number().int().positive().default(1).optional(),
+  limit: z.coerce.number().int().positive().max(100).default(20).optional(),
 });
 
 /**
