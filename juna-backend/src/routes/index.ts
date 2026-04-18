@@ -9,6 +9,7 @@ import reviewRoutes from './review.routes';
 import orderRoutes from './order.routes';
 import uploadRoutes from './upload.routes';
 import geographyRoutes from './geography.routes';
+import homeRoutes from './home.routes';
 // Import des autres routes ici plus tard
 // import proposalRoutes from './proposal.routes';
 // import ticketRoutes from './ticket.routes';
@@ -28,6 +29,7 @@ router.use('/reviews', reviewRoutes);
 router.use('/orders', orderRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/', geographyRoutes);
+router.use('/', homeRoutes);
 
 // Plus tard, ajouter les autres routes
 // router.use('/proposals', proposalRoutes);
