@@ -50,21 +50,28 @@ export class SubscriptionController {
    */
   async getPublic(req: Request, res: Response, next: NextFunction) {
     try {
+      const VALID_SORTS = ['popular', 'recent', 'rating', 'price_asc', 'price_desc'] as const;
+      const rawSort = req.query.sort as string | undefined;
+      const sort = VALID_SORTS.includes(rawSort as any) ? (rawSort as typeof VALID_SORTS[number]) : 'popular';
+
       const filters = {
         type: req.query.type as any,
         category: req.query.category as any,
         duration: req.query.duration as any,
         minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
-        providerId: req.query.providerId as string,
-        search: req.query.search as string,
+        providerId: req.query.providerId as string | undefined,
+        search: req.query.search as string | undefined,
         city: req.query.city as string | undefined,
+        cityId: req.query.cityId as string | undefined,
         country: req.query.country as string | undefined,
-        isActive: true,
-        isPublic: true,
+        landmarkId: req.query.landmarkId as string | undefined,
+        sort,
+        page: req.query.page ? Math.max(1, parseInt(req.query.page as string)) : 1,
+        limit: req.query.limit ? Math.min(100, Math.max(1, parseInt(req.query.limit as string))) : 20,
       };
-      const subscriptions = await subscriptionService.getPublic(filters);
-      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTIONS_FETCHED, subscriptions);
+      const result = await subscriptionService.getPublic(filters);
+      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTIONS_FETCHED, result);
     } catch (error) {
       next(error);
     }

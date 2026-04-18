@@ -221,7 +221,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Lister les abonnements publics avec filtres
+   * Lister les abonnements publics avec filtres, tri et pagination
    */
   async findPublic(filters?: {
     type?: SubscriptionType;
@@ -232,29 +232,22 @@ export class SubscriptionRepository {
     providerId?: string;
     search?: string;
     city?: string;
+    cityId?: string;
     country?: string;
     landmarkId?: string;
-  }): Promise<Subscription[]> {
+    sort?: 'popular' | 'recent' | 'rating' | 'price_asc' | 'price_desc';
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: any[]; total: number }> {
     const where: Prisma.SubscriptionWhereInput = {
       isPublic: true,
       isActive: true,
     };
 
-    if (filters?.type) {
-      where.type = filters.type;
-    }
-
-    if (filters?.category) {
-      where.category = filters.category;
-    }
-
-    if (filters?.duration) {
-      where.duration = filters.duration;
-    }
-
-    if (filters?.providerId) {
-      where.providerId = filters.providerId;
-    }
+    if (filters?.type) where.type = filters.type;
+    if (filters?.category) where.category = filters.category;
+    if (filters?.duration) where.duration = filters.duration;
+    if (filters?.providerId) where.providerId = filters.providerId;
 
     if (filters?.minPrice || filters?.maxPrice) {
       where.price = {};
@@ -269,57 +262,62 @@ export class SubscriptionRepository {
       ];
     }
 
-    if (filters?.city || filters?.country || filters?.landmarkId) {
-      where.provider = {
-        is: {
-          ...(filters.city && {
-            city: { is: { name: { equals: filters.city, mode: 'insensitive' } } },
-          }),
-          ...(filters.country && {
-            city: { is: { country: { is: { code: filters.country } } } },
-          }),
-          ...(filters.landmarkId && {
-            landmarks: { some: { landmarkId: filters.landmarkId } },
-          }),
-        } as any,
-      };
-    }
+    const providerFilter: Prisma.ProviderWhereInput = { status: 'APPROVED' };
+    if (filters?.cityId) providerFilter.cityId = filters.cityId;
+    if (filters?.city) providerFilter.city = { is: { name: { equals: filters.city, mode: 'insensitive' } } };
+    if (filters?.country) providerFilter.city = { is: { country: { is: { code: filters.country } } } };
+    if (filters?.landmarkId) providerFilter.landmarks = { some: { landmarkId: filters.landmarkId } };
+    where.provider = { is: providerFilter };
 
-    return prisma.subscription.findMany({
-      where,
-      include: {
-        provider: {
-          select: {
-            id: true,
-            businessName: true,
-            logo: true,
-            rating: true,
-            totalReviews: true,
-            acceptsDelivery: true,
-            acceptsPickup: true,
-            deliveryZones: true,
-            city: {
-              select: {
-                id: true,
-                name: true,
-                country: {
-                  select: { code: true, translations: true },
-                },
-              },
-            },
-            landmarks: {
-              include: {
-                landmark: { select: { id: true, name: true, cityId: true } },
-              },
-            },
-          },
+    const sort = filters?.sort ?? 'popular';
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const select = {
+      id: true,
+      name: true,
+      description: true,
+      price: true,
+      type: true,
+      category: true,
+      duration: true,
+      imageUrl: true,
+      rating: true,
+      totalReviews: true,
+      isActive: true,
+      createdAt: true,
+      _count: { select: { mealsInSubscriptions: true, orders: true } },
+      provider: {
+        select: {
+          id: true,
+          businessName: true,
+          logo: true,
+          status: true,
+          rating: true,
+          totalReviews: true,
         },
       },
-      orderBy: [
-        { rating: 'desc' },
-        { subscriberCount: 'desc' },
-      ],
-    });
+    };
+
+    // popular nécessite un tri JS → on récupère tout sans pagination DB
+    if (sort === 'popular') {
+      const data = await prisma.subscription.findMany({ where, select });
+      return { data, total: data.length };
+    }
+
+    const orderBy: Prisma.SubscriptionOrderByWithRelationInput =
+      sort === 'recent'     ? { createdAt: 'desc' } :
+      sort === 'rating'     ? { rating: 'desc' } :
+      sort === 'price_asc'  ? { price: 'asc' } :
+                              { price: 'desc' };
+
+    const [data, total] = await Promise.all([
+      prisma.subscription.findMany({ where, select, orderBy, skip, take: limit }),
+      prisma.subscription.count({ where }),
+    ]);
+
+    return { data, total };
   }
 
   /**

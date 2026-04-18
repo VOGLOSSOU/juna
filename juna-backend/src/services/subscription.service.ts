@@ -153,10 +153,62 @@ export class SubscriptionService {
   }
 
   /**
-   * Lister les abonnements publics
+   * Lister les abonnements publics avec tri et pagination
    */
   async getPublic(filters?: SubscriptionFiltersInput) {
-    return subscriptionRepository.findPublic(filters);
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 20;
+    const sort = filters?.sort ?? 'popular';
+
+    const { data, total } = await subscriptionRepository.findPublic(filters);
+
+    let sorted: typeof data;
+
+    if (sort === 'popular') {
+      sorted = data
+        .sort((a: any, b: any) => {
+          const score = (item: any) =>
+            item.rating * 0.3 +
+            Math.log(item.totalReviews + 1) * 0.2 +
+            Math.log(item._count.orders + 1) * 0.4 +
+            (item.provider.status === 'APPROVED' ? 0.1 : 0);
+          return score(b) - score(a);
+        })
+        .slice((page - 1) * limit, page * limit);
+    } else if (sort === 'rating') {
+      sorted = data.sort((a: any, b: any) => b.totalReviews - a.totalReviews || b.rating - a.rating);
+    } else {
+      sorted = data;
+    }
+
+    const subscriptions = sorted.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      description: s.description,
+      price: s.price,
+      currency: 'XOF',
+      type: s.type,
+      category: s.category,
+      duration: s.duration,
+      mealCount: s._count.mealsInSubscriptions,
+      images: s.imageUrl ? [s.imageUrl] : [],
+      rating: s.rating,
+      reviewCount: s.totalReviews,
+      isActive: s.isActive,
+      provider: {
+        id: s.provider.id,
+        name: s.provider.businessName,
+        logo: s.provider.logo,
+        isVerified: s.provider.status === 'APPROVED',
+      },
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      subscriptions,
+      pagination: { page, limit, total, totalPages },
+    };
   }
 
   /**

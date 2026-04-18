@@ -140,8 +140,12 @@ export const subscriptionFiltersSchema = z.object({
   isActive: z.boolean().optional(),
   isPublic: z.boolean().optional(),
   city: z.string().optional(),
+  cityId: z.string().uuid('ID ville invalide').optional(),
   country: z.string().length(2).toUpperCase().optional(),
   landmarkId: z.string().uuid('ID lieu invalide').optional(),
+  sort: z.enum(['popular', 'recent', 'rating', 'price_asc', 'price_desc']).optional(),
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
 });
 
 /**
