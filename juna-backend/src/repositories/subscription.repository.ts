@@ -61,7 +61,7 @@ export class SubscriptionRepository {
    * Trouver un abonnement par ID avec provider et repas
    */
   async findByIdWithDetails(id: string): Promise<(Subscription & {
-    provider: { id: string; businessName: string };
+    provider: { id: string; businessName: string; description: string | null; logo: string; status: string };
     mealsInSubscriptions: Array<{
       id: string;
       quantity: number;
@@ -69,9 +69,7 @@ export class SubscriptionRepository {
         id: string;
         name: string;
         description: string;
-        price: number;
         imageUrl: string | null;
-        mealType: string;
       };
     }>;
   }) | null> {
@@ -82,7 +80,10 @@ export class SubscriptionRepository {
           select: {
             id: true,
             businessName: true,
+            description: true,
             businessAddress: true,
+            logo: true,
+            status: true,
             city: {
               select: {
                 id: true,
@@ -109,9 +110,7 @@ export class SubscriptionRepository {
                 id: true,
                 name: true,
                 description: true,
-                price: true,
                 imageUrl: true,
-                mealType: true,
               },
             },
           },

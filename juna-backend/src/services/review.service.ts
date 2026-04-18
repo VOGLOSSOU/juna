@@ -118,6 +118,32 @@ export class ReviewService {
   }
 
   /**
+   * Obtenir les avis d'un abonnement avec pagination et avatar
+   */
+  async getBySubscriptionIdPaginated(subscriptionId: string, page: number, limit: number) {
+    const subscription = await subscriptionRepository.findById(subscriptionId);
+    if (!subscription) {
+      throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
+    }
+
+    const { reviews, total } = await reviewRepository.findBySubscriptionIdPaginated(
+      subscriptionId,
+      page,
+      limit
+    );
+
+    return {
+      reviews,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
    * Obtenir les avis d'un utilisateur
    */
   async getByUserId(userId: string): Promise<Review[]> {

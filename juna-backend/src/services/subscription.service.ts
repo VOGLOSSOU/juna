@@ -89,13 +89,52 @@ export class SubscriptionService {
     if (!subscription) {
       throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
     }
-    const { mealsInSubscriptions, ...rest } = subscription as any;
+
+    const raw = subscription as any;
+    const provider = raw.provider;
+    const meals = (raw.mealsInSubscriptions ?? []).map((m: any) => ({
+      id: m.meal.id,
+      name: m.meal.name,
+      description: m.meal.description,
+      imageUrl: m.meal.imageUrl ?? null,
+    }));
+
+    const deliveryZones: string[] = Array.isArray(provider.deliveryZones)
+      ? provider.deliveryZones
+      : provider.deliveryZones
+        ? Object.values(provider.deliveryZones as Record<string, string>)
+        : [];
+
+    const pickupPoints: string[] = (provider.landmarks ?? []).map(
+      (pl: any) => pl.landmark.name
+    );
+
     return {
-      ...rest,
-      meals: mealsInSubscriptions.map((m: any) => ({
-        ...m.meal,
-        quantity: m.quantity,
-      })),
+      id: raw.id,
+      name: raw.name,
+      description: raw.description,
+      price: raw.price,
+      currency: 'XOF',
+      type: raw.type,
+      category: raw.category,
+      duration: raw.duration,
+      mealCount: meals.length,
+      images: raw.imageUrl ? [raw.imageUrl] : [],
+      rating: raw.rating,
+      reviewCount: raw.totalReviews,
+      isActive: raw.isActive,
+      provider: {
+        id: provider.id,
+        name: provider.businessName,
+        logo: provider.logo,
+        isVerified: provider.status === 'APPROVED',
+        description: provider.description ?? null,
+        rating: provider.rating,
+        reviewCount: provider.totalReviews,
+      },
+      meals,
+      deliveryZones,
+      pickupPoints,
     };
   }
 

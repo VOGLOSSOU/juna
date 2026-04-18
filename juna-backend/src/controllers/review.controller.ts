@@ -51,13 +51,15 @@ export class ReviewController {
   }
 
   /**
-   * Obtenir les avis d'un abonnement (approuvés)
+   * Obtenir les avis d'un abonnement (approuvés, paginés)
    */
   async getBySubscriptionId(req: Request, res: Response, next: NextFunction) {
     try {
       const { subscriptionId } = req.params;
-      const reviews = await reviewService.getBySubscriptionId(subscriptionId);
-      sendSuccess(res, SUCCESS_MESSAGES.REVIEWS_FETCHED, reviews);
+      const page = req.query.page ? Math.max(1, parseInt(req.query.page as string)) : 1;
+      const limit = req.query.limit ? Math.min(50, Math.max(1, parseInt(req.query.limit as string))) : 10;
+      const result = await reviewService.getBySubscriptionIdPaginated(subscriptionId, page, limit);
+      sendSuccess(res, SUCCESS_MESSAGES.REVIEWS_FETCHED, result);
     } catch (error) {
       next(error);
     }

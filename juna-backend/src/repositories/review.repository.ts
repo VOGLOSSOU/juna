@@ -93,6 +93,54 @@ export class ReviewRepository {
   }
 
   /**
+   * Trouver les avis d'un abonnement avec pagination et avatar utilisateur
+   */
+  async findBySubscriptionIdPaginated(
+    subscriptionId: string,
+    page: number,
+    limit: number
+  ): Promise<{ reviews: any[]; total: number }> {
+    const skip = (page - 1) * limit;
+    const where = { subscriptionId, status: ReviewStatus.APPROVED };
+
+    const [reviews, total] = await Promise.all([
+      prisma.review.findMany({
+        where,
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+              profile: { select: { avatar: true } },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.review.count({ where }),
+    ]);
+
+    return {
+      reviews: reviews.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment ?? null,
+        createdAt: r.createdAt,
+        user: {
+          name: r.user.name,
+          avatar: r.user.profile?.avatar ?? null,
+        },
+      })),
+      total,
+    };
+  }
+
+  /**
    * Trouver les avis d'un utilisateur
    */
   async findByUserId(userId: string): Promise<Review[]> {
