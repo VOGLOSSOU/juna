@@ -934,6 +934,25 @@ image: <fichier binaire>
 
 ## PARTIE 7 — DEVENIR PRESTATAIRE
 
+### Notes importantes — questions fréquentes
+
+**`deliveryZones.city` est un champ texte libre**
+Pas de contrainte sur la base géo. Valeur libre (`"Cotonou"`, `"Akpakpa"`…). Le serveur fait une comparaison insensible à la casse au moment de calculer les frais de livraison. `country` = code ISO 2 lettres (`"BJ"`, `"CI"`…).
+
+**`documentUrl` — optionnel, conseillé**
+L'admin le voit dans la fiche du prestataire mais il n'y a pas de validation automatique. Inclure le champ dans le formulaire (upload via `POST /upload/documents`) en le rendant facultatif côté UX.
+
+**`landmarkIds` — feature utile, pas secondaire**
+Les landmarks servent à filtrer les prestataires dans `GET /home` (section `providers`) — seuls les prestataires avec au moins un landmark dans la ville demandée apparaissent. C'est aussi ce qui alimente `pickupPoints` dans `GET /subscriptions/:id`. Les UUIDs viennent de `GET /cities/:cityId/landmarks`.
+
+**Rôle après inscription — le `role` reste `USER` jusqu'à validation admin**
+À la soumission de `POST /providers/register`, le rôle dans le JWT reste `USER`. C'est uniquement quand l'admin approuve que le rôle passe à `PROVIDER` en base. Le provider devra se **reconnecter** (ou faire `POST /auth/refresh`) après approbation pour obtenir un token avec `role: "PROVIDER"`. Prévoir un écran "En attente de validation" et inviter l'utilisateur à se reconnecter une fois approuvé.
+
+**Notification approbation — pas de mécanisme automatique**
+Aucun webhook ni email ni push déclenché à l'approbation pour l'instant. Le provider vérifie son statut via `GET /providers/me` → champ `status`. Implémenter un polling sur cette route ou un bouton "Vérifier le statut de ma demande".
+
+---
+
 ### POST /providers/register
 
 **Accès :** auth (USER avec compte existant)
