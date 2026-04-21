@@ -663,7 +663,14 @@ image: <fichier binaire>
       "isVerified": true,
       "description": "Restaurant spécialisé en cuisine africaine...",
       "rating": 4.6,
-      "reviewCount": 87
+      "reviewCount": 87,
+      "acceptsDelivery": true,
+      "acceptsPickup": true,
+      "businessAddress": "Rue 234, Quartier Cadjehoun",
+      "city": {
+        "id": "city-uuid",
+        "name": "Cotonou"
+      }
     },
     "meals": [
       {
@@ -674,14 +681,31 @@ image: <fichier binaire>
       }
     ],
     "deliveryZones": ["Plateau", "Akpakpa", "Cadjehoun"],
-    "pickupPoints": ["Carrefour Étoile Rouge — Akpakpa"]
+    "pickupPoints": ["Carrefour Étoile Rouge — Akpakpa"],
+    "providerSubscriptions": [
+      {
+        "id": "sub-uuid-2",
+        "name": "Abonnement Petit-déjeuner",
+        "price": 15000,
+        "currency": "XOF",
+        "type": "BREAKFAST",
+        "category": "AFRICAN",
+        "duration": "WORK_WEEK",
+        "images": ["https://res.cloudinary.com/..."],
+        "rating": 4.5,
+        "reviewCount": 32,
+        "isActive": true
+      }
+    ]
   }
 }
 ```
 
 > `meals[].price` n'est pas retourné — uniquement le prix global de l'abonnement.
 > `provider.description` peut être `null`.
+> `provider.city` peut être `null`.
 > `meals[].imageUrl` peut être `null`.
+> `providerSubscriptions` : 6 derniers abonnements actifs et publics du même provider, hors abonnement courant. Tableau vide `[]` si le provider n'a pas d'autres abonnements.
 
 ---
 

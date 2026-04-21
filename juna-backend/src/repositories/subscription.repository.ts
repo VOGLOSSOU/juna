@@ -61,16 +61,23 @@ export class SubscriptionRepository {
    * Trouver un abonnement par ID avec provider et repas
    */
   async findByIdWithDetails(id: string): Promise<(Subscription & {
-    provider: { id: string; businessName: string; description: string | null; logo: string; status: string };
+    provider: {
+      id: string;
+      businessName: string;
+      description: string | null;
+      logo: string;
+      status: string;
+      acceptsDelivery: boolean;
+      acceptsPickup: boolean;
+      businessAddress: string;
+      city: { id: string; name: string } | null;
+      rating: number;
+      totalReviews: number;
+    };
     mealsInSubscriptions: Array<{
       id: string;
       quantity: number;
-      meal: {
-        id: string;
-        name: string;
-        description: string;
-        imageUrl: string | null;
-      };
+      meal: { id: string; name: string; description: string; imageUrl: string | null };
     }>;
   }) | null> {
     return prisma.subscription.findUnique({
@@ -116,6 +123,29 @@ export class SubscriptionRepository {
           },
         },
       },
+    });
+  }
+
+  /**
+   * Autres abonnements actifs du même provider (pour la page de détail)
+   */
+  async findOthersByProviderId(providerId: string, excludeId: string, limit: number) {
+    return prisma.subscription.findMany({
+      where: { providerId, isActive: true, isPublic: true, NOT: { id: excludeId } },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        type: true,
+        category: true,
+        duration: true,
+        imageUrl: true,
+        rating: true,
+        totalReviews: true,
+        isActive: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
     });
   }
 

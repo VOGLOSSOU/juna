@@ -92,6 +92,7 @@ export class SubscriptionService {
 
     const raw = subscription as any;
     const provider = raw.provider;
+
     const meals = (raw.mealsInSubscriptions ?? []).map((m: any) => ({
       id: m.meal.id,
       name: m.meal.name,
@@ -108,6 +109,26 @@ export class SubscriptionService {
     const pickupPoints: string[] = (provider.landmarks ?? []).map(
       (pl: any) => pl.landmark.name
     );
+
+    const otherSubs = await subscriptionRepository.findOthersByProviderId(
+      provider.id,
+      raw.id,
+      6
+    );
+
+    const providerSubscriptions = otherSubs.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      price: s.price,
+      currency: 'XOF',
+      type: s.type,
+      category: s.category,
+      duration: s.duration,
+      images: s.imageUrl ? [s.imageUrl] : [],
+      rating: s.rating,
+      reviewCount: s.totalReviews,
+      isActive: s.isActive,
+    }));
 
     return {
       id: raw.id,
@@ -131,10 +152,17 @@ export class SubscriptionService {
         description: provider.description ?? null,
         rating: provider.rating,
         reviewCount: provider.totalReviews,
+        acceptsDelivery: provider.acceptsDelivery,
+        acceptsPickup: provider.acceptsPickup,
+        businessAddress: provider.businessAddress,
+        city: provider.city
+          ? { id: provider.city.id, name: provider.city.name }
+          : null,
       },
       meals,
       deliveryZones,
       pickupPoints,
+      providerSubscriptions,
     };
   }
 
