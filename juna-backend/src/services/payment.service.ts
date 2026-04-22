@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import paymentRepository from '@/repositories/payment.repository';
 import orderRepository from '@/repositories/order.repository';
 import pawaPayService from './pawapay.service';
@@ -62,7 +62,7 @@ export class PaymentService {
       resolvedProvider = prediction.provider;
     }
 
-    const depositId = uuidv4();
+    const depositId = randomUUID();
     const method = resolvePaymentMethod(resolvedProvider);
 
     const payment = await paymentRepository.create({
