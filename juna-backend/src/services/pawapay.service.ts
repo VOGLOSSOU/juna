@@ -12,7 +12,6 @@ interface DepositPayload {
       provider: string;
     };
   };
-  statementDescription?: string;
 }
 
 interface DepositResponse {

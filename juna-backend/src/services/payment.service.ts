@@ -85,7 +85,6 @@ export class PaymentService {
           provider: resolvedProvider,
         },
       },
-      statementDescription: `JUNA - Abonnement`,
     });
 
     if (pawapayResponse.status === 'REJECTED') {

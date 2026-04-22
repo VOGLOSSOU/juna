@@ -16,16 +16,18 @@ Le paiement est **asynchrone** : on initie, l'opérateur envoie une notification
 **Flux global :**
 
 ```
-[User] → POST /payments/initiate → [Backend JUNA] → PawaPay
-                                                          ↓
+[User] → POST /payments/initiate → [Backend JUNA] → POST /v2/predict-provider (validation numéro)
+                                                               ↓
+                                                    POST /v2/deposits (initier le dépôt)
+                                                               ↓
                                               (user reçoit une demande PIN sur son téléphone)
-                                                          ↓
+                                                               ↓
                                               (user valide ou refuse)
-                                                          ↓
+                                                               ↓
                                          PawaPay → POST /payments/webhook/deposit → [Backend JUNA]
-                                                          ↓
+                                                               ↓
                                               (commande passe à CONFIRMED)
-                                                          ↓
+                                                               ↓
 [Frontend] → GET /payments/:id/status ← polling jusqu'à statut final
 ```
 
@@ -67,10 +69,8 @@ Tous les endpoints protégés nécessitent : `Authorization: Bearer {accessToken
 | Champ | Type | Requis | Description |
 |---|---|---|---|
 | `orderId` | UUID | ✅ | ID de la commande à payer (créée via `POST /orders`) |
-| `phoneNumber` | string | ✅ | Numéro Mobile Money du payeur (avec ou sans indicatif) |
+| `phoneNumber` | string | ✅ | Numéro Mobile Money **avec indicatif, sans `+`** (ex: `22997123456`) |
 | `provider` | string | ❌ | Code opérateur (ex: `MTN_MOMO_BEN`, `MOOV_BEN`). Si omis, détecté automatiquement depuis le numéro |
-
-> **Tip :** Ne pas envoyer `provider` si vous laissez l'utilisateur taper seulement son numéro. Le backend prédit l'opérateur automatiquement.
 
 **Réponse succès (200) :**
 ```json
@@ -142,126 +142,42 @@ Cet endpoint est appelé **directement par PawaPay**, pas par le frontend. Vous 
 | 404 | `ORDER_NOT_FOUND` | L'`orderId` n'existe pas | Vérifier l'ID de commande |
 | 403 | `FORBIDDEN` | La commande n'appartient pas au user connecté | Ne devrait pas arriver normalement |
 | 409 | `PAYMENT_ALREADY_PROCESSED` | Commande déjà payée ou paiement déjà en cours | Rediriger vers le statut existant |
-| 400 | `PAYMENT_FAILED` | PawaPay a rejeté immédiatement (numéro invalide, provider indisponible…) | Afficher le message d'erreur, laisser réessayer |
-| 503 | `PAWAPAY_ERROR` | PawaPay est indisponible | Afficher un message "service momentanément indisponible" |
+| 400 | `INVALID_PHONE_NUMBER` | Numéro de téléphone invalide ou non reconnu par PawaPay | Afficher "Numéro invalide", laisser corriger |
+| 400 | `PAYMENT_FAILED` | PawaPay a rejeté immédiatement (provider indisponible, montant invalide…) | Afficher le message d'erreur de la réponse |
+| 503 | `PAWAPAY_ERROR` | PawaPay est indisponible (réseau, panne opérateur) | Afficher "service momentanément indisponible" |
 | 422 | `VALIDATION_ERROR` | Champs manquants ou invalides | Corriger le formulaire |
 
 ---
 
-## Flux d'implémentation étape par étape
+## Format du numéro de téléphone
 
-### Étape 1 — Créer la commande
+PawaPay attend le format **MSISDN** : indicatif international + numéro, **sans `+`**, **sans espace**, **sans zéro initial**.
 
-Avant de payer, une commande doit exister. Si ce n'est pas encore fait :
+| Format | Exemple | Valide |
+|---|---|---|
+| Indicatif + numéro, sans `+` | `22997123456` | ✅ |
+| Avec `+` | `+22997123456` | ❌ |
+| Avec zéro initial après indicatif | `229097123456` | ❌ |
+| Avec espaces | `229 97 12 34 56` | ❌ |
+| Numéro local sans indicatif | `97123456` | ❌ |
 
-```
-POST /orders
-{
-  "subscriptionId": "...",
-  "deliveryMethod": "DELIVERY" | "PICKUP",
-  "deliveryAddress": "...",         // si DELIVERY
-  "pickupLocation": "..."           // si PICKUP
-}
-```
-
-Récupérer l'`orderId` dans la réponse.
+**Recommandation :** afficher le sélecteur de pays avec le préfixe (`+229`) et laisser l'utilisateur saisir uniquement les chiffres sans indicatif (`97123456`). Concaténer avant l'envoi : `"229" + "97123456"` → `"22997123456"`.
 
 ---
 
-### Étape 2 — Afficher le formulaire de paiement
+## Numéros de test (environnement sandbox)
 
-Collecter auprès de l'utilisateur :
-- Son **numéro Mobile Money** (avec l'indicatif du pays, ex: `22997123456`)
-- Son **opérateur** (optionnel — vous pouvez laisser le backend le détecter)
+L'environnement actuel est **sandbox** (`https://api.sandbox.pawapay.io`). Aucun argent réel n'est débité. Utiliser ces numéros pour tester :
 
-> **Recommandation UX :** ne pas forcer l'utilisateur à choisir l'opérateur. Laissez le champ optionnel et laissez le backend prédire depuis le numéro. Affichez juste l'opérateur détecté pour confirmation.
+| Scénario | Numéro | Opérateur |
+|---|---|---|
+| Paiement réussi (COMPLETED) | `22997000001` | `MTN_MOMO_BEN` |
+| Paiement échoué (FAILED) | `22997000002` | `MTN_MOMO_BEN` |
+| Paiement timeout | `22997000003` | `MTN_MOMO_BEN` |
 
----
+> En sandbox, il n'y a pas de demande de code PIN sur le téléphone. Le callback de statut final arrive automatiquement en quelques secondes.
 
-### Étape 3 — Appeler `POST /payments/initiate`
-
-```javascript
-const response = await fetch('/api/v1/payments/initiate', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${accessToken}`,
-  },
-  body: JSON.stringify({
-    orderId,
-    phoneNumber,
-    // provider optionnel
-  }),
-});
-
-const { data } = await response.json();
-// Sauvegarder data.paymentId
-```
-
-En cas de succès, **afficher immédiatement un écran d'attente** en expliquant à l'utilisateur :
-
-> "Une demande de confirmation a été envoyée sur votre téléphone. Veuillez saisir votre code PIN Mobile Money pour valider le paiement."
-
----
-
-### Étape 4 — Polling sur `GET /payments/:id/status`
-
-Démarrer un polling toutes les **5 secondes**, avec un timeout maximum de **3 minutes**.
-
-```javascript
-const POLL_INTERVAL = 5000;    // 5 secondes
-const MAX_WAIT = 180000;       // 3 minutes
-const startTime = Date.now();
-
-async function pollPaymentStatus(paymentId) {
-  while (Date.now() - startTime < MAX_WAIT) {
-    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
-
-    const res = await fetch(`/api/v1/payments/${paymentId}/status`, {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-    });
-
-    const { data } = await res.json();
-
-    if (data.status === 'SUCCESS') {
-      // Paiement validé → aller vers la page de confirmation
-      navigateTo(`/orders/${data.orderId}/confirmation`);
-      return;
-    }
-
-    if (data.status === 'FAILED') {
-      // Échec → afficher erreur et option de réessayer
-      showError('Le paiement a échoué. Vérifiez votre solde et réessayez.');
-      return;
-    }
-
-    // Sinon : status = PROCESSING → continuer le polling
-  }
-
-  // Timeout atteint → afficher message d'attente prolongée
-  showError('Le paiement prend plus de temps que prévu. Vérifiez votre historique de transactions.');
-}
-```
-
----
-
-### Étape 5 — Écrans à prévoir
-
-**Écran en cours de paiement (PROCESSING) :**
-- Spinner ou animation de chargement
-- Message : "Validation en cours… Saisissez votre code PIN sur votre téléphone."
-- Montant et opérateur affichés
-- Bouton "Annuler" (ne fait pas d'appel API, redirige juste l'utilisateur vers ses commandes — le paiement reste en attente côté backend)
-
-**Écran de succès (SUCCESS) :**
-- Confirmation visuelle (checkmark, animation)
-- Récapitulatif : abonnement, montant, date
-- Bouton "Voir ma commande"
-
-**Écran d'échec (FAILED) :**
-- Message d'erreur clair
-- Bouton "Réessayer" → relancer le formulaire de paiement avec le même `orderId`
-- Bouton "Annuler" → retour à l'abonnement
+> Les numéros de test exacts sont disponibles dans votre dashboard PawaPay sandbox sous **"Test numbers"**. Si les numéros ci-dessus ne fonctionnent pas, se référer au dashboard.
 
 ---
 
@@ -281,12 +197,144 @@ async function pollPaymentStatus(paymentId) {
 
 ---
 
+## Flux d'implémentation étape par étape
+
+### Étape 1 — Créer la commande
+
+Avant de payer, une commande doit exister. Si ce n'est pas encore fait :
+
+```
+POST /orders
+{
+  "subscriptionId": "...",
+  "deliveryMethod": "DELIVERY" | "PICKUP",
+  "deliveryAddress": "...",
+  "pickupLocation": "..."
+}
+```
+
+Récupérer l'`orderId` dans la réponse.
+
+---
+
+### Étape 2 — Afficher le formulaire de paiement
+
+Collecter auprès de l'utilisateur :
+- Son **numéro Mobile Money** (sans indicatif — le frontend ajoute l'indicatif avant l'envoi)
+- Son **opérateur** (optionnel — le backend le détecte automatiquement depuis le numéro)
+
+**Recommandation UX :** ne pas forcer l'utilisateur à choisir l'opérateur. Affichez un sélecteur de pays avec préfixe, laissez le backend détecter le provider. En cas d'erreur `INVALID_PHONE_NUMBER`, invitez à corriger le numéro.
+
+---
+
+### Étape 3 — Appeler `POST /payments/initiate`
+
+```javascript
+// Le user a saisi "97123456", le pays Bénin (+229)
+const phoneNumber = '229' + userInput.replace(/\s/g, ''); // → "22997123456"
+
+const response = await fetch('/api/v1/payments/initiate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken}`,
+  },
+  body: JSON.stringify({
+    orderId,
+    phoneNumber,
+    // provider: "MTN_MOMO_BEN" // optionnel, omettre pour détection auto
+  }),
+});
+
+const json = await response.json();
+
+if (!json.success) {
+  // Gérer l'erreur selon json.error.code
+  // INVALID_PHONE_NUMBER → afficher "Numéro invalide"
+  // PAYMENT_ALREADY_PROCESSED → rediriger vers le statut
+  // PAWAPAY_ERROR → afficher "Service indisponible"
+  return;
+}
+
+const { paymentId } = json.data;
+// Démarrer le polling
+```
+
+---
+
+### Étape 4 — Polling sur `GET /payments/:id/status`
+
+Démarrer un polling toutes les **5 secondes**, avec un timeout maximum de **3 minutes**.
+
+```javascript
+const POLL_INTERVAL = 5000;
+const MAX_WAIT = 180000;
+const startTime = Date.now();
+
+async function pollPaymentStatus(paymentId, orderId) {
+  while (Date.now() - startTime < MAX_WAIT) {
+    await new Promise(resolve => setTimeout(resolve, POLL_INTERVAL));
+
+    const res = await fetch(`/api/v1/payments/${paymentId}/status`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` },
+    });
+
+    // Gérer l'expiration du token JWT (15 min)
+    if (res.status === 401) {
+      await refreshAccessToken();
+      continue;
+    }
+
+    const { data } = await res.json();
+
+    if (data.status === 'SUCCESS') {
+      navigateTo(`/orders/${orderId}/confirmation`);
+      return;
+    }
+
+    if (data.status === 'FAILED') {
+      showError('Le paiement a échoué. Vérifiez votre solde et réessayez.');
+      return;
+    }
+
+    // PROCESSING → continuer le polling
+  }
+
+  // Timeout atteint
+  showError('Le paiement prend plus de temps que prévu. Vérifiez votre historique de transactions.');
+}
+```
+
+---
+
+### Étape 5 — Écrans à prévoir
+
+**Écran en cours de paiement (PROCESSING) :**
+- Spinner ou animation de chargement
+- Message : "Validation en cours… Saisissez votre code PIN sur votre téléphone."
+- Montant et opérateur affichés
+- Bouton "Annuler" (pas d'appel API — redirige vers les commandes du user, le paiement reste en attente côté backend)
+
+**Écran de succès (SUCCESS) :**
+- Confirmation visuelle (checkmark, animation)
+- Récapitulatif : abonnement, montant, date
+- Bouton "Voir ma commande"
+
+**Écran d'échec (FAILED) :**
+- Message d'erreur clair
+- Bouton "Réessayer" → relancer le formulaire avec le **même `orderId`** (ne pas recréer de commande)
+- Bouton "Annuler" → retour à la page de l'abonnement
+
+---
+
 ## Précautions importantes
 
-**Ne jamais recréer une commande pour réessayer un paiement.** Si un paiement a échoué, réutiliser le même `orderId` dans un nouvel appel à `POST /payments/initiate`. Le backend gère la réinitialisation.
+**Ne jamais recréer une commande pour réessayer un paiement.** Si un paiement a échoué, réutiliser le même `orderId` dans un nouvel appel à `POST /payments/initiate`. Le backend gère la réinitialisation automatiquement.
 
-**Gérer le cas où le token expire pendant le polling.** Si le token JWT expire (15 min) pendant le polling, le refresh token doit être utilisé pour en obtenir un nouveau avant de continuer.
+**Gérer le cas où le token expire pendant le polling.** Le token JWT expire après 15 minutes. Si le polling dure longtemps, gérer le 401 en rafraîchissant le token via `POST /auth/refresh` avant de continuer.
 
 **Ne pas afficher le `depositId` à l'utilisateur.** C'est un identifiant interne PawaPay. Utiliser uniquement le `paymentId` JUNA pour les appels API.
 
-**En environnement sandbox PawaPay :** les paiements sont automatiquement validés sans demande de PIN. Le callback arrive en quelques secondes. En production, l'utilisateur doit saisir son PIN sur son téléphone — le délai peut aller jusqu'à 1-2 minutes.
+**En environnement sandbox :** les paiements sont validés automatiquement, pas de PIN requis, callback en quelques secondes. En production, l'utilisateur doit saisir son PIN sur son téléphone — le délai peut aller jusqu'à 1-2 minutes.
+
+**Si `INVALID_PHONE_NUMBER` (400) :** le numéro est rejeté par PawaPay avant même d'initier le dépôt. Afficher un message clair et laisser l'utilisateur corriger son numéro. Vous pouvez aussi passer `provider` explicitement si la détection automatique échoue sur certains numéros.
