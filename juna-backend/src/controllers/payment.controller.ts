@@ -31,6 +31,16 @@ export class PaymentController {
     }
   }
 
+  async payoutCallback(req: Request, res: Response) {
+    console.log('[Webhook] Payout callback received:', JSON.stringify(req.body));
+    res.status(200).json({ success: true });
+  }
+
+  async refundCallback(req: Request, res: Response) {
+    console.log('[Webhook] Refund callback received:', JSON.stringify(req.body));
+    res.status(200).json({ success: true });
+  }
+
   async getStatus(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = (req as any).user.id;

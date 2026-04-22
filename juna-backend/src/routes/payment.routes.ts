@@ -14,11 +14,10 @@ router.post(
   paymentController.initiateDeposit.bind(paymentController)
 );
 
-// Webhook PawaPay — pas d'auth JWT, appelé par PawaPay
-router.post(
-  '/webhook/deposit',
-  paymentController.depositCallback.bind(paymentController)
-);
+// Webhooks PawaPay — pas d'auth JWT, appelés par PawaPay
+router.post('/webhook/deposit', paymentController.depositCallback.bind(paymentController));
+router.post('/webhook/payout', paymentController.payoutCallback.bind(paymentController));
+router.post('/webhook/refund', paymentController.refundCallback.bind(paymentController));
 
 // Vérifier le statut d'un paiement
 router.get(

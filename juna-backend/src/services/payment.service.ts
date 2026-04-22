@@ -16,51 +16,48 @@ function resolvePaymentMethod(provider: string): PaymentMethod {
   return PaymentMethod.MOBILE_MONEY_MTN;
 }
 
+async function applyFinalStatus(paymentId: string, orderId: string, pawapayStatus: string, raw: any) {
+  if (pawapayStatus === 'COMPLETED') {
+    await prisma.$transaction([
+      prisma.payment.update({
+        where: { id: paymentId },
+        data: { status: PaymentStatus.SUCCESS, paidAt: new Date(), gatewayResponse: raw },
+      }),
+      prisma.order.update({
+        where: { id: orderId },
+        data: { status: OrderStatus.CONFIRMED },
+      }),
+    ]);
+  } else if (pawapayStatus === 'FAILED') {
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: { status: PaymentStatus.FAILED, gatewayResponse: raw },
+    });
+  }
+}
+
 export class PaymentService {
-  /**
-   * Initier un dépôt PawaPay pour payer une commande
-   */
   async initiateDeposit(
     userId: string,
-    data: {
-      orderId: string;
-      phoneNumber: string;
-      provider?: string;
-    }
+    data: { orderId: string; phoneNumber: string; provider?: string }
   ) {
     const order = await orderRepository.findById(data.orderId);
-    if (!order) {
-      throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
-    }
+    if (!order) throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
 
-    if (order.userId !== userId) {
-      throw new ForbiddenError('Accès refusé', ERROR_CODES.FORBIDDEN);
-    }
+    if (order.userId !== userId) throw new ForbiddenError('Accès refusé', ERROR_CODES.FORBIDDEN);
 
     if (order.status !== OrderStatus.PENDING) {
-      throw new ConflictError(
-        'Cette commande ne peut plus être payée',
-        ERROR_CODES.PAYMENT_ALREADY_PROCESSED
-      );
+      throw new ConflictError('Cette commande ne peut plus être payée', ERROR_CODES.PAYMENT_ALREADY_PROCESSED);
     }
 
     const existing = await paymentRepository.findByOrderId(data.orderId);
     if (existing && (existing.status === PaymentStatus.PROCESSING || existing.status === PaymentStatus.SUCCESS)) {
-      throw new ConflictError(
-        'Un paiement est déjà en cours pour cette commande',
-        ERROR_CODES.PAYMENT_ALREADY_PROCESSED
-      );
+      throw new ConflictError('Un paiement est déjà en cours pour cette commande', ERROR_CODES.PAYMENT_ALREADY_PROCESSED);
     }
-
-    // Prédire l'opérateur si non fourni, et valider le numéro
-    let resolvedProvider = data.provider;
-    let resolvedPhone = data.phoneNumber;
 
     const prediction = await pawaPayService.predictProvider(data.phoneNumber);
-    resolvedPhone = prediction.phoneNumber;
-    if (!resolvedProvider) {
-      resolvedProvider = prediction.provider;
-    }
+    const resolvedPhone = prediction.phoneNumber;
+    const resolvedProvider = data.provider ?? prediction.provider;
 
     const depositId = randomUUID();
     const method = resolvePaymentMethod(resolvedProvider);
@@ -74,25 +71,34 @@ export class PaymentService {
       transactionId: depositId,
     });
 
-    const pawapayResponse = await pawaPayService.initiateDeposit({
-      depositId,
-      amount: String(Math.round(order.amount)),
-      currency: 'XOF',
-      payer: {
-        type: 'MMO',
-        accountDetails: {
-          phoneNumber: resolvedPhone,
-          provider: resolvedProvider,
+    let pawapayResponse: any;
+    try {
+      pawapayResponse = await pawaPayService.initiateDeposit({
+        depositId,
+        amount: String(Math.round(order.amount)),
+        currency: 'XOF',
+        payer: {
+          type: 'MMO',
+          accountDetails: {
+            phoneNumber: resolvedPhone,
+            provider: resolvedProvider,
+          },
         },
-      },
-    });
+      });
+    } catch (err) {
+      // L'appel PawaPay a échoué — marquer le payment FAILED pour ne pas laisser un PROCESSING orphelin
+      await paymentRepository.updateStatus(payment.id, PaymentStatus.FAILED, {
+        gatewayResponse: { error: (err as any)?.message ?? 'PawaPay unreachable' },
+      });
+      throw err;
+    }
 
     if (pawapayResponse.status === 'REJECTED') {
       await paymentRepository.updateStatus(payment.id, PaymentStatus.FAILED, {
         gatewayResponse: pawapayResponse,
       });
       throw new ValidationError(
-        pawapayResponse.failureReason?.failureMessage ?? 'Paiement refusé par l\'opérateur',
+        pawapayResponse.failureReason?.failureMessage ?? "Paiement refusé par l'opérateur",
         ERROR_CODES.PAYMENT_FAILED
       );
     }
@@ -109,67 +115,61 @@ export class PaymentService {
     };
   }
 
-  /**
-   * Traiter le callback PawaPay (webhook deposit)
-   */
   async handleDepositCallback(payload: any) {
     const { depositId, status } = payload;
-
     if (!depositId || !status) return;
 
     const payment = await paymentRepository.findByTransactionId(depositId);
-    if (!payment) return;
-
-    if (payment.status === PaymentStatus.SUCCESS || payment.status === PaymentStatus.FAILED) {
+    if (!payment) {
+      console.warn('[Webhook] Payment not found for depositId:', depositId);
       return;
     }
 
-    if (status === 'COMPLETED') {
-      await prisma.$transaction([
-        prisma.payment.update({
-          where: { id: payment.id },
-          data: {
-            status: PaymentStatus.SUCCESS,
-            paidAt: new Date(),
-            gatewayResponse: payload,
-          },
-        }),
-        prisma.order.update({
-          where: { id: payment.orderId },
-          data: { status: OrderStatus.CONFIRMED },
-        }),
-      ]);
-    } else if (status === 'FAILED') {
-      await paymentRepository.updateStatus(payment.id, PaymentStatus.FAILED, {
-        gatewayResponse: payload,
-      });
-    }
+    if (payment.status === PaymentStatus.SUCCESS || payment.status === PaymentStatus.FAILED) return;
+
+    console.log('[Webhook] Received status=%s for depositId=%s paymentId=%s', status, depositId, payment.id);
+    await applyFinalStatus(payment.id, payment.orderId, status, payload);
   }
 
-  /**
-   * Obtenir le statut d'un paiement
-   */
   async getStatus(paymentId: string, userId: string) {
     const payment = await paymentRepository.findById(paymentId);
-    if (!payment) {
-      throw new NotFoundError('Paiement introuvable', ERROR_CODES.RESOURCE_NOT_FOUND);
+    if (!payment) throw new NotFoundError('Paiement introuvable', ERROR_CODES.RESOURCE_NOT_FOUND);
+    if (payment.userId !== userId) throw new ForbiddenError('Accès refusé', ERROR_CODES.FORBIDDEN);
+
+    // Fallback : si toujours PROCESSING, on interroge PawaPay directement
+    // Couvre le cas où le webhook n'est pas encore configuré ou n'est pas arrivé
+    if (payment.status === PaymentStatus.PROCESSING && payment.transactionId) {
+      try {
+        const remote = await pawaPayService.getDepositStatus(payment.transactionId);
+        const remoteStatus: string = Array.isArray(remote) ? remote[0]?.status : remote?.status;
+
+        if (remoteStatus === 'COMPLETED' || remoteStatus === 'FAILED') {
+          console.log('[Sync] Updating payment %s from PROCESSING to %s via direct poll', payment.id, remoteStatus);
+          await applyFinalStatus(payment.id, payment.orderId, remoteStatus, remote);
+          const updated = await paymentRepository.findById(paymentId);
+          return formatPayment(updated!);
+        }
+      } catch (err) {
+        // Erreur du poll direct — on retourne simplement le statut en base sans bloquer
+        console.warn('[Sync] Could not fetch deposit status from PawaPay:', (err as any)?.message);
+      }
     }
 
-    if (payment.userId !== userId) {
-      throw new ForbiddenError('Accès refusé', ERROR_CODES.FORBIDDEN);
-    }
-
-    return {
-      id: payment.id,
-      orderId: payment.orderId,
-      amount: payment.amount,
-      currency: payment.currency,
-      method: payment.method,
-      status: payment.status,
-      paidAt: payment.paidAt,
-      createdAt: payment.createdAt,
-    };
+    return formatPayment(payment);
   }
+}
+
+function formatPayment(payment: any) {
+  return {
+    id: payment.id,
+    orderId: payment.orderId,
+    amount: payment.amount,
+    currency: payment.currency,
+    method: payment.method,
+    status: payment.status,
+    paidAt: payment.paidAt,
+    createdAt: payment.createdAt,
+  };
 }
 
 export default new PaymentService();
