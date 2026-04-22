@@ -10,6 +10,7 @@ import orderRoutes from './order.routes';
 import uploadRoutes from './upload.routes';
 import geographyRoutes from './geography.routes';
 import homeRoutes from './home.routes';
+import paymentRoutes from './payment.routes';
 // Import des autres routes ici plus tard
 // import proposalRoutes from './proposal.routes';
 // import ticketRoutes from './ticket.routes';
@@ -30,6 +31,7 @@ router.use('/orders', orderRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/', geographyRoutes);
 router.use('/', homeRoutes);
+router.use('/payments', paymentRoutes);
 
 // Plus tard, ajouter les autres routes
 // router.use('/proposals', proposalRoutes);
