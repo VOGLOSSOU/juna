@@ -1557,27 +1557,31 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 ---
 
-### PUT /orders/:id/confirm — Confirmer une commande (provider)
+### PUT /orders/:id/activate — Activer une commande (user)
 
-**Réponse 200 ✅ — TEST 9.10 :**
+**Accès :** auth (USER propriétaire)
+
+**Utilisation :** L'utilisateur active sa commande pour déclencher le paiement au provider et permettre le retrait/livraison.
+
+**Réponse 200 ✅ :**
 ```json
 {
   "success": true,
-  "message": "Commande confirmée",
-  "data": { "id": "<uuid>", "status": "CONFIRMED" }
+  "message": "Commande activée avec succès",
+  "data": {
+    "id": "<uuid>",
+    "status": "ACTIVE",
+    "message": "Le paiement a été versé au prestataire. Vous pouvez maintenant récupérer votre commande."
+  }
 }
 ```
 
----
-
-### PUT /orders/:id/ready — Marquer comme prête (provider)
-
-**Réponse 200 ✅ — TEST 9.11 :**
+**Réponse 409 ❌ — Déjà active :**
 ```json
 {
-  "success": true,
-  "message": "Commande prête",
-  "data": { "id": "<uuid>", "status": "READY" }
+  "success": false,
+  "message": "Cette commande est déjà active",
+  "error": { "code": "INVALID_INPUT" }
 }
 ```
 

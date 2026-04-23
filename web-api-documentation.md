@@ -94,8 +94,7 @@ Toutes les réponses ont la structure suivante :
 | `PUT` | `/meals/:id/toggle` | auth | PROVIDER | Activer / désactiver plat |
 | `DELETE` | `/meals/:id` | auth | PROVIDER | Supprimer plat |
 | `GET` | `/orders/provider/me` | auth | PROVIDER | Commandes reçues |
-| `PUT` | `/orders/:id/confirm` | auth | PROVIDER | Confirmer commande |
-| `PUT` | `/orders/:id/ready` | auth | PROVIDER | Marquer comme prêt |
+| `PUT` | `/orders/:id/activate` | auth | USER | Activer commande |
 | `PUT` | `/orders/:id/qrcode` | auth | PROVIDER | Régénérer QR code |
 | `POST` | `/orders/scan/:id/:qrCode` | public | — | Scanner QR code |
 
@@ -681,7 +680,7 @@ image: <fichier binaire>
       }
     ],
     "deliveryZones": ["Plateau", "Akpakpa", "Cadjehoun"],
-    "pickupPoints": ["Carrefour Étoile Rouge — Akpakpa"],
+    "pickupPoints": ["Rue 234, Cadjehoun"], // Simplifié : adresse du provider
     "providerSubscriptions": [
       {
         "id": "sub-uuid-2",
@@ -767,12 +766,13 @@ image: <fichier binaire>
 | `deliveryMethod` | string | ✅ | `DELIVERY` ou `PICKUP` |
 | `deliveryAddress` | string | ❌ | Adresse de livraison (requis si `DELIVERY`) |
 | `deliveryCity` | string | ❌ | Ville de livraison (requis si `DELIVERY`) |
-| `pickupLocation` | string | ❌ | Point de retrait (si `PICKUP`) |
+| `pickupLocation` | string | ❌ | Adresse du provider (auto-rempli si `PICKUP`) |
 | `startAsap` | boolean | ❌* | Démarrer dès que possible |
 | `requestedStartDate` | string (ISO 8601) | ❌* | Date de début souhaitée |
 
 > *`startAsap` OU `requestedStartDate` est obligatoire — l'un ou l'autre.
 > Si `requestedStartDate`, la date doit respecter le délai de préparation du prestataire (`preparationHours`).
+> **Simplification MVP :** Pour `PICKUP`, `pickupLocation` est automatiquement l'adresse du provider (`businessAddress`).
 
 **Réponse 201 ✅ :**
 ```json
@@ -1002,8 +1002,8 @@ Valeur libre pour indiquer les zones desservies (`"Cotonou"`, `"Akpakpa"`…). P
 **`documentUrl` — optionnel, conseillé**
 L'admin le voit dans la fiche du prestataire mais il n'y a pas de validation automatique. Inclure le champ dans le formulaire (upload via `POST /upload/documents`) en le rendant facultatif côté UX.
 
-**`landmarkIds` — feature utile, pas secondaire**
-Les landmarks servent à filtrer les prestataires dans `GET /home` (section `providers`) — seuls les prestataires avec au moins un landmark dans la ville demandée apparaissent. C'est aussi ce qui alimente `pickupPoints` dans `GET /subscriptions/:id`. Les UUIDs viennent de `GET /cities/:cityId/landmarks`.
+**`landmarkIds` — pour filtrage géographique**
+Les landmarks servent à filtrer les prestataires dans `GET /home` (section `providers`) — seuls les prestataires avec au moins un landmark dans la ville demandée apparaissent. **Simplification MVP :** Pour le retrait, l'utilisateur récupère toujours à l'adresse principale du provider (`businessAddress`).
 
 **Rôle après inscription — le `role` reste `USER` jusqu'à validation admin**
 À la soumission de `POST /providers/register`, le rôle dans le JWT reste `USER`. C'est uniquement quand l'admin approuve que le rôle passe à `PROVIDER` en base. Le provider devra se **reconnecter** (ou faire `POST /auth/refresh`) après approbation pour obtenir un token avec `role: "PROVIDER"`. Prévoir un écran "En attente de validation" et inviter l'utilisateur à se reconnecter une fois approuvé.
@@ -1390,24 +1390,34 @@ Aucun webhook ni email ni push déclenché à l'approbation pour l'instant. Le p
 
 ---
 
-### PUT /orders/:id/confirm — Confirmer une commande
+### PUT /orders/:id/activate — Activer une commande
 
-**Accès :** auth (PROVIDER)
+**Accès :** auth (USER propriétaire)
 
-**Pas de body.** Passe la commande de `PENDING` → `CONFIRMED`.
+**Pas de body.** L'utilisateur active sa commande pour déclencher le paiement au provider.
+
+**Actions :**
+- Passe la commande de `CONFIRMED` → `ACTIVE`
+- Déclenche automatiquement le paiement au provider
+- Génère/envoie une notification au provider
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Commande activée avec succès",
+  "data": {
+    "id": "order-uuid",
+    "status": "ACTIVE",
+    "message": "Le paiement a été versé au prestataire. Vous pouvez maintenant récupérer votre commande."
+  }
+}
+```
 
 **Réponse 409 ❌ :**
 ```json
-{ "success": false, "message": "Cette commande ne peut pas être confirmée", "error": { "code": "ORDER_ALREADY_CANCELLED" } }
+{ "success": false, "message": "Cette commande ne peut pas être activée", "error": { "code": "INVALID_INPUT" } }
 ```
-
----
-
-### PUT /orders/:id/ready — Marquer comme prêt
-
-**Accès :** auth (PROVIDER)
-
-**Pas de body.** Passe la commande de `CONFIRMED` → `READY`. La commande doit obligatoirement être `CONFIRMED` d'abord.
 
 ---
 

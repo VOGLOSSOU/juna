@@ -114,29 +114,14 @@ export class OrderController {
   }
 
   /**
-   * Confirmer une commande
+   * Activer une commande (user)
    */
-  async confirm(req: Request, res: Response, next: NextFunction) {
+  async activate(req: Request, res: Response, next: NextFunction) {
     try {
-      const providerId = (req as any).user.providerId;
+      const userId = (req as any).user.id;
       const { id } = req.params;
 
-      const order = await orderService.confirm(id, providerId);
-      sendSuccess(res, SUCCESS_MESSAGES.ORDER_STATUS_UPDATED, order);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
-   * Marquer comme prêt
-   */
-  async markReady(req: Request, res: Response, next: NextFunction) {
-    try {
-      const providerId = (req as any).user.providerId;
-      const { id } = req.params;
-
-      const order = await orderService.markReady(id, providerId);
+      const order = await orderService.activate(id, userId);
       sendSuccess(res, SUCCESS_MESSAGES.ORDER_STATUS_UPDATED, order);
     } catch (error) {
       next(error);

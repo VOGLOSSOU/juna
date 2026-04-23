@@ -21,15 +21,11 @@ enum UserRole {
 }
 
 enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PREPARING
-  READY
-  IN_DELIVERY
-  DELIVERED
-  COMPLETED
-  CANCELLED
-  REFUNDED
+  PENDING     // Commande créée, en attente de paiement
+  CONFIRMED   // Paiement réussi, commande validée
+  ACTIVE      // Commande activée par l'utilisateur (provider reçoit paiement)
+  COMPLETED   // Commande terminée (retrait validé ou livraison confirmée)
+  CANCELLED   // Annulée
 }
 
 enum PaymentStatus {

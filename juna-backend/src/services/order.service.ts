@@ -9,6 +9,7 @@ import {
 } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
 import { OrderStatus, DeliveryMethod, SubscriptionDuration } from '@prisma/client';
+import prisma from '@/config/database';
 
 const DURATION_DAYS: Record<SubscriptionDuration, number> = {
   DAY:        1,
@@ -185,59 +186,32 @@ export class OrderService {
   }
 
   /**
-   * Confirmer une commande
+   * Activer la commande (user)
    */
-  async confirm(id: string, providerId: string) {
+  async activate(id: string, userId: string) {
     const order = await orderRepository.findById(id);
     if (!order) {
       throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
     }
 
-    // Vérifier que c'est le bon fournisseur
-    const subscription = await subscriptionRepository.findById(order.subscriptionId);
-    if (!subscription || subscription.providerId !== providerId) {
+    if (order.userId !== userId) {
       throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à modifier cette commande',
-        ERROR_CODES.FORBIDDEN
-      );
-    }
-
-    // Vérifier le statut actuel
-    if (order.status !== OrderStatus.PENDING) {
-      throw new ConflictError(
-        'Cette commande ne peut pas être confirmée',
-        ERROR_CODES.ORDER_ALREADY_CANCELLED
-      );
-    }
-
-    return orderRepository.updateStatus(id, OrderStatus.CONFIRMED);
-  }
-
-  /**
-   * Marquer la commande comme prête
-   */
-  async markReady(id: string, providerId: string) {
-    const order = await orderRepository.findById(id);
-    if (!order) {
-      throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
-    }
-
-    const subscription = await subscriptionRepository.findById(order.subscriptionId);
-    if (!subscription || subscription.providerId !== providerId) {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à modifier cette commande',
+        'Vous n\'êtes pas autorisé à activer cette commande',
         ERROR_CODES.FORBIDDEN
       );
     }
 
     if (order.status !== OrderStatus.CONFIRMED) {
       throw new ValidationError(
-        'La commande doit être confirmée avant d\'être marquée comme prête',
+        'La commande doit être confirmée avant d\'être activée',
         ERROR_CODES.INVALID_INPUT
       );
     }
 
-    return orderRepository.updateStatus(id, OrderStatus.READY);
+    // TODO: Déclencher le paiement au provider ici
+    // providerService.processPayment(order.subscription.providerId, order.amount);
+
+    return orderRepository.updateStatus(id, OrderStatus.ACTIVE);
   }
 
   /**
@@ -249,28 +223,32 @@ export class OrderService {
       throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
     }
 
-    // Vérifier le QR code
     if (order.qrCode !== qrCode) {
-      throw new ValidationError(
-        'QR code invalide',
-        ERROR_CODES.QR_CODE_INVALID
-      );
+      throw new ValidationError('QR code invalide', ERROR_CODES.INVALID_INPUT);
     }
 
-    // Vérifier si déjà utilisé
-    if (order.status === OrderStatus.DELIVERED || order.status === OrderStatus.COMPLETED) {
+    if (order.status === OrderStatus.COMPLETED) {
       throw new ConflictError(
-        'QR code déjà utilisé',
+        'Cette commande est déjà terminée',
         ERROR_CODES.QR_CODE_ALREADY_USED
       );
     }
 
-    // Selon le type de livraison
-    if (order.deliveryMethod === DeliveryMethod.PICKUP) {
-      return orderRepository.updateStatus(id, OrderStatus.COMPLETED);
-    } else {
-      return orderRepository.updateStatus(id, OrderStatus.DELIVERED);
+    if (order.status !== OrderStatus.ACTIVE) {
+      throw new ValidationError(
+        'La commande doit être active pour être validée',
+        ERROR_CODES.INVALID_INPUT
+      );
     }
+
+    // Marquer comme terminée avec timestamp
+    return prisma.order.update({
+      where: { id },
+      data: {
+        status: OrderStatus.COMPLETED,
+        completedAt: new Date()
+      }
+    });
   }
 
   /**
@@ -291,11 +269,7 @@ export class OrderService {
     }
 
     // Vérifier si annulable (seulement PENDING ou CONFIRMED)
-    if (order.status === OrderStatus.READY ||
-        order.status === OrderStatus.IN_DELIVERY ||
-        order.status === OrderStatus.DELIVERED ||
-        order.status === OrderStatus.COMPLETED ||
-        order.status === OrderStatus.CANCELLED) {
+    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.CONFIRMED) {
       throw new ConflictError(
         'Cette commande ne peut plus être annulée',
         ERROR_CODES.ORDER_CANNOT_BE_CANCELLED

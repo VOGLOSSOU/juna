@@ -62,22 +62,12 @@ router.get(
   orderController.getProviderOrders.bind(orderController)
 );
 
-// Confirmer une commande
+// Activer une commande (user)
 router.put(
-  '/:id/confirm',
+  '/:id/activate',
   authenticate,
-  authorize([UserRole.PROVIDER]),
   validateParams(orderIdSchema),
-  orderController.confirm.bind(orderController)
-);
-
-// Marquer comme prêt
-router.put(
-  '/:id/ready',
-  authenticate,
-  authorize([UserRole.PROVIDER]),
-  validateParams(orderIdSchema),
-  orderController.markReady.bind(orderController)
+  orderController.activate.bind(orderController)
 );
 
 // Régénérer QR code
