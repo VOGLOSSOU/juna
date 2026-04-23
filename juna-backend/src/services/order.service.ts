@@ -76,22 +76,9 @@ export class OrderService {
       );
     }
 
-    // Si livraison : trouver la zone, calculer le coût total (coût/jour × nombre de jours)
-    let deliveryCost = 0;
-    if (data.deliveryMethod === DeliveryMethod.DELIVERY && data.deliveryCity) {
-      const zones = (provider.deliveryZones as Array<{ city: string; country: string; cost: number }>) ?? [];
-      const zone = zones.find(
-        (z) => z.city.toLowerCase() === data.deliveryCity!.toLowerCase()
-      );
-      if (!zone) {
-        throw new ValidationError(
-          `Le prestataire ne livre pas à ${data.deliveryCity}`,
-          ERROR_CODES.INVALID_INPUT
-        );
-      }
-      const numberOfDays = DURATION_DAYS[subscription.duration];
-      deliveryCost = zone.cost * numberOfDays;
-    }
+    // Plus de calcul automatique des frais de livraison
+    // Le prix affiché est une estimation, le vrai coût sera négocié avec le provider
+    const deliveryCost = 0;
 
     // Calculer la date de début de l'abonnement
     const now = new Date();

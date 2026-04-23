@@ -1524,8 +1524,8 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   "data": {
     "id": "<uuid>",
     "orderNumber": "ORD-<date>-<num>",
-    "amount": 27500,
-    "deliveryCost": 2500,
+    "amount": 25000,
+    "deliveryCost": 0,
     "scheduledFor": "<timestamp>",
     "qrCode": "JUNA-<code>",
     "status": "PENDING"
@@ -1533,8 +1533,8 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 }
 ```
 
-> `amount` = prix abonnement + `deliveryCost`
-> `deliveryCost` = `zone.cost × DURATION_DAYS[duration]`
+> `amount` = prix abonnement (frais de livraison négociés séparément)
+> `deliveryCost` = 0 (estimation affichée, négociation directe avec provider)
 > `scheduledFor` = `now + preparationHours` si `startAsap`, sinon `requestedStartDate`
 
 **Réponse 400 ❌ — Date trop proche (TEST 9.4) :**

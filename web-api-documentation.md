@@ -783,8 +783,8 @@ image: <fichier binaire>
     "id": "order-uuid",
     "orderNumber": "JUNA-0001",
     "status": "PENDING",
-    "amount": 25500,
-    "deliveryCost": 500,
+    "amount": 25000,
+    "deliveryCost": 0,
     "deliveryMethod": "DELIVERY",
     "deliveryAddress": "Quartier Cadjehoun",
     "deliveryCity": "Cotonou",
@@ -795,15 +795,51 @@ image: <fichier binaire>
 }
 ```
 
-> `amount` = prix abonnement + `deliveryCost`.
-> `deliveryCost` = coût de livraison par jour × nombre de jours de la durée.
+> `amount` = prix abonnement uniquement (frais de livraison négociés séparément).
+> `deliveryCost` = 0 (estimation affichée, négociation directe avec le provider).
 > `qrCode` est généré automatiquement à la création.
+
+---
+
+### **🎯 VERSION WEB : Modal d'information livraison**
+
+**Sur la page web de commande**, lorsqu'un utilisateur choisit le mode "LIVRAISON" :
+
+#### **Afficher un modal d'information obligatoire :**
+
+```
+┌─────────────────────────────────────────────────┐
+│  ℹ️  Information importante sur la livraison     │
+│                                                 │
+│  Les prix de livraison affichés sont des        │
+│  estimations basées sur des moyennes dans       │
+│  cette zone géographique.                       │
+│                                                 │
+│  Le prestataire vous contactera directement     │
+│  en ce qui concerne les frais de livraisons    │
+│  et les modalités de paiement.                  │
+│                                                 │
+│       [ J'ai compris ]  ← bouton orange         │
+└─────────────────────────────────────────────────┘
+```
+
+**Règles d'affichage :**
+- Modal s'affiche automatiquement quand `deliveryMethod = "DELIVERY"`
+- Bouton "J'ai compris" obligatoire pour continuer
+- Texte en français, ton informatif et rassurant
+- Pas de possibilité de fermer le modal sans accepter
+
+**Impact UX :**
+- ✅ Transparence sur les prix estimés
+- ✅ Gestion des attentes réalistes
+- ✅ Préparation à la négociation directe
+
+---
 
 **Réponses d'erreur :**
 ```json
 { "success": false, "message": "Cet abonnement n'est pas disponible", "error": { "code": "INVALID_INPUT" } }
 { "success": false, "message": "Ce prestataire ne propose pas la livraison", "error": { "code": "INVALID_INPUT" } }
-{ "success": false, "message": "Le prestataire ne livre pas à Lokossa", "error": { "code": "INVALID_INPUT" } }
 ```
 
 ---
@@ -849,8 +885,8 @@ image: <fichier binaire>
     "id": "order-uuid",
     "orderNumber": "JUNA-0001",
     "status": "CONFIRMED",
-    "amount": 25500,
-    "deliveryCost": 500,
+    "amount": 25000,
+    "deliveryCost": 0,
     "deliveryMethod": "DELIVERY",
     "deliveryAddress": "Quartier Cadjehoun",
     "deliveryCity": "Cotonou",
@@ -960,8 +996,8 @@ image: <fichier binaire>
 
 ### Notes importantes — questions fréquentes
 
-**`deliveryZones.city` est un champ texte libre**
-Pas de contrainte sur la base géo. Valeur libre (`"Cotonou"`, `"Akpakpa"`…). Le serveur fait une comparaison insensible à la casse au moment de calculer les frais de livraison. `country` = code ISO 2 lettres (`"BJ"`, `"CI"`…).
+**`deliveryZones.city` — champ informatif**
+Valeur libre pour indiquer les zones desservies (`"Cotonou"`, `"Akpakpa"`…). Plus utilisé pour le calcul automatique des frais (négociation directe avec les clients). `country` = code ISO 2 lettres (`"BJ"`, `"CI"`…).
 
 **`documentUrl` — optionnel, conseillé**
 L'admin le voit dans la fiche du prestataire mais il n'y a pas de validation automatique. Inclure le champ dans le formulaire (upload via `POST /upload/documents`) en le rendant facultatif côté UX.
