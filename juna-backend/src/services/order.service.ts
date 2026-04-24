@@ -162,7 +162,23 @@ export class OrderService {
    * Obtenir mes commandes
    */
   async getMyOrders(userId: string) {
-    return orderRepository.findByUserId(userId);
+    const orders = await orderRepository.findByUserId(userId);
+    return orders.map((o: any) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      status: o.status,
+      amount: o.amount,
+      currency: 'XOF',
+      deliveryMethod: o.deliveryMethod,
+      deliveryAddress: o.deliveryAddress ?? null,
+      pickupLocation: o.pickupLocation ?? null,
+      scheduledFor: o.scheduledFor ?? null,
+      completedAt: o.completedAt ?? null,
+      createdAt: o.createdAt ?? null,
+      updatedAt: o.updatedAt ?? null,
+      subscription: o.subscription ?? null,
+      payment: o.payment ?? null,
+    }));
   }
 
   /**
