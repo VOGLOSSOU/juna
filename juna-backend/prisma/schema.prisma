@@ -177,19 +177,20 @@ model User {
   updatedAt     DateTime      @updatedAt
 
   // Relations
-  profile       UserProfile?
-  provider      Provider?
-  admin         Admin?
-  orders        Order[]
-  payments      Payment[]
-  proposals     CustomProposal[]
-  reviews       Review[]
-  tickets       SupportTicket[]
-  notifications Notification[]
-  refreshTokens RefreshToken[]
-  referrals     Referral[]     @relation("Referrer")
-  referredBy    Referral[]     @relation("Referee")
-  ticketMessages TicketMessage[]
+  profile            UserProfile?
+  provider           Provider?
+  admin              Admin?
+  orders             Order[]
+  payments           Payment[]
+  proposals          CustomProposal[]
+  reviews            Review[]
+  tickets            SupportTicket[]
+  notifications      Notification[]
+  refreshTokens      RefreshToken[]
+  referrals          Referral[]     @relation("Referrer")
+  referredBy         Referral[]     @relation("Referee")
+  ticketMessages     TicketMessage[]
+  activeSubscriptions ActiveSubscription[]
 
   @@index([email])
   @@index([phone])
@@ -286,11 +287,12 @@ model Subscription {
   updatedAt        DateTime           @updatedAt
 
   // Relations
-  provider         Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  orders           Order[]
-  reviews          Review[]
-  proposals        CustomProposal[]
-  mealsInSubscriptions SubscriptionMeal[]
+  provider              Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  orders                Order[]
+  reviews               Review[]
+  proposals             CustomProposal[]
+  mealsInSubscriptions  SubscriptionMeal[]
+  activeSubscriptions   ActiveSubscription[]
 
   @@index([providerId])
   @@index([type])
@@ -335,11 +337,12 @@ model Order {
   updatedAt       DateTime        @updatedAt
 
   // Relations
-  user            User            @relation(fields: [userId], references: [id])
-  subscription    Subscription    @relation(fields: [subscriptionId], references: [id])
-  payment         Payment?
-  review          Review?
-  tickets         SupportTicket[]
+  user                 User                  @relation(fields: [userId], references: [id])
+  subscription         Subscription          @relation(fields: [subscriptionId], references: [id])
+  payment              Payment?
+  review               Review?
+  tickets              SupportTicket[]
+  activeSubscription   ActiveSubscription?
 
   @@index([userId])
   @@index([subscriptionId])
@@ -629,4 +632,29 @@ model Analytics {
   @@index([date])
   @@index([metric])
   @@map("analytics")
+}
+
+// ============================================
+// ACTIVE SUBSCRIPTIONS
+// ============================================
+
+model ActiveSubscription {
+  id              String                @id @default(uuid()) @db.Uuid
+  userId          String                @db.Uuid
+  orderId         String                @unique @db.Uuid
+  subscriptionId  String                @db.Uuid
+  startedAt       DateTime
+  endsAt          DateTime
+  duration        SubscriptionDuration
+  createdAt       DateTime              @default(now())
+
+  // Relations
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order           Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subscription    Subscription          @relation(fields: [subscriptionId], references: [id])
+
+  @@index([userId])
+  @@index([endsAt])
+  @@index([subscriptionId])
+  @@map("active_subscriptions")
 }

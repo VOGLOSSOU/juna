@@ -208,10 +208,40 @@ export class OrderService {
       );
     }
 
-    // TODO: Déclencher le paiement au provider ici
-    // providerService.processPayment(order.subscription.providerId, order.amount);
+    // Récupérer la subscription complète pour avoir la duration
+    const subscription = await subscriptionRepository.findById(order.subscriptionId);
+    if (!subscription) {
+      throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
+    }
 
-    return orderRepository.updateStatus(id, OrderStatus.ACTIVE);
+    // Calculer la date de fin de l'abonnement
+    const durationDays = DURATION_DAYS[subscription.duration];
+    const endsAt = new Date(order.scheduledFor!.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+    // TODO: Déclencher le paiement au provider ici
+    // providerService.processPayment(subscription.providerId, order.amount);
+
+    // Activer la commande ET créer l'abonnement actif
+    await prisma.$transaction([
+      // Mettre à jour le statut de la commande
+      prisma.order.update({
+        where: { id },
+        data: { status: OrderStatus.ACTIVE }
+      }),
+      // Créer l'entrée dans active_subscriptions
+      prisma.activeSubscription.create({
+        data: {
+          userId: order.userId,
+          orderId: order.id,
+          subscriptionId: subscription.id,
+          startedAt: order.scheduledFor!,
+          endsAt: endsAt,
+          duration: subscription.duration,
+        }
+      })
+    ]);
+
+    return { message: 'Commande activée avec succès' };
   }
 
   /**

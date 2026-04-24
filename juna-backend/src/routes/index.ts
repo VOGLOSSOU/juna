@@ -11,6 +11,7 @@ import uploadRoutes from './upload.routes';
 import geographyRoutes from './geography.routes';
 import homeRoutes from './home.routes';
 import paymentRoutes from './payment.routes';
+import activeSubscriptionRoutes from './active-subscription.routes';
 // Import des autres routes ici plus tard
 // import proposalRoutes from './proposal.routes';
 // import ticketRoutes from './ticket.routes';
@@ -32,6 +33,7 @@ router.use('/upload', uploadRoutes);
 router.use('/', geographyRoutes);
 router.use('/', homeRoutes);
 router.use('/payments', paymentRoutes);
+router.use('/active-subscriptions', activeSubscriptionRoutes);
 
 // Plus tard, ajouter les autres routes
 // router.use('/proposals', proposalRoutes);

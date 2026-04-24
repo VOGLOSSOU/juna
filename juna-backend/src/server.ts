@@ -33,8 +33,22 @@ process.on('uncaughtException', (err) => {
     } catch (redisError) {
       console.warn('⚠️ Redis unavailable — cache disabled, continuing without it');
     }
-    
-    console.log('6. Starting server...');
+
+    console.log('6. Starting cron jobs...');
+    try {
+      // Import conditionnel pour éviter l'erreur si node-cron n'est pas installé
+      const cronModule = await import('@/jobs/cron.jobs');
+      if (cronModule.startCronJobs) {
+        cronModule.startCronJobs();
+        console.log('✅ Cron jobs started');
+      } else {
+        console.warn('⚠️ Cron jobs module incomplete — continuing without them');
+      }
+    } catch (cronError) {
+      console.warn('⚠️ Cron jobs unavailable — continuing without them');
+    }
+
+    console.log('7. Starting server...');
     const server = app.listen(env.port, () => {
       console.log(`🚀 Server running on http://localhost:${env.port}`);
     });
