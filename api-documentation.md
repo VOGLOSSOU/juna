@@ -1561,7 +1561,7 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 
 **Accès :** auth (USER propriétaire)
 
-**Utilisation :** L'utilisateur active sa commande pour déclencher le paiement au provider et permettre le retrait/livraison.
+**Utilisation :** L'utilisateur active sa commande pour déclencher le paiement au provider, créer l'abonnement actif automatiquement, et permettre le retrait/livraison.
 
 **Réponse 200 ✅ :**
 ```json
@@ -1575,6 +1575,8 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
   }
 }
 ```
+
+> **Note importante :** L'activation de la commande crée automatiquement un enregistrement dans `active_subscriptions` avec la durée calculée. Voir `GET /active-subscriptions/me` pour récupérer les abonnements actifs de l'utilisateur.
 
 **Réponse 409 ❌ — Déjà active :**
 ```json
@@ -1654,3 +1656,154 @@ Les pays, villes et landmarks sont gérés par l'admin et consommés publiquemen
 | `subscriptions` | `imageUrl` dans `/subscriptions` |
 | `avatars` | `avatar` dans `/users/profile` |
 | `documents` | `documentUrl` dans `/providers/register` |
+
+---
+
+## PARTIE 9 — ABONNEMENTS ACTIFS
+
+### Vue d'ensemble
+
+Les abonnements actifs sont stockés dans une table séparée `active_subscriptions` qui contient uniquement les abonnements en cours d'utilisation (statut `ACTIVE`).
+
+**Logique :**
+- Quand user active une commande → création d'une entrée `active_subscriptions`
+- Job cron quotidien supprime automatiquement les abonnements expirés
+- Table optimisée pour les requêtes fréquentes (vérifications d'accès, etc.)
+
+---
+
+### GET /active-subscriptions/me — Mes abonnements actifs
+
+**Accès :** auth (USER)
+
+**Utilisation :** Afficher les abonnements actifs dans le profil utilisateur
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Abonnements actifs récupérés",
+  "data": [
+    {
+      "id": "active-sub-uuid",
+      "userId": "user-uuid",
+      "orderId": "order-uuid",
+      "subscriptionId": "sub-uuid",
+      "startedAt": "2026-04-15T08:00:00Z",
+      "endsAt": "2026-04-22T08:00:00Z",
+      "duration": "WORK_WEEK",
+      "subscription": {
+        "id": "sub-uuid",
+        "name": "Abonnement Repas Africain",
+        "category": "AFRICAN",
+        "type": "LUNCH",
+        "provider": {
+          "id": "prov-uuid",
+          "businessName": "Chez Mariam"
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+### GET /active-subscriptions/check — Vérifier abonnement actif
+
+**Accès :** auth (USER)
+
+**Query params :**
+- `category` : AFRICAN, EUROPEAN, etc. (optionnel)
+- `type` : BREAKFAST, LUNCH, etc. (optionnel)
+
+**Utilisation :** Vérifier si user a accès à certains contenus/fonctionnalités
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "hasActive": true  // ou false
+  }
+}
+```
+
+---
+
+### GET /active-subscriptions/provider/me — Abonnements actifs de mes clients (provider)
+
+**Accès :** auth (PROVIDER)
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Abonnements actifs récupérés",
+  "data": [
+    {
+      "id": "active-sub-uuid",
+      "userId": "user-uuid",
+      "orderId": "order-uuid",
+      "subscriptionId": "sub-uuid",
+      "startedAt": "2026-04-15T08:00:00Z",
+      "endsAt": "2026-04-22T08:00:00Z",
+      "duration": "WORK_WEEK",
+      "subscription": { /* détails abonnement */ },
+      "user": { /* détails client */ },
+      "order": { /* détails commande */ }
+    }
+  ]
+}
+```
+
+---
+
+### GET /active-subscriptions/stats — Statistiques (admin)
+
+**Accès :** auth (ADMIN)
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "activeSubscriptionsCount": 145
+  }
+}
+```
+
+---
+
+## Logique métier des abonnements actifs
+
+### Création automatique :
+```typescript
+// Lors de l'activation d'une commande
+await prisma.activeSubscription.create({
+  data: {
+    userId, orderId, subscriptionId,
+    startedAt: order.scheduledFor,
+    endsAt: calculatedEndDate,  // startedAt + duration_days
+    duration: subscription.duration
+  }
+});
+```
+
+### Nettoyage automatique :
+```typescript
+// Job cron chaque nuit à 2h
+await prisma.activeSubscription.deleteMany({
+  where: { endsAt: { lt: new Date() } }
+});
+```
+
+### Avantages :
+- ✅ **Performance** : Table séparée, indexée
+- ✅ **Fiabilité** : Suppression automatique des expirés
+- ✅ **Simplicité** : Pas de vérifications complexes
+- ✅ **Évolutivité** : Facile d'ajouter des features (renouvellement, etc.)
+
+---
+
+*Cette section complète la documentation API avec la gestion des abonnements actifs.*

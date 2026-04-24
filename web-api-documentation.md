@@ -97,6 +97,10 @@ Toutes les réponses ont la structure suivante :
 | `PUT` | `/orders/:id/activate` | auth | USER | Activer commande |
 | `PUT` | `/orders/:id/qrcode` | auth | PROVIDER | Régénérer QR code |
 | `POST` | `/orders/scan/:id/:qrCode` | public | — | Scanner QR code |
+| `GET` | `/active-subscriptions/me` | auth | USER | Mes abonnements actifs |
+| `GET` | `/active-subscriptions/check` | auth | USER | Vérifier abonnement actif |
+| `GET` | `/active-subscriptions/provider/me` | auth | PROVIDER | Abonnements actifs de mes clients |
+| `GET` | `/active-subscriptions/stats` | auth | ADMIN | Stats globaux |
 
 ---
 
@@ -992,6 +996,165 @@ image: <fichier binaire>
 
 ---
 
+## PARTIE 6 — ABONNEMENTS ACTIFS
+
+### GET /active-subscriptions/me — Mes abonnements actifs
+
+**Accès :** auth (USER)
+
+**Utilisation :** Afficher les abonnements actifs dans le profil utilisateur ou dashboard
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Abonnements actifs récupérés",
+  "data": [
+    {
+      "id": "active-sub-uuid",
+      "userId": "user-uuid",
+      "orderId": "order-uuid",
+      "subscriptionId": "sub-uuid",
+      "startedAt": "2026-04-15T08:00:00Z",
+      "endsAt": "2026-04-22T08:00:00Z",
+      "duration": "WORK_WEEK",
+      "subscription": {
+        "id": "sub-uuid",
+        "name": "Abonnement Repas Africain",
+        "category": "AFRICAN",
+        "type": "LUNCH",
+        "provider": {
+          "id": "prov-uuid",
+          "businessName": "Chez Mariam"
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+### GET /active-subscriptions/check — Vérifier abonnement actif
+
+**Accès :** auth (USER)
+
+**Query params :**
+- `category` : AFRICAN, EUROPEAN, etc. (optionnel)
+- `type` : BREAKFAST, LUNCH, etc. (optionnel)
+
+**Utilisation :** Vérifier si l'utilisateur a accès à certains contenus/fonctionnalités (ex: contenu premium, accès à des features)
+
+**Exemples d'utilisation frontend :**
+- Afficher un badge "Premium" si abonnement actif
+- Débloquer des fonctionnalités spécifiques
+- Personnaliser l'interface selon les abonnements
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "hasActive": true
+  }
+}
+```
+
+**Exemple :** `GET /api/v1/active-subscriptions/check?category=AFRICAN&type=LUNCH`
+- Retourne `true` si l'utilisateur a un abonnement africain pour le déjeuner actif
+
+---
+
+### GET /active-subscriptions/provider/me — Abonnements actifs de mes clients
+
+**Accès :** auth (PROVIDER approuvé)
+
+**Utilisation :** Dashboard provider pour voir tous les abonnements actifs de ses clients
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Abonnements actifs récupérés",
+  "data": [
+    {
+      "id": "active-sub-uuid",
+      "userId": "user-uuid",
+      "orderId": "order-uuid",
+      "subscriptionId": "sub-uuid",
+      "startedAt": "2026-04-15T08:00:00Z",
+      "endsAt": "2026-04-22T08:00:00Z",
+      "duration": "WORK_WEEK",
+      "subscription": {
+        "id": "sub-uuid",
+        "name": "Abonnement Repas Africain",
+        "category": "AFRICAN",
+        "type": "LUNCH",
+        "price": 25000,
+        "provider": {
+          "id": "prov-uuid",
+          "businessName": "Chez Mariam"
+        }
+      },
+      "user": {
+        "id": "user-uuid",
+        "name": "Jean Dupont",
+        "email": "jean@example.com",
+        "phone": "+22961111111"
+      },
+      "order": {
+        "id": "order-uuid",
+        "orderNumber": "JUNA-0001",
+        "scheduledFor": "2026-04-15T08:00:00Z",
+        "deliveryMethod": "PICKUP",
+        "deliveryAddress": "Quartier Cadjehoun",
+        "deliveryCity": "Cotonou"
+      }
+    }
+  ]
+}
+```
+
+**Utilisation frontend :**
+- Afficher le nombre total d'abonnés actifs dans le dashboard
+- Lister les clients actifs avec leurs détails
+- Voir les dates d'expiration pour planifier les renouvellements
+- Calculer les revenus actifs
+
+---
+
+### GET /active-subscriptions/stats — Statistiques (admin)
+
+**Accès :** auth (ADMIN)
+
+**Utilisation :** Dashboard admin pour voir les métriques des abonnements actifs
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "activeSubscriptionsCount": 145
+  }
+}
+```
+
+---
+
+### Flux complet : De la commande à l'abonnement actif
+
+1. **Création de commande** → `POST /orders`
+2. **Confirmation par provider** → Commande passe à `CONFIRMED`
+3. **Activation par user** → `PUT /orders/:id/activate`
+   - Déclenche la création automatique de l'abonnement actif
+   - Paiement versé au provider
+4. **Utilisation** → `GET /active-subscriptions/me` pour voir ses abonnements actifs
+5. **Vérification** → `GET /active-subscriptions/check` pour contrôles d'accès
+
+**Expiration automatique :** Les abonnements expirés sont supprimés automatiquement par un job cron.
+
+---
+
 ## PARTIE 7 — DEVENIR PRESTATAIRE
 
 ### Notes importantes — questions fréquentes
@@ -1399,7 +1562,14 @@ Aucun webhook ni email ni push déclenché à l'approbation pour l'instant. Le p
 **Actions :**
 - Passe la commande de `CONFIRMED` → `ACTIVE`
 - Déclenche automatiquement le paiement au provider
+- **Crée automatiquement l'abonnement actif** (voir `GET /active-subscriptions/me`)
 - Génère/envoie une notification au provider
+
+**Utilisation frontend :**
+- Bouton "Activer mon abonnement" dans la page de confirmation de commande
+- Après activation, rediriger vers le profil utilisateur ou afficher un message de succès
+- Mettre à jour l'état local pour refléter l'abonnement actif
+- Rafraîchir les données d'abonnements actifs avec `GET /active-subscriptions/me`
 
 **Réponse 200 ✅ :**
 ```json
