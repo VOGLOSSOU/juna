@@ -163,7 +163,7 @@ export class UserService {
       isVerified: user.isVerified,
       isActive: user.isActive,
       createdAt: user.createdAt,
-      isProfileComplete: !!(user.phone && user.profile?.cityId),
+      isProfileComplete: !!(user.profile?.cityId),
       profile: {
         avatar: user.profile?.avatar || null,
         address: user.profile?.address || null,

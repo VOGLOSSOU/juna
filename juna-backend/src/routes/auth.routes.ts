@@ -59,10 +59,10 @@ router.post(
 );
 
 /**
- * PUT /api/v1/auth/change-password
+ * POST /api/v1/auth/change-password
  * Changer le mot de passe (authentification requise)
  */
-router.put(
+router.post(
   '/change-password',
   authenticate,
   validate(changePasswordSchema),

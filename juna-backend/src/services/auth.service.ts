@@ -68,7 +68,7 @@ export class AuthService {
     return {
       user: userWithoutPassword,
       tokens,
-      isProfileComplete: !!user.phone,
+      isProfileComplete: false,
     };
   }
 
@@ -105,13 +105,16 @@ export class AuthService {
     // Sauvegarder le refresh token
     await this.saveRefreshToken(user.id, tokens.refreshToken);
 
+    // Charger le profil pour calculer isProfileComplete
+    const userWithProfile = await userRepository.findByIdWithProfile(user.id);
+
     // Retourner la réponse sans le mot de passe
     const { password, ...userWithoutPassword } = user;
 
     return {
       user: userWithoutPassword,
       tokens,
-      isProfileComplete: !!user.phone,
+      isProfileComplete: !!(userWithProfile?.profile?.cityId),
     };
   }
 

@@ -382,6 +382,7 @@ Toutes les réponses ont la structure suivante :
 
 > `profile.avatar` peut être `null` si l'utilisateur n'a pas uploadé de photo.
 > `profile.city` peut être `null` si la ville n'a pas encore été définie.
+> `isProfileComplete: true` uniquement si `cityId` est défini — le téléphone n'entre pas dans le calcul.
 
 ---
 
