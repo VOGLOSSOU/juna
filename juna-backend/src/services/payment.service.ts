@@ -6,6 +6,7 @@ import { NotFoundError, ForbiddenError, ConflictError, ValidationError } from '@
 import { ERROR_CODES } from '@/constants/errors';
 import { PaymentMethod, PaymentStatus, OrderStatus } from '@prisma/client';
 import prisma from '@/config/database';
+import { sendOrderConfirmedEmail, sendProviderNewOrderEmail } from '@/services/email.service';
 
 function resolvePaymentMethod(provider: string): PaymentMethod {
   const p = provider.toUpperCase();
@@ -28,6 +29,35 @@ async function applyFinalStatus(paymentId: string, orderId: string, pawapayStatu
         data: { status: OrderStatus.CONFIRMED },
       }),
     ]);
+
+    // Emails de notification — non-bloquants
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        user: true,
+        subscription: {
+          include: {
+            provider: { include: { user: true } },
+          },
+        },
+      },
+    });
+
+    if (order) {
+      sendOrderConfirmedEmail(order.user.email, order.user.name, {
+        orderNumber: order.orderNumber,
+        subscriptionName: order.subscription.name,
+        amount: order.amount,
+        currency: 'FCFA',
+      }).catch(() => {});
+
+      const providerUser = order.subscription.provider.user;
+      sendProviderNewOrderEmail(providerUser.email, providerUser.name, {
+        orderNumber: order.orderNumber,
+        subscriptionName: order.subscription.name,
+        customerName: order.user.name,
+      }).catch(() => {});
+    }
   } else if (pawapayStatus === 'FAILED') {
     await prisma.payment.update({
       where: { id: paymentId },

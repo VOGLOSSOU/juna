@@ -4,12 +4,13 @@ import { validate } from '@/middlewares/validation.middleware';
 import { authenticate } from '@/middlewares/auth.middleware';
 import { authRateLimiter } from '@/middlewares/rateLimiter.middleware';
 import {
+  sendVerificationCodeSchema,
+  verifyCodeSchema,
   registerSchema,
   loginSchema,
   refreshTokenSchema,
   logoutSchema,
   changePasswordSchema,
-  verifyEmailSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
 } from '@/validators/auth.validator';
@@ -17,8 +18,30 @@ import {
 const router = Router();
 
 /**
+ * POST /api/v1/auth/send-verification-code
+ * Envoyer un code OTP à l'email (étape 1 avant inscription ou re-vérification)
+ */
+router.post(
+  '/send-verification-code',
+  authRateLimiter,
+  validate(sendVerificationCodeSchema),
+  authController.sendVerificationCode.bind(authController)
+);
+
+/**
+ * POST /api/v1/auth/verify-code
+ * Vérifier le code OTP reçu par email
+ */
+router.post(
+  '/verify-code',
+  authRateLimiter,
+  validate(verifyCodeSchema),
+  authController.verifyCode.bind(authController)
+);
+
+/**
  * POST /api/v1/auth/register
- * Inscription d'un nouvel utilisateur
+ * Inscription (requiert un verifiedToken valide)
  */
 router.post(
   '/register',
@@ -70,18 +93,8 @@ router.post(
 );
 
 /**
- * POST /api/v1/auth/verify-email
- * Vérifier l'email (à implémenter)
- */
-router.post(
-  '/verify-email',
-  validate(verifyEmailSchema),
-  authController.verifyEmail.bind(authController)
-);
-
-/**
  * POST /api/v1/auth/forgot-password
- * Mot de passe oublié (à implémenter)
+ * Demander un lien de réinitialisation de mot de passe
  */
 router.post(
   '/forgot-password',
@@ -92,7 +105,7 @@ router.post(
 
 /**
  * POST /api/v1/auth/reset-password
- * Réinitialiser le mot de passe (à implémenter)
+ * Réinitialiser le mot de passe via token reçu par email
  */
 router.post(
   '/reset-password',

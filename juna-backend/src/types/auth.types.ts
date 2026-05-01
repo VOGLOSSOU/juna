@@ -1,7 +1,17 @@
 import { User } from '@prisma/client';
 
+export interface SendVerificationCodeDTO {
+  email: string;
+}
+
+export interface VerifyCodeDTO {
+  email: string;
+  code: string;
+}
+
 export interface RegisterDTO {
   email: string;
+  verifiedToken: string;
   password: string;
   name: string;
   phone?: string;

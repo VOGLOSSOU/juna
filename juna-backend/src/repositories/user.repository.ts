@@ -137,6 +137,10 @@ export class UserRepository {
       },
     });
   }
+
+  async findByPasswordResetToken(token: string): Promise<User | null> {
+    return prisma.user.findUnique({ where: { passwordResetToken: token } });
+  }
 }
 
 export default new UserRepository();

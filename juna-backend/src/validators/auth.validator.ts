@@ -2,6 +2,32 @@ import { z } from 'zod';
 import { PASSWORD } from '@/config/constants';
 
 /**
+ * Schéma de validation pour envoyer le code OTP de vérification
+ */
+export const sendVerificationCodeSchema = z.object({
+  email: z
+    .string({ required_error: 'Email requis' })
+    .email('Email invalide')
+    .toLowerCase()
+    .trim(),
+});
+
+/**
+ * Schéma de validation pour vérifier le code OTP
+ */
+export const verifyCodeSchema = z.object({
+  email: z
+    .string({ required_error: 'Email requis' })
+    .email('Email invalide')
+    .toLowerCase()
+    .trim(),
+  code: z
+    .string({ required_error: 'Code requis' })
+    .length(6, 'Le code doit faire 6 chiffres')
+    .regex(/^\d{6}$/, 'Le code doit être composé de 6 chiffres'),
+});
+
+/**
  * Schéma de validation pour l'inscription
  */
 export const registerSchema = z.object({
@@ -10,6 +36,7 @@ export const registerSchema = z.object({
     .email('Email invalide')
     .toLowerCase()
     .trim(),
+  verifiedToken: z.string({ required_error: 'Token de vérification requis' }),
   password: z
     .string({ required_error: 'Mot de passe requis' })
     .min(PASSWORD.MIN_LENGTH, `Minimum ${PASSWORD.MIN_LENGTH} caractères`)

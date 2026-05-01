@@ -2,9 +2,37 @@ import { Request, Response, NextFunction } from 'express';
 import authService from '@/services/auth.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
-import { RegisterDTO, LoginDTO, ChangePasswordDTO, RefreshTokenDTO } from '@/types/auth.types';
+import { RegisterDTO, LoginDTO, ChangePasswordDTO, RefreshTokenDTO, SendVerificationCodeDTO, VerifyCodeDTO } from '@/types/auth.types';
 
 export class AuthController {
+  /**
+   * Envoyer le code OTP de vérification
+   * POST /api/v1/auth/send-verification-code
+   */
+  async sendVerificationCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const data: SendVerificationCodeDTO = req.body;
+      const result = await authService.sendVerificationCode(data.email);
+      sendSuccess(res, result.message);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Vérifier le code OTP
+   * POST /api/v1/auth/verify-code
+   */
+  async verifyCode(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const data: VerifyCodeDTO = req.body;
+      const result = await authService.verifyCode(data.email, data.code);
+      sendSuccess(res, 'Email vérifié avec succès', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   /**
    * Inscription
    * POST /api/v1/auth/register
@@ -77,28 +105,14 @@ export class AuthController {
   }
 
   /**
-   * Vérifier l'email
-   * POST /api/v1/auth/verify-email
-   * (À implémenter plus tard)
-   */
-  async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
-    try {
-      // TODO: Implémenter la vérification d'email
-      sendSuccess(res, 'Fonctionnalité à venir');
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  /**
    * Mot de passe oublié
    * POST /api/v1/auth/forgot-password
-   * (À implémenter plus tard)
    */
   async forgotPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // TODO: Implémenter l'envoi d'email de réinitialisation
-      sendSuccess(res, 'Fonctionnalité à venir');
+      const { email } = req.body;
+      const result = await authService.forgotPassword(email);
+      sendSuccess(res, result.message);
     } catch (error) {
       next(error);
     }
@@ -107,12 +121,12 @@ export class AuthController {
   /**
    * Réinitialiser le mot de passe
    * POST /api/v1/auth/reset-password
-   * (À implémenter plus tard)
    */
   async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      // TODO: Implémenter la réinitialisation du mot de passe
-      sendSuccess(res, 'Fonctionnalité à venir');
+      const { token, newPassword } = req.body;
+      const result = await authService.resetPassword(token, newPassword);
+      sendSuccess(res, result.message);
     } catch (error) {
       next(error);
     }

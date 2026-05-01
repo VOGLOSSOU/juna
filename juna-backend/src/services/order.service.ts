@@ -1,6 +1,7 @@
 import orderRepository from '@/repositories/order.repository';
 import subscriptionRepository from '@/repositories/subscription.repository';
 import providerRepository from '@/repositories/provider.repository';
+import userRepository from '@/repositories/user.repository';
 import {
   NotFoundError,
   ForbiddenError,
@@ -40,6 +41,12 @@ export class OrderService {
       requestedStartDate?: string;
     }
   ) {
+    // Vérifier que l'email de l'user est vérifié
+    const currentUser = await userRepository.findById(userId);
+    if (!currentUser?.isVerified) {
+      throw new ForbiddenError('Vous devez vérifier votre email avant de passer une commande', ERROR_CODES.EMAIL_NOT_VERIFIED);
+    }
+
     // Vérifier que l'abonnement existe et est actif
     const subscription = await subscriptionRepository.findById(data.subscriptionId);
     if (!subscription) {

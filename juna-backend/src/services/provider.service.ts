@@ -1,6 +1,7 @@
 import prisma from '@/config/database';
 import providerRepository from '@/repositories/provider.repository';
 import userRepository from '@/repositories/user.repository';
+import { sendProviderApprovedEmail, sendProviderRejectedEmail } from '@/services/email.service';
 import {
   ConflictError,
   NotFoundError,
@@ -23,6 +24,11 @@ export class ProviderService {
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new NotFoundError('Utilisateur introuvable', ERROR_CODES.USER_NOT_FOUND);
+    }
+
+    // Vérifier que l'email est vérifié
+    if (!user.isVerified) {
+      throw new ForbiddenError('Vous devez vérifier votre email avant de devenir prestataire', ERROR_CODES.EMAIL_NOT_VERIFIED);
     }
 
     // Verifier si l'utilisateur est deja un fournisseur
@@ -174,10 +180,12 @@ export class ProviderService {
     await providerRepository.updateStatus(providerId, 'APPROVED');
 
     // Mettre a jour le role de l'utilisateur
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: provider.userId },
       data: { role: 'PROVIDER' },
     });
+
+    sendProviderApprovedEmail(updatedUser.email, updatedUser.name, provider.businessName).catch(() => {});
 
     return {
       success: true,
@@ -211,6 +219,11 @@ export class ProviderService {
 
     // Mettre a jour le statut du fournisseur
     await providerRepository.updateStatus(providerId, 'REJECTED');
+
+    const rejectedUser = await userRepository.findById(provider.userId);
+    if (rejectedUser) {
+      sendProviderRejectedEmail(rejectedUser.email, rejectedUser.name, provider.businessName, reason).catch(() => {});
+    }
 
     return {
       success: true,
