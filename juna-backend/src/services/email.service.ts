@@ -67,8 +67,23 @@ function layout(title: string, content: string) {
 
           <!-- Header -->
           <tr>
-            <td align="center" style="background-color:${C.orange};padding:32px 40px;">
-              <img src="${LOGO_URL}" alt="Juna" height="44" style="display:block;height:44px;width:auto;border:0;" />
+            <td align="center" style="background-color:${C.white};padding:32px 40px 24px;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle;padding-right:12px;">
+                    <img src="${LOGO_URL}" alt="Juna" height="36" style="display:block;height:36px;width:auto;border:0;" />
+                  </td>
+                  <td style="vertical-align:middle;">
+                    <span style="font-size:22px;font-weight:800;color:${C.orange};letter-spacing:1px;">JUNA</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Header divider -->
+          <tr>
+            <td style="padding:0 40px;">
+              <div style="height:1px;background-color:${C.border};"></div>
             </td>
           </tr>
 
@@ -76,13 +91,6 @@ function layout(title: string, content: string) {
           <tr>
             <td style="padding:40px 40px 32px;color:${C.body};font-size:15px;line-height:1.7;">
               ${content}
-            </td>
-          </tr>
-
-          <!-- Divider -->
-          <tr>
-            <td style="padding:0 40px;">
-              <div style="height:1px;background-color:${C.border};"></div>
             </td>
           </tr>
 
@@ -129,12 +137,12 @@ function button(text: string, href: string) {
   </table>`;
 }
 
-function notice(icon: string, text: string, bg: string, borderColor: string) {
+function notice(icon: string, text: string) {
   return `
   <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
     <tr>
-      <td style="background-color:${bg};border-left:4px solid ${borderColor};border-radius:8px;padding:14px 16px;font-size:14px;color:${C.body};line-height:1.6;">
-        <strong style="color:${C.navy};">${icon}&nbsp;&nbsp;</strong>${text}
+      <td style="background-color:${C.bg};border-radius:10px;padding:16px 20px;font-size:14px;color:${C.body};line-height:1.7;">
+        ${icon}&nbsp; ${text}
       </td>
     </tr>
   </table>`;
@@ -175,7 +183,7 @@ export async function sendVerificationCodeEmail(email: string, code: string) {
     ${heading('Vérifiez votre adresse email')}
     ${paragraph('Entrez le code ci-dessous dans l\'application pour confirmer votre adresse email.')}
     ${otpBox(code)}
-    ${notice('⏱', 'Ce code est valable <strong>10 minutes</strong>. Ne le partagez avec personne.', C.warnBg, C.warning)}
+    ${notice('⏱', 'Ce code est valable <strong>10 minutes</strong>. Ne le partagez avec personne.')}
     <p style="margin:16px 0 0;color:${C.muted};font-size:13px;text-align:center;">Vous n'avez pas demandé ce code ? Ignorez cet email.</p>
   `);
   await send({ email }, 'Votre code de vérification Juna', html);
@@ -207,7 +215,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
     ${paragraph(`Bonjour <strong>${name}</strong>, nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.`)}
     ${paragraph('Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :')}
     ${button('Réinitialiser mon mot de passe', link)}
-    ${notice('⏱', 'Ce lien est valable <strong>1 heure</strong> uniquement.', C.warnBg, C.warning)}
+    ${notice('⏱', 'Ce lien est valable <strong>1 heure</strong> uniquement.')}
     <p style="margin:16px 0 0;color:${C.muted};font-size:13px;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email — votre mot de passe reste inchangé.</p>
     <p style="margin:12px 0 0;color:${C.muted};font-size:12px;word-break:break-all;">Lien : <a href="${link}" style="color:${C.orange};">${link}</a></p>
   `);
@@ -269,7 +277,7 @@ export async function sendProviderRejectedEmail(
   const html = layout('Mise à jour de votre candidature — Juna', `
     ${heading('Mise à jour de votre candidature')}
     ${paragraph(`Bonjour <strong>${name}</strong>, après examen de votre dossier pour <strong>${businessName}</strong>, nous ne sommes pas en mesure de donner suite à votre candidature pour le motif suivant :`)}
-    ${notice('📋', reason, C.warnBg, C.warning)}
+    ${notice('📋', reason)}
     ${paragraph('Si vous pensez qu\'il s\'agit d\'une erreur ou si vous souhaitez soumettre une nouvelle candidature avec des informations corrigées, vous pouvez soumettre une nouvelle demande depuis l\'application.')}
     ${paragraph('Merci de votre compréhension.')}
   `);
@@ -288,7 +296,7 @@ export async function sendProviderNewOrderEmail(
       infoRow('Numéro de commande', `#${order.orderNumber}`) +
       infoRow('Client', order.customerName)
     )}
-    ${notice('ℹ️', 'Le client activera sa commande depuis l\'application. Vous recevrez sa confirmation au moment de l\'activation.', C.bg, C.border)}
+    ${notice('ℹ️', 'Le client activera sa commande depuis l\'application. Vous recevrez sa confirmation au moment de l\'activation.')}
   `);
   await send({ email, name }, `Nouvelle commande #${order.orderNumber} — Juna`, html);
 }
