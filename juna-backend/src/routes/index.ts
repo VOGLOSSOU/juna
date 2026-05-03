@@ -15,7 +15,7 @@ import activeSubscriptionRoutes from './active-subscription.routes';
 // Import des autres routes ici plus tard
 // import proposalRoutes from './proposal.routes';
 // import ticketRoutes from './ticket.routes';
-// import notificationRoutes from './notification.routes';
+import notificationRoutes from './notification.routes';
 // import referralRoutes from './referral.routes';
 
 const router = Router();
@@ -38,7 +38,7 @@ router.use('/active-subscriptions', activeSubscriptionRoutes);
 // Plus tard, ajouter les autres routes
 // router.use('/proposals', proposalRoutes);
 // router.use('/tickets', ticketRoutes);
-// router.use('/notifications', notificationRoutes);
+router.use('/notifications', notificationRoutes);
 // router.use('/referrals', referralRoutes);
 
 export default router;

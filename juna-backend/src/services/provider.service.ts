@@ -2,6 +2,7 @@ import prisma from '@/config/database';
 import providerRepository from '@/repositories/provider.repository';
 import userRepository from '@/repositories/user.repository';
 import { sendProviderApprovedEmail, sendProviderRejectedEmail } from '@/services/email.service';
+import { createNotification } from '@/services/notification.service';
 import {
   ConflictError,
   NotFoundError,
@@ -186,6 +187,13 @@ export class ProviderService {
     });
 
     sendProviderApprovedEmail(updatedUser.email, updatedUser.name, provider.businessName).catch(() => {});
+    createNotification(
+      provider.userId,
+      'PROPOSAL_VALIDATED',
+      'Candidature approuvée 🎊',
+      `Votre demande pour "${provider.businessName}" a été approuvée. Vous pouvez maintenant créer vos abonnements.`,
+      { providerId: provider.id }
+    );
 
     return {
       success: true,
@@ -223,6 +231,13 @@ export class ProviderService {
     const rejectedUser = await userRepository.findById(provider.userId);
     if (rejectedUser) {
       sendProviderRejectedEmail(rejectedUser.email, rejectedUser.name, provider.businessName, reason).catch(() => {});
+      createNotification(
+        provider.userId,
+        'PROPOSAL_REJECTED',
+        'Mise à jour de votre candidature',
+        `Votre demande pour "${provider.businessName}" n'a pas été retenue. Consultez votre email pour plus de détails.`,
+        { providerId: provider.id }
+      );
     }
 
     return {

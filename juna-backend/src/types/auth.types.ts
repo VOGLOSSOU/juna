@@ -36,10 +36,6 @@ export interface ForgotPasswordDTO {
   email: string;
 }
 
-export interface VerifyEmailDTO {
-  token: string;
-}
-
 export interface RefreshTokenDTO {
   refreshToken: string;
 }

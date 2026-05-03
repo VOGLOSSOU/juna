@@ -89,7 +89,7 @@ function layout(title: string, content: string) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:24px 40px;color:${C.muted};font-size:12px;line-height:1.6;">
-              &copy; ${year} Juna &mdash; Abonnements de nourriture<br/>
+              &copy; ${year} <strong style="color:${C.navy};">Juna</strong> &mdash; Abonnements de nourriture<br/>
               <span style="color:${C.border};">&#9679;</span>&nbsp;
               Si vous n'êtes pas à l'origine de cette action, ignorez simplement cet email.
             </td>

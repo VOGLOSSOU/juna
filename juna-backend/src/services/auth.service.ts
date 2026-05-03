@@ -23,6 +23,7 @@ import {
   sendWelcomeEmail,
   sendPasswordResetEmail,
 } from '@/services/email.service';
+import { createNotification } from '@/services/notification.service';
 
 function generateOTP(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -135,8 +136,14 @@ export class AuthService {
     const tokens = this.generateTokens(user);
     await this.saveRefreshToken(user.id, tokens.refreshToken);
 
-    // Email de bienvenue (non-bloquant)
+    // Email de bienvenue + notif in-app (non-bloquants)
     sendWelcomeEmail(user.email, user.name).catch(() => {});
+    createNotification(
+      user.id,
+      'SYSTEM',
+      'Bienvenue sur Juna ! 🎉',
+      'Votre inscription est confirmée. Explorez les abonnements disponibles près de chez vous.'
+    );
 
     const { password, ...userWithoutPassword } = user;
 
@@ -246,6 +253,13 @@ export class AuthService {
     const hashedPassword = await hashPassword(data.newPassword);
     await userRepository.update(userId, { password: hashedPassword });
     await userRepository.revokeAllUserTokens(userId);
+
+    createNotification(
+      userId,
+      'SYSTEM',
+      'Mot de passe mis à jour',
+      'Votre mot de passe a été modifié avec succès. Si vous n\'êtes pas à l\'origine de cette action, contactez-nous.'
+    );
   }
 
   /**

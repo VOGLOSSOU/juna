@@ -81,13 +81,6 @@ export const logoutSchema = z.object({
 });
 
 /**
- * Schéma de validation pour la vérification d'email
- */
-export const verifyEmailSchema = z.object({
-  token: z.string({ required_error: 'Token de vérification requis' }),
-});
-
-/**
  * Schéma de validation pour mot de passe oublié
  */
 export const forgotPasswordSchema = z.object({

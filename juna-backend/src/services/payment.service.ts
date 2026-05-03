@@ -7,6 +7,7 @@ import { ERROR_CODES } from '@/constants/errors';
 import { PaymentMethod, PaymentStatus, OrderStatus } from '@prisma/client';
 import prisma from '@/config/database';
 import { sendOrderConfirmedEmail, sendProviderNewOrderEmail } from '@/services/email.service';
+import { createNotification } from '@/services/notification.service';
 
 function resolvePaymentMethod(provider: string): PaymentMethod {
   const p = provider.toUpperCase();
@@ -51,12 +52,28 @@ async function applyFinalStatus(paymentId: string, orderId: string, pawapayStatu
         currency: 'FCFA',
       }).catch(() => {});
 
+      createNotification(
+        order.user.id,
+        'ORDER_CONFIRMATION',
+        'Commande confirmée ✅',
+        `Votre paiement pour "${order.subscription.name}" a bien été reçu. Activez votre commande depuis l'application.`,
+        { orderNumber: order.orderNumber, orderId: order.id }
+      );
+
       const providerUser = order.subscription.provider.user;
       sendProviderNewOrderEmail(providerUser.email, providerUser.name, {
         orderNumber: order.orderNumber,
         subscriptionName: order.subscription.name,
         customerName: order.user.name,
       }).catch(() => {});
+
+      createNotification(
+        providerUser.id,
+        'ORDER_CONFIRMATION',
+        'Nouvelle commande reçue 🍽️',
+        `${order.user.name} vient de confirmer une commande pour "${order.subscription.name}".`,
+        { orderNumber: order.orderNumber, orderId: order.id }
+      );
     }
   } else if (pawapayStatus === 'FAILED') {
     await prisma.payment.update({
