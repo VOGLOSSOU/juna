@@ -33,10 +33,12 @@ Toutes les réponses ont la structure suivante :
 
 - `data` est présent uniquement en cas de succès
 - `error` est présent uniquement en cas d'échec
-- `message` peut être un tableau de strings pour les erreurs de validation
+- `message` peut être un **tableau de strings** pour les erreurs de validation Zod, ou une **string simple** pour les erreurs métier
 - Les endpoints protégés nécessitent : `Authorization: Bearer {accessToken}`
 - `accessToken` expire après **15 minutes**, `refreshToken` après **7 jours**
 - Rate limit auth : **5 requêtes / 15 minutes**
+
+> ⚠️ **Gestion des erreurs côté frontend** : Ne jamais afficher un message générique "Une erreur est survenue". Toujours lire `response.data.message`. Si c'est un tableau, afficher chaque item. Si c'est une string, l'afficher directement. Ces messages sont en français et directement destinés à l'utilisateur.
 
 ### Points critiques — erreurs fréquentes
 
@@ -189,18 +191,29 @@ Toutes les réponses ont la structure suivante :
 ```json
 {
   "email": "user@example.com",
-  "password": "Password123",
+  "verifiedToken": "uuid-du-token-reçu-après-vérification-OTP",
+  "password": "MotDePasse123",
   "name": "Jean Dupont",
-  "phone": "+22961111111"
+  "phone": "+22997111111"
 }
 ```
 
 | Champ | Type | Obligatoire | Contraintes |
 |-------|------|-------------|-------------|
-| `email` | string | ✅ | Format email valide |
-| `password` | string | ✅ | Min 8 caractères |
-| `name` | string | ✅ | Min 2 caractères |
-| `phone` | string | ❌ | Format international (ex: `+22961111111`) |
+| `email` | string | ✅ | Format email valide — doit correspondre à l'email vérifié par OTP |
+| `verifiedToken` | string | ✅ | Token reçu après `POST /auth/verify-code` — valide 30 min |
+| `password` | string | ✅ | Min 8 caractères · Au moins 1 majuscule · Au moins 1 chiffre · Max 128 caractères |
+| `name` | string | ✅ | Min 2 caractères, max 100 |
+| `phone` | string | ❌ | Chiffres, espaces, tirets et `+` acceptés. Stocké tel quel — ce champ n'est pas utilisé pour le paiement. |
+
+> 🎨 **UX — Champ téléphone** : Ne pas afficher ce champ comme "optionnel" dans le formulaire. Présenter-le simplement sans mention obligatoire/optionnel pour encourager sa saisie.
+
+> 🎨 **UX — Indicateur de force du mot de passe** : Afficher sous le champ mot de passe une liste de critères qui passent au vert en temps réel quand l'utilisateur tape :
+> - ✅ Au moins 8 caractères
+> - ✅ Au moins une lettre majuscule
+> - ✅ Au moins un chiffre
+>
+> Chaque critère commence en gris avec une icône ✗, et passe en vert ✓ dès qu'il est satisfait. Cela évite à l'utilisateur de soumettre et recevoir une erreur sans savoir pourquoi.
 
 **Réponse 201 ✅ :**
 ```json
@@ -212,9 +225,9 @@ Toutes les réponses ont la structure suivante :
       "id": "user-uuid",
       "email": "user@example.com",
       "name": "Jean Dupont",
-      "phone": "+22961111111",
+      "phone": "+22997111111",
       "role": "USER",
-      "isVerified": false,
+      "isVerified": true,
       "isActive": true
     },
     "tokens": {
@@ -227,11 +240,17 @@ Toutes les réponses ont la structure suivante :
 }
 ```
 
+> `isVerified` est toujours `true` après inscription — l'email est vérifié avant la création du compte via le flow OTP.
+
 **Réponses d'erreur :**
 ```json
 { "success": false, "message": ["Cet email est déjà utilisé"], "error": { "code": "EMAIL_ALREADY_EXISTS" } }
 { "success": false, "message": ["Ce numéro de téléphone est déjà utilisé"], "error": { "code": "PHONE_ALREADY_EXISTS" } }
+{ "success": false, "message": ["Token de vérification invalide"], "error": { "code": "INVALID_TOKEN" } }
+{ "success": false, "message": ["Minimum 8 caractères", "Le mot de passe doit contenir au moins une majuscule", "Le mot de passe doit contenir au moins un chiffre"], "error": { "code": "INVALID_INPUT" } }
 ```
+
+> Ces messages de validation sont directement affichables à l'utilisateur. Lire `response.data.message` — c'est un **tableau** dans ce cas, itérer dessus pour afficher chaque erreur.
 
 ---
 

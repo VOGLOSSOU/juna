@@ -50,7 +50,7 @@ export const registerSchema = z.object({
     .trim(),
   phone: z
     .string()
-    .regex(/^[+]?[\d\s-]{8,}$/, 'Numéro de téléphone invalide')
+    .regex(/^[+]?[\d\s\-]{8,}$/, 'Numéro de téléphone invalide')
     .optional(),
 });
 
