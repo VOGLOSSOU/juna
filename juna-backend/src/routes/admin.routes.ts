@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import adminService from '@/services/admin.service';
 import providerService from '@/services/provider.service';
+import subscriptionController from '@/controllers/subscription.controller';
 import { validate } from '@/middlewares/validation.middleware';
 import { authenticate, requireRole } from '@/middlewares/auth.middleware';
 import { UserRole } from '@prisma/client';
@@ -241,6 +242,18 @@ router.get(
       next(error);
     }
   }
+);
+
+/**
+ * GET /api/v1/admin/subscriptions
+ * Lister tous les abonnements sans filtre de visibilité (admin)
+ * Accès: ADMIN uniquement
+ */
+router.get(
+  '/subscriptions',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  subscriptionController.getAll.bind(subscriptionController)
 );
 
 export default router;

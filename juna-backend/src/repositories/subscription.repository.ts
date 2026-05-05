@@ -355,6 +355,7 @@ export class SubscriptionRepository {
    */
   async findAll(filters?: {
     providerId?: string;
+    cityId?: string;
     type?: SubscriptionType;
     category?: SubscriptionCategory;
     duration?: SubscriptionDuration;
@@ -366,6 +367,10 @@ export class SubscriptionRepository {
 
     if (filters?.providerId) {
       where.providerId = filters.providerId;
+    }
+
+    if (filters?.cityId) {
+      where.provider = { cityId: filters.cityId };
     }
 
     if (filters?.type) {
@@ -402,6 +407,13 @@ export class SubscriptionRepository {
           select: {
             id: true,
             businessName: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                country: { select: { code: true, translations: true } },
+              },
+            },
           },
         },
       },

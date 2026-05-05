@@ -87,6 +87,7 @@ export class SubscriptionController {
         category: req.query.category as any,
         duration: req.query.duration as any,
         providerId: req.query.providerId as string,
+        cityId: req.query.cityId as string,
         search: req.query.search as string,
         isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
         isPublic: req.query.isPublic === 'true' ? true : req.query.isPublic === 'false' ? false : undefined,
