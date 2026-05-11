@@ -14,8 +14,8 @@ const LOGO_URL = 'https://junaeats.com/juna-logo.png';
 
 // Palette
 const C = {
-  orange:    '#FF6B35',
-  orangeDark:'#E85A25',
+  orange:    '#F4521E',
+  orangeDark:'#D4420E',
   navy:      '#1A1A2E',
   body:      '#52526C',
   muted:     '#9090A8',
@@ -179,14 +179,14 @@ function otpBox(code: string) {
 // ─── Emails ───────────────────────────────────────────────────────────────────
 
 export async function sendVerificationCodeEmail(email: string, code: string) {
-  const html = layout('Votre code de vérification — Juna', `
-    ${heading('Vérifiez votre adresse email')}
-    ${paragraph('Entrez le code ci-dessous dans l\'application pour confirmer votre adresse email.')}
+  const html = layout('Votre code de confirmation — Juna', `
+    ${heading('Voici votre code de confirmation')}
+    ${paragraph('Entrez ce code dans l\'application Juna pour valider votre adresse et continuer.')}
     ${otpBox(code)}
     ${notice('⏱', 'Ce code est valable <strong>10 minutes</strong>. Ne le partagez avec personne.')}
     <p style="margin:16px 0 0;color:${C.muted};font-size:13px;text-align:center;">Vous n'avez pas demandé ce code ? Ignorez cet email.</p>
   `);
-  await send({ email }, 'Votre code de vérification Juna', html);
+  await send({ email }, 'Votre code de confirmation Juna', html);
 }
 
 export async function sendWelcomeEmail(email: string, name: string) {
