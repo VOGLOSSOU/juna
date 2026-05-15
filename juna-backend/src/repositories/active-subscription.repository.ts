@@ -84,13 +84,11 @@ export class ActiveSubscriptionRepository {
   }
 
   /**
-   * Compter les abonnements actifs
+   * Compter les abonnements actifs via la table orders (source de vérité)
    */
-  async countActive() {
-    return prisma.activeSubscription.count({
-      where: {
-        endsAt: { gt: new Date() }
-      }
+  async countActiveOrders() {
+    return prisma.order.count({
+      where: { status: 'ACTIVE' }
     });
   }
 
