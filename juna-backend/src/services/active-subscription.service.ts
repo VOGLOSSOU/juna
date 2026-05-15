@@ -27,11 +27,9 @@ export class ActiveSubscriptionService {
 
   /**
    * Statistiques des abonnements actifs
-   * Compte les commandes ACTIVE (source de vérité) plutôt que la table active_subscriptions
-   * qui ne se peuple que via orderService.activate() et peut avoir des écarts.
    */
   async getActiveSubscriptionsStats() {
-    const count = await activeSubscriptionRepository.countActiveOrders();
+    const count = await activeSubscriptionRepository.countActive();
     return { activeSubscriptionsCount: count };
   }
 
