@@ -12,24 +12,35 @@ export const cleanupExpiredSubscriptions = () => {
     try {
       logInfo('Starting cleanup of expired active subscriptions...');
 
-      const result = await prisma.activeSubscription.deleteMany({
-        where: {
-          endsAt: {
-            lt: new Date()  // Supprimer si endsAt < maintenant
-          }
-        }
+      const expired = await prisma.activeSubscription.findMany({
+        where: { endsAt: { lt: new Date() } },
+        select: { id: true, orderId: true },
       });
 
-      if (result.count > 0) {
-        logInfo(`Cleaned up ${result.count} expired active subscriptions`);
-      } else {
+      if (expired.length === 0) {
         logInfo('No expired subscriptions to clean up');
+        return;
       }
+
+      const orderIds = expired.map((s) => s.orderId);
+      const activeSubIds = expired.map((s) => s.id);
+
+      await prisma.$transaction([
+        prisma.order.updateMany({
+          where: { id: { in: orderIds }, status: 'ACTIVE' },
+          data: { status: 'COMPLETED', completedAt: new Date() },
+        }),
+        prisma.activeSubscription.deleteMany({
+          where: { id: { in: activeSubIds } },
+        }),
+      ]);
+
+      logInfo(`Cleaned up ${expired.length} expired active subscriptions, orders marked COMPLETED`);
     } catch (error) {
       logError('Error during cleanup of expired subscriptions', error);
     }
   }, {
-    timezone: 'UTC'  // Ajuster selon le fuseau horaire souhaité
+    timezone: 'UTC',
   });
 };
 
