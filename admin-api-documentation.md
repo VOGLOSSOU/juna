@@ -45,6 +45,7 @@ Toutes les réponses ont la structure suivante :
 | `POST` | `/auth/refresh` | public | Rafraîchir le token |
 | `POST` | `/auth/logout` | auth | Déconnexion |
 | `GET` | `/admin/dashboard` | ADMIN | Statistiques globales |
+| `GET` | `/admin/dashboard/stats` | ADMIN | Statistiques détaillées par période |
 | `GET` | `/countries` | public | Lister les pays |
 | `POST` | `/admin/countries` | ADMIN | Créer un pays |
 | `GET` | `/countries/:code/cities` | public | Villes d'un pays |
@@ -55,6 +56,7 @@ Toutes les réponses ont la structure suivante :
 | `GET` | `/admin/users/:id` | ADMIN | Détail d'un utilisateur |
 | `PUT` | `/admin/users/:id/suspend` | ADMIN | Suspendre un utilisateur |
 | `PUT` | `/admin/users/:id/activate` | ADMIN | Réactiver un utilisateur |
+| `PUT` | `/admin/users/:id/ban` | ADMIN | Bannir définitivement un utilisateur |
 | `GET` | `/admin/providers` | ADMIN | Lister tous les prestataires (filtres disponibles) |
 | `GET` | `/admin/providers/pending` | ADMIN | Candidatures en attente |
 | `GET` | `/admin/providers/:id` | ADMIN | Détail d'un prestataire |
@@ -206,6 +208,38 @@ Toutes les réponses ont la structure suivante :
 - `ordersByDay` couvre les **7 derniers jours**
 - `completedOrders` = commandes livrées/retirées (statut `COMPLETED`)
 - `pendingOrders` = commandes non encore payées (statut `PENDING`)
+
+---
+
+### GET /admin/dashboard/stats — Statistiques détaillées par période
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Query params :**
+| Paramètre | Type | Description |
+|-----------|------|-------------|
+| `period` | enum | `day`, `week`, `month` (défaut : 30 derniers jours) |
+
+**Exemples :**
+- `GET /admin/dashboard/stats?period=day` — dernières 24h
+- `GET /admin/dashboard/stats?period=week` — 7 derniers jours
+- `GET /admin/dashboard/stats?period=month` — 30 derniers jours
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "period": "week",
+    "newUsers": 8,
+    "newProviders": 2,
+    "newOrders": 31,
+    "revenue": 775000
+  }
+}
+```
+
+> Idéal pour des widgets "cette semaine" ou "aujourd'hui" sur le tableau de bord.
 
 ---
 
@@ -579,6 +613,46 @@ Passe `isActive` à `true`. Permet à l'utilisateur de se reconnecter.
 
 ---
 
+### PUT /admin/users/:id/ban — Bannir définitivement un utilisateur
+
+Désactive le compte **et anonymise l'email** (`banned_<id>@deleted.com`) — action irréversible. Impossible sur un admin ou super admin.
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Body :**
+```json
+{ "reason": "Fraude avérée, signalements multiples." }
+```
+
+| Champ | Type | Obligatoire |
+|-------|------|-------------|
+| `reason` | string | ❌ — usage interne |
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "data": {
+    "success": true,
+    "message": "Utilisateur banni avec succès",
+    "userId": "4cc99927-3bfd-49b3-8664-3058f7ac3388",
+    "reason": "Fraude avérée, signalements multiples."
+  }
+}
+```
+
+**Erreurs possibles :**
+```json
+{ "success": false, "message": "Utilisateur introuvable", "error": { "code": "USER_NOT_FOUND" } }
+{ "success": false, "message": "Impossible de bannir un administrateur", "error": { "code": "FORBIDDEN" } }
+```
+
+> **Différence suspend vs ban :**
+> - `suspend` → `isActive: false`, email intact, réversible via `activate`
+> - `ban` → `isActive: false` + email anonymisé, **irréversible**
+
+---
+
 ## 5. PRESTATAIRES
 
 ### GET /admin/providers — Lister tous les prestataires
@@ -874,11 +948,13 @@ Le statut passe à `SUSPENDED`. Le prestataire ne peut plus recevoir de commande
 | `providerId` | UUID | Filtrer par prestataire |
 | `subscriptionId` | UUID | Filtrer par abonnement |
 | `deliveryMethod` | enum | `DELIVERY` ou `PICKUP` |
+| `page` | number | Page (défaut : 1) |
+| `limit` | number | Résultats par page, max 100 (défaut : 20) |
 
 **Exemples :**
-- `GET /orders` — toutes les commandes
+- `GET /orders` — première page, 20 commandes
 - `GET /orders?status=PENDING` — commandes non payées
-- `GET /orders?status=CONFIRMED` — commandes payées en attente d'activation
+- `GET /orders?status=CONFIRMED&page=2&limit=50` — page 2, 50 par page
 - `GET /orders?providerId=uuid` — commandes d'un prestataire précis
 
 **Réponse 200 ✅ :**
@@ -886,34 +962,40 @@ Le statut passe à `SUSPENDED`. Le prestataire ne peut plus recevoir de commande
 {
   "success": true,
   "message": "Commandes récupérées avec succès",
-  "data": [
-    {
-      "id": "order-uuid",
-      "orderNumber": "JO-20260430-0001",
-      "status": "CONFIRMED",
-      "amount": 25000,
-      "deliveryMethod": "PICKUP",
-      "scheduledFor": "2026-05-01T07:00:00.000Z",
-      "createdAt": "2026-04-30T14:22:00.000Z",
-      "user": {
-        "id": "user-uuid",
-        "name": "Sena Akpovi",
-        "email": "sena.akpovi@gmail.com"
-      },
-      "subscription": {
-        "id": "sub-uuid",
-        "name": "Formule Semaine Africaine",
-        "provider": {
-          "businessName": "Chez Mariam"
+  "data": {
+    "data": [
+      {
+        "id": "order-uuid",
+        "orderNumber": "JO-20260430-0001",
+        "status": "CONFIRMED",
+        "amount": 25000,
+        "deliveryMethod": "PICKUP",
+        "scheduledFor": "2026-05-01T07:00:00.000Z",
+        "createdAt": "2026-04-30T14:22:00.000Z",
+        "user": {
+          "id": "user-uuid",
+          "name": "Sena Akpovi",
+          "email": "sena.akpovi@gmail.com"
+        },
+        "subscription": {
+          "id": "sub-uuid",
+          "name": "Formule Semaine Africaine",
+          "provider": { "businessName": "Chez Mariam" }
+        },
+        "payment": {
+          "status": "SUCCESS",
+          "amount": 25000
         }
-      },
-      "payment": {
-        "status": "SUCCESS",
-        "amount": 25000
       }
-    }
-  ]
+    ],
+    "total": 120,
+    "page": 1,
+    "totalPages": 6
+  }
 }
+```
+
+> La liste des commandes est dans `data.data`. `total` = nombre total toutes pages confondues, `totalPages` permet de construire la pagination UI.
 ```
 
 **Statuts de commande :**
