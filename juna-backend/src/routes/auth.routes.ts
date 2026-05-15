@@ -2,7 +2,7 @@ import { Router } from 'express';
 import authController from '@/controllers/auth.controller';
 import { validate } from '@/middlewares/validation.middleware';
 import { authenticate } from '@/middlewares/auth.middleware';
-import { authRateLimiter } from '@/middlewares/rateLimiter.middleware';
+import { authRateLimiter, otpRateLimiter } from '@/middlewares/rateLimiter.middleware';
 import {
   sendVerificationCodeSchema,
   verifyCodeSchema,
@@ -23,7 +23,7 @@ const router = Router();
  */
 router.post(
   '/send-verification-code',
-  authRateLimiter,
+  otpRateLimiter,
   validate(sendVerificationCodeSchema),
   authController.sendVerificationCode.bind(authController)
 );

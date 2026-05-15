@@ -52,6 +52,25 @@ export const adminRateLimiter = rateLimit({
 });
 
 /**
+ * Rate limiter pour l'envoi de codes OTP (3 envois max / 10 minutes par IP)
+ * Compte toutes les requêtes y compris les succès pour éviter le spam d'emails
+ */
+export const otpRateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    sendError(
+      res,
+      'Trop de codes envoyés. Veuillez patienter 10 minutes avant de réessayer.',
+      429,
+      'TOO_MANY_REQUESTS'
+    );
+  },
+});
+
+/**
  * Rate limiter personnalisable
  */
 export const createRateLimiter = (maxRequests: number, windowMs: number = RATE_LIMIT.WINDOW_MS) => {

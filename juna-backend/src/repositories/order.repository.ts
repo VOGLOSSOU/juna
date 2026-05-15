@@ -188,63 +188,45 @@ export class OrderRepository {
     providerId?: string;
     status?: OrderStatus;
     deliveryMethod?: DeliveryMethod;
-  }): Promise<Order[]> {
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: Order[]; total: number; page: number; totalPages: number }> {
     const where: Prisma.OrderWhereInput = {};
 
-    if (filters?.userId) {
-      where.userId = filters.userId;
-    }
-
-    if (filters?.subscriptionId) {
-      where.subscriptionId = filters.subscriptionId;
-    }
-
+    if (filters?.userId) where.userId = filters.userId;
+    if (filters?.subscriptionId) where.subscriptionId = filters.subscriptionId;
     if (filters?.providerId) {
-      where.subscription = {
-        provider: {
-          id: filters.providerId,
-        },
-      };
+      where.subscription = { provider: { id: filters.providerId } };
     }
+    if (filters?.status) where.status = filters.status;
+    if (filters?.deliveryMethod) where.deliveryMethod = filters.deliveryMethod;
 
-    if (filters?.status) {
-      where.status = filters.status;
-    }
+    const page = Math.max(1, filters?.page ?? 1);
+    const limit = Math.min(100, Math.max(1, filters?.limit ?? 20));
+    const skip = (page - 1) * limit;
 
-    if (filters?.deliveryMethod) {
-      where.deliveryMethod = filters.deliveryMethod;
-    }
-
-    return prisma.order.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
-        },
-        subscription: {
-          select: {
-            id: true,
-            name: true,
-            provider: {
-              select: {
-                businessName: true,
-              },
+    const [data, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          subscription: {
+            select: {
+              id: true,
+              name: true,
+              provider: { select: { businessName: true } },
             },
           },
+          payment: { select: { status: true, amount: true } },
         },
-        payment: {
-          select: {
-            status: true,
-            amount: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return { data, total, page, totalPages: Math.ceil(total / limit) };
   }
 
   /**

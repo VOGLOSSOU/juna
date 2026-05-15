@@ -22,6 +22,7 @@ import {
   sendVerificationCodeEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
+  sendPasswordChangedEmail,
 } from '@/services/email.service';
 import { createNotification } from '@/services/notification.service';
 
@@ -307,6 +308,8 @@ export class AuthService {
     });
 
     await userRepository.revokeAllUserTokens(user.id);
+
+    sendPasswordChangedEmail(user.email, user.name).catch(() => {});
 
     return { message: 'Mot de passe réinitialisé avec succès' };
   }

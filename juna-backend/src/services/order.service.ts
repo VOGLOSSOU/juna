@@ -204,6 +204,8 @@ export class OrderService {
     providerId?: string;
     status?: OrderStatus;
     deliveryMethod?: DeliveryMethod;
+    page?: number;
+    limit?: number;
   }) {
     return orderRepository.findAll(filters);
   }

@@ -284,6 +284,15 @@ export async function sendProviderRejectedEmail(
   await send({ email, name }, 'Mise à jour de votre candidature prestataire — Juna', html);
 }
 
+export async function sendPasswordChangedEmail(email: string, name: string) {
+  const html = layout('Mot de passe modifié — Juna', `
+    ${heading('Votre mot de passe a été modifié')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, votre mot de passe Juna vient d'être réinitialisé avec succès.`)}
+    ${notice('🔒', 'Si vous êtes à l\'origine de cette action, vous pouvez ignorer ce message. Sinon, contactez-nous immédiatement.')}
+  `);
+  await send({ email, name }, 'Votre mot de passe Juna a été modifié', html);
+}
+
 export async function sendProviderNewOrderEmail(
   email: string,
   name: string,

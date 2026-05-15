@@ -105,9 +105,11 @@ export class OrderController {
         providerId: req.query.providerId as string,
         status: req.query.status as any,
         deliveryMethod: req.query.deliveryMethod as any,
+        page: req.query.page ? parseInt(req.query.page as string) : 1,
+        limit: req.query.limit ? parseInt(req.query.limit as string) : 20,
       };
-      const orders = await orderService.getAll(filters);
-      sendSuccess(res, SUCCESS_MESSAGES.ORDERS_FETCHED, orders);
+      const result = await orderService.getAll(filters);
+      sendSuccess(res, SUCCESS_MESSAGES.ORDERS_FETCHED, result);
     } catch (error) {
       next(error);
     }

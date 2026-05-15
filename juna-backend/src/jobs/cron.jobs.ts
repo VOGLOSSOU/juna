@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import prisma from '@/config/database';
+import emailVerificationCodeRepository from '@/repositories/emailVerificationCode.repository';
 import { logInfo, logError } from '@/utils/logger.util';
 
 /**
@@ -33,10 +34,25 @@ export const cleanupExpiredSubscriptions = () => {
 };
 
 /**
+ * Job cron pour nettoyer les codes OTP expirés
+ * S'exécute toutes les heures
+ */
+export const cleanupExpiredOtpCodes = () => {
+  cron.schedule('0 * * * *', async () => {
+    try {
+      await emailVerificationCodeRepository.deleteExpired();
+    } catch (error) {
+      logError('Error during cleanup of expired OTP codes', error);
+    }
+  }, { timezone: 'UTC' });
+};
+
+/**
  * Démarrer tous les jobs cron
  */
 export const startCronJobs = () => {
   logInfo('Starting cron jobs...');
   cleanupExpiredSubscriptions();
+  cleanupExpiredOtpCodes();
   logInfo('Cron jobs started successfully');
 };

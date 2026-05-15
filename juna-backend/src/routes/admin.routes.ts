@@ -226,6 +226,28 @@ router.put(
 );
 
 /**
+ * PUT /api/v1/admin/users/:id/ban
+ * Bannir définitivement un utilisateur (anonymise email + désactive)
+ * Accès: ADMIN uniquement
+ */
+router.put(
+  '/users/:id/ban',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  async (req: any, res: any, next: any) => {
+    try {
+      const adminId = req.user!.id;
+      const { id } = req.params;
+      const { reason } = req.body;
+      const result = await adminService.banUser(id, adminId, reason);
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * GET /api/v1/admin/dashboard
  * Obtenir les statistiques du dashboard
  * Accès: ADMIN uniquement
@@ -237,6 +259,26 @@ router.get(
   async (req: any, res: any, next: any) => {
     try {
       const result = await adminService.getDashboardStats();
+      res.json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * GET /api/v1/admin/dashboard/stats
+ * Statistiques détaillées par période
+ * Accès: ADMIN uniquement
+ */
+router.get(
+  '/dashboard/stats',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  async (req: any, res: any, next: any) => {
+    try {
+      const period = req.query.period as 'day' | 'week' | 'month' | undefined;
+      const result = await adminService.getDetailedStats(period);
       res.json({ success: true, data: result });
     } catch (error) {
       next(error);
