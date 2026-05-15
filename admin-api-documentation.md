@@ -67,6 +67,11 @@ Toutes les réponses ont la structure suivante :
 | `GET` | `/orders/pending/count` | ADMIN | Nombre de commandes en attente |
 | `GET` | `/admin/subscriptions` | ADMIN | Lister tous les abonnements (tous statuts) |
 | `GET` | `/subscriptions` | public | Lister les abonnements publics et actifs |
+| `GET` | `/reviews` | ADMIN | Lister tous les avis (filtres disponibles) |
+| `GET` | `/reviews/pending/count` | ADMIN | Nombre d'avis en attente de modération |
+| `GET` | `/reviews/:id` | ADMIN | Détail d'un avis avec relations |
+| `PUT` | `/reviews/:id/moderate` | ADMIN | Approuver ou rejeter un avis |
+| `GET` | `/active-subscriptions/stats` | ADMIN | Nombre d'abonnements actifs en cours |
 
 ### Routes NON disponibles (ne pas appeler)
 
@@ -1128,6 +1133,183 @@ Retourne **tous** les abonnements sans filtre de visibilité — actifs, inactif
 
 ---
 
+## 8. AVIS (MODÉRATION)
+
+### GET /reviews — Lister tous les avis
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Query params disponibles :**
+| Paramètre | Type | Valeurs | Description |
+|-----------|------|---------|-------------|
+| `status` | enum | `PENDING`, `APPROVED`, `REJECTED` | Filtrer par statut de modération |
+| `subscriptionId` | UUID | — | Filtrer par abonnement |
+| `userId` | UUID | — | Filtrer par auteur |
+| `rating` | integer | `1` à `5` | Filtrer par note |
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Avis récupérés",
+  "data": [
+    {
+      "id": "a1b2c3d4-...",
+      "rating": 4,
+      "comment": "Très bons repas, livraison ponctuelle.",
+      "status": "PENDING",
+      "moderatedAt": null,
+      "moderatedBy": null,
+      "createdAt": "2026-05-10T12:00:00.000Z",
+      "userId": "u1...",
+      "subscriptionId": "s1...",
+      "orderId": "o1...",
+      "user": {
+        "id": "u1...",
+        "name": "Kofi Mensah"
+      },
+      "subscription": {
+        "id": "s1...",
+        "name": "Menu Africain — Déjeuner",
+        "provider": {
+          "id": "p1...",
+          "businessName": "Chez Maman Gbo"
+        }
+      }
+    }
+  ]
+}
+```
+
+> **Usage recommandé :** Afficher d'abord les avis `PENDING` en priorité — ce sont ceux qui attendent action.
+
+---
+
+### GET /reviews/pending/count — Nombre d'avis en attente
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Nombre d'avis en attente",
+  "data": { "pendingCount": 7 }
+}
+```
+
+> Utiliser pour afficher un badge sur le menu "Avis" du panel.
+
+---
+
+### GET /reviews/:id — Détail d'un avis
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Avis récupéré",
+  "data": {
+    "id": "a1b2c3d4-...",
+    "rating": 4,
+    "comment": "Très bons repas, livraison ponctuelle.",
+    "status": "PENDING",
+    "moderatedAt": null,
+    "moderatedBy": null,
+    "createdAt": "2026-05-10T12:00:00.000Z",
+    "user": {
+      "id": "u1...",
+      "name": "Kofi Mensah"
+    },
+    "subscription": {
+      "id": "s1...",
+      "name": "Menu Africain — Déjeuner",
+      "provider": {
+        "id": "p1...",
+        "businessName": "Chez Maman Gbo"
+      }
+    },
+    "order": {
+      "id": "o1...",
+      "orderNumber": "ORD-202605-00042"
+    }
+  }
+}
+```
+
+**Réponse 404 ❌ :**
+```json
+{ "success": false, "message": "Avis introuvable", "error": { "code": "REVIEW_NOT_FOUND" } }
+```
+
+---
+
+### PUT /reviews/:id/moderate — Modérer un avis
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Body :**
+```json
+{
+  "status": "APPROVED",
+  "reason": "Avis conforme aux règles de la communauté"
+}
+```
+
+| Champ | Type | Obligatoire | Description |
+|-------|------|-------------|-------------|
+| `status` | enum | ✅ | `APPROVED` ou `REJECTED` |
+| `reason` | string | ❌ | Raison de la décision (utile pour les rejets) |
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Avis modéré",
+  "data": {
+    "id": "a1b2c3d4-...",
+    "rating": 4,
+    "comment": "Très bons repas, livraison ponctuelle.",
+    "status": "APPROVED",
+    "moderatedAt": "2026-05-15T09:30:00.000Z",
+    "moderatedBy": "admin-uuid",
+    "createdAt": "2026-05-10T12:00:00.000Z"
+  }
+}
+```
+
+> **Effet de l'approbation :** La note moyenne de l'abonnement et du prestataire est automatiquement recalculée et mise à jour.
+
+**Réponse 404 ❌ :**
+```json
+{ "success": false, "message": "Avis introuvable", "error": { "code": "REVIEW_NOT_FOUND" } }
+```
+
+---
+
+## 9. ABONNEMENTS ACTIFS — STATISTIQUES
+
+### GET /active-subscriptions/stats — Statistiques d'abonnements actifs
+
+**Header :** `Authorization: Bearer <accessToken>`
+
+**Réponse 200 ✅ :**
+```json
+{
+  "success": true,
+  "message": "Statistiques récupérées",
+  "data": {
+    "activeSubscriptionsCount": 143
+  }
+}
+```
+
+> Correspond au nombre d'utilisateurs qui ont actuellement un abonnement en cours (statut `ACTIVE`, non expiré). À afficher sur le tableau de bord comme KPI "Abonnés actifs".
+
+---
+
 ## Codes d'erreur globaux
 
 | Code | HTTP | Description |
@@ -1159,3 +1341,13 @@ Retourne **tous** les abonnements sans filtre de visibilité — actifs, inactif
 1. `GET /admin/dashboard` → KPIs + graphiques
 2. `GET /orders/pending/count` → badge sur le menu commandes
 3. `GET /admin/providers/pending` → badge sur le menu candidatures (utiliser `data.length`)
+4. `GET /reviews/pending/count` → badge sur le menu avis (champ `data.pendingCount`)
+5. `GET /active-subscriptions/stats` → KPI "Abonnés actifs" (champ `data.activeSubscriptionsCount`)
+
+### Modération des avis
+
+1. `GET /reviews?status=PENDING` → afficher la file d'attente d'avis à modérer
+2. Clic sur un avis → `GET /reviews/:id` → fiche détaillée (auteur, abonnement, commande, texte)
+3. Bouton "Approuver" → `PUT /reviews/:id/moderate` avec `{ "status": "APPROVED" }`
+4. Bouton "Rejeter" → `PUT /reviews/:id/moderate` avec `{ "status": "REJECTED", "reason": "..." }`
+5. Après approbation : la note du prestataire et de l'abonnement est automatiquement mise à jour
