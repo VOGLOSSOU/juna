@@ -239,27 +239,27 @@ export class OrderService {
       throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
     }
 
-    // Calculer la date de fin de l'abonnement
+    // La durée part du moment de l'activation, pas de scheduledFor
+    // scheduledFor reste utile pour le provider (info de préparation)
+    const activatedAt = new Date();
     const durationDays = DURATION_DAYS[subscription.duration];
-    const endsAt = new Date(order.scheduledFor!.getTime() + durationDays * 24 * 60 * 60 * 1000);
+    const endsAt = new Date(activatedAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
     // TODO: Déclencher le paiement au provider ici
     // providerService.processPayment(subscription.providerId, order.amount);
 
     // Activer la commande ET créer l'abonnement actif
     await prisma.$transaction([
-      // Mettre à jour le statut de la commande
       prisma.order.update({
         where: { id },
         data: { status: OrderStatus.ACTIVE }
       }),
-      // Créer l'entrée dans active_subscriptions
       prisma.activeSubscription.create({
         data: {
           userId: order.userId,
           orderId: order.id,
           subscriptionId: subscription.id,
-          startedAt: order.scheduledFor!,
+          startedAt: activatedAt,
           endsAt: endsAt,
           duration: subscription.duration,
         }
