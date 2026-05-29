@@ -165,15 +165,11 @@ function infoTable(rows: string) {
 }
 
 function otpBox(code: string) {
-  const digits = code.split('').map(d =>
-    `<td style="width:44px;height:52px;text-align:center;vertical-align:middle;background-color:${C.bg};border:2px solid ${C.border};border-radius:10px;font-size:26px;font-weight:800;color:${C.orange};">${d}</td>
-     <td style="width:8px;"></td>`
-  ).join('');
-
+  const spaced = code.split('').join('  ');
   return `
-  <table cellpadding="0" cellspacing="0" border="0" style="margin:28px auto;">
-    <tr>${digits}</tr>
-  </table>`;
+  <div style="margin:28px auto;text-align:center;">
+    <span style="display:inline-block;background-color:${C.bg};border:2px solid ${C.border};border-radius:12px;padding:16px 32px;font-size:32px;font-weight:800;color:${C.orange};letter-spacing:8px;font-family:monospace;">${spaced}</span>
+  </div>`;
 }
 
 // ─── Emails ───────────────────────────────────────────────────────────────────
