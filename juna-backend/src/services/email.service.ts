@@ -168,7 +168,7 @@ function otpBox(code: string) {
   const spaced = code.split('').join('  ');
   return `
   <div style="margin:28px auto;text-align:center;">
-    <span style="display:inline-block;background-color:${C.bg};border:2px solid ${C.border};border-radius:12px;padding:16px 32px;font-size:32px;font-weight:800;color:${C.orange};letter-spacing:8px;font-family:monospace;">${spaced}</span>
+    <span style="display:inline-block;background-color:${C.bg};border:2px solid ${C.border};border-radius:12px;padding:16px 28px;font-size:26px;font-weight:800;color:${C.orange};white-space:nowrap;font-family:monospace;">${spaced}</span>
   </div>`;
 }
 
