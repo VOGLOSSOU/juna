@@ -634,6 +634,8 @@ image: <fichier binaire>
         "rating": 4.8,
         "reviewCount": 120,
         "isActive": true,
+        "isImmediate": false,
+        "preparationHours": 2,
         "provider": {
           "id": "prov-uuid",
           "name": "Chez Mariam",
@@ -679,6 +681,8 @@ image: <fichier binaire>
     "rating": 4.8,
     "reviewCount": 120,
     "isActive": true,
+    "isImmediate": false,
+    "preparationHours": 2,
     "provider": {
       "id": "prov-uuid",
       "name": "Chez Mariam",
