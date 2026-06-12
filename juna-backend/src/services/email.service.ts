@@ -199,7 +199,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
         </td>
       </tr>
     </table>
-    ${button('Découvrir Juna', APP_URL)}
+    ${paragraph('Ouvrez l\'application Juna pour découvrir les abonnements disponibles près de chez vous.')}
   `);
   await send({ email, name }, 'Bienvenue sur Juna — Votre compte est actif !', html);
 }
@@ -239,7 +239,6 @@ export async function sendOrderConfirmedEmail(
       infoRow('Montant payé', `${order.amount.toLocaleString('fr-FR')} ${order.currency ?? 'FCFA'}`, true)
     )}
     ${paragraph('Pour démarrer votre abonnement, activez votre commande depuis l\'application.')}
-    ${button('Voir ma commande', APP_URL)}
   `);
   await send({ email, name }, `Commande confirmée #${order.orderNumber} — Juna`, html);
 }
@@ -258,7 +257,7 @@ export async function sendProviderApprovedEmail(email: string, name: string, bus
         </td>
       </tr>
     </table>
-    ${button('Accéder à mon espace prestataire', APP_URL)}
+    ${paragraph('Connectez-vous à l\'application Juna pour accéder à votre espace prestataire.')}
     ${paragraph('Bienvenue dans la famille Juna !')}
   `);
   await send({ email, name }, 'Félicitations — Votre compte prestataire est approuvé !', html);
