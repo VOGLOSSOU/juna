@@ -38,8 +38,11 @@ app.options('*', cors());
 // Compression des réponses
 app.use(compression());
 
-// Parser JSON
-app.use(express.json({ limit: '10mb' }));
+// Parser JSON (rawBody préservé pour la vérification des signatures webhook)
+app.use(express.json({
+  limit: '10mb',
+  verify: (req: any, _res, buf) => { req.rawBody = buf.toString('utf8'); },
+}));
 
 // Parser URL-encoded
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

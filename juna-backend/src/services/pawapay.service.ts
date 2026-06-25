@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { ServiceUnavailableError, ValidationError } from '@/utils/errors.util';
+import { buildSignedHeaders } from '@/utils/pawapay-signature.util';
 
 interface DepositPayload {
   depositId: string;
@@ -58,7 +59,10 @@ export class PawaPayService {
   async initiateDeposit(payload: DepositPayload): Promise<DepositResponse> {
     console.log('[PawaPay] POST /v2/deposits payload:', JSON.stringify(payload));
     try {
-      const { data } = await this.client.post<DepositResponse>('/v2/deposits', payload);
+      const signedHeaders = buildSignedHeaders('POST', '/v2/deposits', payload);
+      const { data } = await this.client.post<DepositResponse>('/v2/deposits', payload, {
+        headers: signedHeaders,
+      });
       console.log('[PawaPay] POST /v2/deposits response:', JSON.stringify(data));
       return data;
     } catch (err: any) {
