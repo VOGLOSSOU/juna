@@ -43,12 +43,8 @@ export class HomeRepository {
   async findProvidersByCity(cityId: string, limit: number) {
     return prisma.provider.findMany({
       where: {
+        cityId,
         status: 'APPROVED',
-        landmarks: {
-          some: {
-            landmark: { cityId },
-          },
-        },
       },
       select: {
         id: true,
