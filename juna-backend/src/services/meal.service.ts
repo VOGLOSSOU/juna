@@ -1,25 +1,29 @@
 import mealRepository from '@/repositories/meal.repository';
 import providerRepository from '@/repositories/provider.repository';
-import {
-  ConflictError,
-  NotFoundError,
-  ForbiddenError,
-} from '@/utils/errors.util';
+import { ConflictError, NotFoundError, ForbiddenError } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
 import { CreateMealInput, UpdateMealInput, MealFiltersInput } from '@/validators/meal.validator';
-import { Meal, MealType } from '@prisma/client';
+
+function resolvePriceFields(data: CreateMealInput | UpdateMealInput) {
+  const priceType = data.priceType ?? 'FIXED';
+
+  if (priceType === 'FIXED') {
+    return { price: data.price!, priceType, priceMin: null, priceMax: null };
+  }
+
+  if (priceType === 'MULTIPLE') {
+    const minFromPricings = Math.min(...(data.pricings ?? []).map((p) => p.price));
+    return { price: minFromPricings, priceType, priceMin: null, priceMax: null };
+  }
+
+  // RANGE
+  return { price: data.priceMin!, priceType, priceMin: data.priceMin!, priceMax: data.priceMax! };
+}
 
 export class MealService {
-  /**
-   * Créer un repas
-   */
-  async create(providerId: string, data: CreateMealInput): Promise<Meal> {
-    // Vérifier que le fournisseur existe et est approuvé
+  async create(providerId: string, data: CreateMealInput) {
     const provider = await providerRepository.findById(providerId);
-    if (!provider) {
-      throw new NotFoundError('Fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
-    }
-
+    if (!provider) throw new NotFoundError('Fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
     if (provider.status !== 'APPROVED') {
       throw new ForbiddenError(
         'Votre compte fournisseur doit être approuvé avant de créer des repas',
@@ -27,144 +31,117 @@ export class MealService {
       );
     }
 
-    // Vérifier si un repas avec le même nom existe déjà pour ce fournisseur
-    const existingMeal = await mealRepository.findByProviderAndName(providerId, data.name);
-    if (existingMeal) {
-      throw new ConflictError(
-        'Un repas avec ce nom existe déjà',
-        ERROR_CODES.MEAL_ALREADY_EXISTS
-      );
-    }
+    const existing = await mealRepository.findByProviderAndName(providerId, data.name);
+    if (existing) throw new ConflictError('Un repas avec ce nom existe déjà', ERROR_CODES.MEAL_ALREADY_EXISTS);
 
-    return mealRepository.create({
+    const { price, priceType, priceMin, priceMax } = resolvePriceFields(data);
+
+    const meal = await mealRepository.create({
       provider: { connect: { id: providerId } },
       name: data.name,
       description: data.description,
-      price: data.price,
+      price,
+      priceType,
+      priceMin,
+      priceMax,
+      priceGuideline: data.priceGuideline ?? null,
       imageUrl: data.imageUrl,
       mealType: data.mealType,
       isActive: true,
     });
+
+    if (priceType === 'MULTIPLE' && data.pricings?.length) {
+      await mealRepository.replacePricings(meal.id, data.pricings);
+    }
+
+    return mealRepository.findById(meal.id);
   }
 
-  /**
-   * Obtenir un repas par ID
-   */
-  async getById(id: string): Promise<Meal> {
+  async getById(id: string) {
     const meal = await mealRepository.findById(id);
-    if (!meal) {
-      throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    }
+    if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     return meal;
   }
 
-  /**
-   * Obtenir un repas par ID avec provider
-   */
   async getByIdWithProvider(id: string) {
     const meal = await mealRepository.findByIdWithProvider(id);
-    if (!meal) {
-      throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    }
+    if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     return meal;
   }
 
-  /**
-   * Obtenir tous les repas d'un fournisseur
-   */
-  async getByProviderId(providerId: string): Promise<Meal[]> {
+  async getByProviderId(providerId: string) {
     return mealRepository.findByProviderId(providerId);
   }
 
-  /**
-   * Obtenir tous les repas actifs d'un fournisseur
-   */
-  async getActiveByProviderId(providerId: string): Promise<Meal[]> {
+  async getActiveByProviderId(providerId: string) {
     return mealRepository.findActiveByProviderId(providerId);
   }
 
-  /**
-   * Lister les repas avec filtres
-   */
-  async getAll(filters?: MealFiltersInput): Promise<Meal[]> {
+  async getAll(filters?: MealFiltersInput) {
     return mealRepository.findAll(filters);
   }
 
-  /**
-   * Mettre à jour un repas
-   */
-  async update(id: string, providerId: string, data: UpdateMealInput): Promise<Meal> {
-    // Vérifier que le repas existe
+  async update(id: string, providerId: string, data: UpdateMealInput) {
     const meal = await mealRepository.findById(id);
-    if (!meal) {
-      throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    }
-
-    // Vérifier que le repas appartient au fournisseur
+    if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à modifier ce repas',
-        ERROR_CODES.FORBIDDEN
-      );
+      throw new ForbiddenError('Vous n\'êtes pas autorisé à modifier ce repas', ERROR_CODES.FORBIDDEN);
     }
 
-    // Vérifier si le nouveau nom n'est pas déjà utilisé par un autre repas
     if (data.name && data.name !== meal.name) {
-      const existingMeal = await mealRepository.findByProviderAndName(providerId, data.name);
-      if (existingMeal && existingMeal.id !== id) {
-        throw new ConflictError(
-          'Un repas avec ce nom existe déjà',
-          ERROR_CODES.MEAL_ALREADY_EXISTS
-        );
+      const existing = await mealRepository.findByProviderAndName(providerId, data.name);
+      if (existing && existing.id !== id) {
+        throw new ConflictError('Un repas avec ce nom existe déjà', ERROR_CODES.MEAL_ALREADY_EXISTS);
       }
     }
 
-    return mealRepository.update(id, {
+    const effectivePriceType = data.priceType ?? meal.priceType;
+    let priceUpdate: Record<string, any> = {};
+
+    if (data.priceType) {
+      const { price, priceType, priceMin, priceMax } = resolvePriceFields({
+        ...data,
+        priceType: data.priceType,
+      } as CreateMealInput);
+      priceUpdate = { price, priceType, priceMin, priceMax };
+    } else if (data.price !== undefined) {
+      priceUpdate.price = data.price;
+    }
+
+    await mealRepository.update(id, {
       name: data.name,
       description: data.description,
-      price: data.price,
       imageUrl: data.imageUrl,
       mealType: data.mealType,
       isActive: data.isActive,
+      priceGuideline: data.priceGuideline,
+      ...priceUpdate,
     });
+
+    if (effectivePriceType === 'MULTIPLE' && data.pricings?.length) {
+      await mealRepository.replacePricings(id, data.pricings);
+    } else if (data.priceType && data.priceType !== 'MULTIPLE') {
+      await mealRepository.replacePricings(id, []);
+    }
+
+    return mealRepository.findById(id);
   }
 
-  /**
-   * Activer/Désactiver un repas
-   */
-  async toggleActive(id: string, providerId: string): Promise<Meal> {
+  async toggleActive(id: string, providerId: string) {
     const meal = await mealRepository.findById(id);
-    if (!meal) {
-      throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    }
-
+    if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à modifier ce repas',
-        ERROR_CODES.FORBIDDEN
-      );
+      throw new ForbiddenError('Vous n\'êtes pas autorisé à modifier ce repas', ERROR_CODES.FORBIDDEN);
     }
-
     return mealRepository.toggleActive(id);
   }
 
-  /**
-   * Supprimer un repas
-   */
   async delete(id: string, providerId: string): Promise<void> {
     const meal = await mealRepository.findById(id);
-    if (!meal) {
-      throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    }
-
+    if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à supprimer ce repas',
-        ERROR_CODES.FORBIDDEN
-      );
+      throw new ForbiddenError('Vous n\'êtes pas autorisé à supprimer ce repas', ERROR_CODES.FORBIDDEN);
     }
-
-    // Vérifier si le repas est utilisé dans des abonnements
     const isUsed = await mealRepository.isUsedInSubscriptions(id);
     if (isUsed) {
       throw new ConflictError(
@@ -172,47 +149,22 @@ export class MealService {
         ERROR_CODES.MEAL_IN_USE
       );
     }
-
     await mealRepository.delete(id);
   }
 
-  /**
-   * Compter les repas d'un fournisseur
-   */
   async countByProvider(providerId: string): Promise<number> {
     return mealRepository.countByProvider(providerId);
   }
 
-  /**
-   * Valider les repas pour un abonnement
-   */
-  async validateMealsForSubscription(
-    providerId: string,
-    mealIds: string[]
-  ): Promise<{ valid: boolean; errors: string[] }> {
+  async validateMealsForSubscription(providerId: string, mealIds: string[]) {
     const errors: string[] = [];
-
     for (const mealId of mealIds) {
       const meal = await mealRepository.findById(mealId);
-      
-      if (!meal) {
-        errors.push(`Repas avec l'ID ${mealId} introuvable`);
-        continue;
-      }
-
-      if (meal.providerId !== providerId) {
-        errors.push(`Le repas "${meal.name}" n'appartient pas à ce fournisseur`);
-      }
-
-      if (!meal.isActive) {
-        errors.push(`Le repas "${meal.name}" n'est pas actif`);
-      }
+      if (!meal) { errors.push(`Repas avec l'ID ${mealId} introuvable`); continue; }
+      if (meal.providerId !== providerId) errors.push(`Le repas "${meal.name}" n'appartient pas à ce fournisseur`);
+      if (!meal.isActive) errors.push(`Le repas "${meal.name}" n'est pas actif`);
     }
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
+    return { valid: errors.length === 0, errors };
   }
 }
 

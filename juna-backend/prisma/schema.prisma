@@ -69,6 +69,12 @@ enum MealType {
   SNACK
 }
 
+enum MealPriceType {
+  FIXED
+  MULTIPLE
+  RANGE
+}
+
 enum SubscriptionType {
   BREAKFAST
   LUNCH
@@ -247,24 +253,41 @@ model Provider {
 }
 
 model Meal {
-  id          String    @id @default(uuid()) @db.Uuid
-  providerId  String    @db.Uuid
-  name        String
-  description String    @db.Text
-  price       Float
-  imageUrl    String?
-  mealType    MealType
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String        @id @default(uuid()) @db.Uuid
+  providerId     String        @db.Uuid
+  name           String
+  description    String        @db.Text
+  price          Float
+  priceType      MealPriceType @default(FIXED)
+  priceMin       Float?
+  priceMax       Float?
+  priceGuideline String?       @db.Text
+  imageUrl       String?
+  mealType       MealType
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   // Relations
-  provider    Provider              @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider             Provider          @relation(fields: [providerId], references: [id], onDelete: Cascade)
   mealsInSubscriptions SubscriptionMeal[]
+  pricings             MealPricing[]
 
   @@index([providerId])
   @@index([mealType])
   @@map("meals")
+}
+
+model MealPricing {
+  id      String @id @default(uuid()) @db.Uuid
+  mealId  String @db.Uuid
+  label   String
+  price   Float
+
+  meal    Meal   @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([mealId])
+  @@map("meal_pricings")
 }
 
 model Subscription {

@@ -98,6 +98,12 @@ export class SubscriptionService {
       name: m.meal.name,
       description: m.meal.description,
       imageUrl: m.meal.imageUrl ?? null,
+      priceType: m.meal.priceType,
+      price: m.meal.price,
+      priceMin: m.meal.priceMin ?? null,
+      priceMax: m.meal.priceMax ?? null,
+      priceGuideline: m.meal.priceGuideline ?? null,
+      pricings: m.meal.pricings ?? [],
     }));
 
     const deliveryZones: string[] = Array.isArray(provider.deliveryZones)
