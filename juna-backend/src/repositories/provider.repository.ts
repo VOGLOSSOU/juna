@@ -173,6 +173,99 @@ export class ProviderRepository {
   }
 
   /**
+   * Page publique d'un provider — toutes les infos visibles par un user
+   */
+  async findPublicProfile(id: string) {
+    return prisma.provider.findUnique({
+      where: { id, status: 'APPROVED' },
+      select: {
+        id: true,
+        businessName: true,
+        description: true,
+        logo: true,
+        businessAddress: true,
+        acceptsDelivery: true,
+        acceptsPickup: true,
+        deliveryZones: true,
+        rating: true,
+        totalReviews: true,
+        createdAt: true,
+        city: {
+          select: {
+            id: true,
+            name: true,
+            country: { select: { id: true, code: true, translations: true } },
+          },
+        },
+        landmarks: {
+          select: {
+            landmark: { select: { id: true, name: true } },
+          },
+        },
+        subscriptions: {
+          where: { isActive: true, isPublic: true },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            price: true,
+            type: true,
+            category: true,
+            duration: true,
+            imageUrl: true,
+            rating: true,
+            totalReviews: true,
+            preparationHours: true,
+            mealsInSubscriptions: {
+              select: {
+                meal: {
+                  select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    imageUrl: true,
+                    mealType: true,
+                    priceType: true,
+                    price: true,
+                    priceMin: true,
+                    priceMax: true,
+                    priceGuideline: true,
+                    pricings: {
+                      select: { id: true, label: true, price: true },
+                      orderBy: { price: 'asc' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          orderBy: { rating: 'desc' },
+        },
+        meals: {
+          where: { isActive: true },
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            imageUrl: true,
+            mealType: true,
+            priceType: true,
+            price: true,
+            priceMin: true,
+            priceMax: true,
+            priceGuideline: true,
+            pricings: {
+              select: { id: true, label: true, price: true },
+              orderBy: { price: 'asc' },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+  }
+
+  /**
    * Supprimer un fournisseur
    */
   async delete(id: string): Promise<Provider> {

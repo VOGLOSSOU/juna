@@ -332,6 +332,77 @@ export class ProviderService {
       message: 'Fournisseur suspendu',
     };
   }
+
+  async getPublicProfile(providerId: string) {
+    const provider = await providerRepository.findPublicProfile(providerId) as any;
+    if (!provider) {
+      throw new NotFoundError('Prestataire introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
+    }
+
+    const subscriptions = provider.subscriptions.map((sub: any) => ({
+      id: sub.id,
+      name: sub.name,
+      description: sub.description,
+      price: sub.price,
+      type: sub.type,
+      category: sub.category,
+      duration: sub.duration,
+      imageUrl: sub.imageUrl ?? null,
+      rating: sub.rating,
+      reviewCount: sub.totalReviews,
+      preparationHours: sub.preparationHours,
+      meals: sub.mealsInSubscriptions.map((m: any) => ({
+        id: m.meal.id,
+        name: m.meal.name,
+        description: m.meal.description,
+        imageUrl: m.meal.imageUrl ?? null,
+        mealType: m.meal.mealType,
+        priceType: m.meal.priceType,
+        price: m.meal.price,
+        priceMin: m.meal.priceMin ?? null,
+        priceMax: m.meal.priceMax ?? null,
+        priceGuideline: m.meal.priceGuideline ?? null,
+        pricings: m.meal.pricings ?? [],
+      })),
+    }));
+
+    const meals = provider.meals.map((meal: any) => ({
+      id: meal.id,
+      name: meal.name,
+      description: meal.description,
+      imageUrl: meal.imageUrl ?? null,
+      mealType: meal.mealType,
+      priceType: meal.priceType,
+      price: meal.price,
+      priceMin: meal.priceMin ?? null,
+      priceMax: meal.priceMax ?? null,
+      priceGuideline: meal.priceGuideline ?? null,
+      pricings: meal.pricings ?? [],
+    }));
+
+    const pickupPoints = provider.landmarks.map((pl: any) => ({
+      id: pl.landmark.id,
+      name: pl.landmark.name,
+    }));
+
+    return {
+      id: provider.id,
+      businessName: provider.businessName,
+      description: provider.description ?? null,
+      logo: provider.logo,
+      businessAddress: provider.businessAddress,
+      rating: provider.rating,
+      reviewCount: provider.totalReviews,
+      acceptsDelivery: provider.acceptsDelivery,
+      acceptsPickup: provider.acceptsPickup,
+      deliveryZones: provider.deliveryZones ?? [],
+      city: provider.city,
+      pickupPoints,
+      memberSince: provider.createdAt,
+      subscriptions,
+      meals,
+    };
+  }
 }
 
 export default new ProviderService();

@@ -109,6 +109,20 @@ export class ProviderController {
   }
 
   /**
+   * Page publique d'un prestataire
+   * GET /api/v1/providers/:id
+   */
+  async getPublicProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { id } = req.params;
+      const result = await providerService.getPublicProfile(id);
+      sendSuccess(res, 'Profil prestataire', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Suspendre un fournisseur (Admin)
    * PUT /api/v1/admin/providers/:id/suspend
    */
