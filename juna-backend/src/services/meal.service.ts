@@ -4,6 +4,15 @@ import { ConflictError, NotFoundError, ForbiddenError } from '@/utils/errors.uti
 import { ERROR_CODES } from '@/constants/errors';
 import { CreateMealInput, UpdateMealInput, MealFiltersInput } from '@/validators/meal.validator';
 
+function serializeMealProvider(provider: { id: string; businessName: string; logo: string; status: string }) {
+  return {
+    id: provider.id,
+    businessName: provider.businessName,
+    logo: provider.logo,
+    isVerified: provider.status === 'APPROVED',
+  };
+}
+
 function resolvePriceFields(data: CreateMealInput | UpdateMealInput) {
   const priceType = data.priceType ?? 'FIXED';
 
@@ -66,7 +75,7 @@ export class MealService {
   async getByIdWithProvider(id: string) {
     const meal = await mealRepository.findByIdWithProvider(id);
     if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    return meal;
+    return { ...meal, provider: serializeMealProvider((meal as any).provider) };
   }
 
   async getByProviderId(providerId: string) {
@@ -78,7 +87,8 @@ export class MealService {
   }
 
   async getAll(filters?: MealFiltersInput) {
-    return mealRepository.findAll(filters);
+    const meals = await mealRepository.findAll(filters);
+    return meals.map((meal) => ({ ...meal, provider: serializeMealProvider((meal as any).provider) }));
   }
 
   async update(id: string, providerId: string, data: UpdateMealInput) {

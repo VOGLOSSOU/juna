@@ -25,7 +25,7 @@ export class MealRepository {
       where: { id },
       include: {
         ...MEAL_WITH_PRICINGS,
-        provider: { select: { id: true, businessName: true } },
+        provider: { select: { id: true, businessName: true, logo: true, status: true } },
       },
     });
   }
@@ -90,7 +90,7 @@ export class MealRepository {
       where,
       include: {
         ...MEAL_WITH_PRICINGS,
-        provider: { select: { id: true, businessName: true } },
+        provider: { select: { id: true, businessName: true, logo: true, status: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
