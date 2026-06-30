@@ -184,6 +184,7 @@ export class ProviderRepository {
         description: true,
         logo: true,
         businessAddress: true,
+        status: true,
         acceptsDelivery: true,
         acceptsPickup: true,
         deliveryZones: true,

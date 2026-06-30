@@ -391,6 +391,7 @@ export class ProviderService {
       description: provider.description ?? null,
       logo: provider.logo,
       businessAddress: provider.businessAddress,
+      isVerified: provider.status === 'APPROVED',
       rating: provider.rating,
       reviewCount: provider.totalReviews,
       acceptsDelivery: provider.acceptsDelivery,
