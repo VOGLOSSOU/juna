@@ -45,6 +45,13 @@ export const SUCCESS_MESSAGES = {
   PROPOSAL_APPROVED: 'Proposition validée avec succès',
   PROPOSAL_REJECTED: 'Proposition rejetée',
 
+  // Subscription proposal
+  SUBSCRIPTION_PROPOSAL_CREATED: 'Votre proposition a été envoyée au fournisseur',
+  SUBSCRIPTION_PROPOSAL_FETCHED: 'Proposition récupérée avec succès',
+  SUBSCRIPTION_PROPOSALS_FETCHED: 'Propositions récupérées avec succès',
+  SUBSCRIPTION_PROPOSAL_APPROVED: 'Proposition approuvée, abonnement créé',
+  SUBSCRIPTION_PROPOSAL_REJECTED: 'Proposition rejetée',
+
   // Review
   REVIEW_CREATED: 'Avis créé avec succès, en attente de modération',
   REVIEW_UPDATED: 'Avis mis à jour avec succès',

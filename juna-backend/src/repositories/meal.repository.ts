@@ -46,6 +46,13 @@ export class MealRepository {
     });
   }
 
+  async findManyByIds(ids: string[]) {
+    return prisma.meal.findMany({
+      where: { id: { in: ids } },
+      include: { pricings: { select: { id: true, label: true } } },
+    });
+  }
+
   async findByProviderAndName(providerId: string, name: string): Promise<Meal | null> {
     return prisma.meal.findFirst({
       where: { providerId, name: { equals: name, mode: 'insensitive' } },
@@ -119,6 +126,13 @@ export class MealRepository {
 
   async isUsedInSubscriptions(id: string): Promise<boolean> {
     const count = await prisma.subscriptionMeal.count({ where: { mealId: id } });
+    return count > 0;
+  }
+
+  async isUsedInPendingProposals(id: string): Promise<boolean> {
+    const count = await prisma.subscriptionProposalMeal.count({
+      where: { mealId: id, proposal: { status: 'PENDING' } },
+    });
     return count > 0;
   }
 }

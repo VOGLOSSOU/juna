@@ -21,11 +21,11 @@ enum UserRole {
 }
 
 enum OrderStatus {
-  PENDING     // Commande créée, en attente de paiement
-  CONFIRMED   // Paiement réussi, commande validée
-  ACTIVE      // Commande activée par l'utilisateur (provider reçoit paiement)
-  COMPLETED   // Commande terminée (retrait validé ou livraison confirmée)
-  CANCELLED   // Annulée
+  PENDING // Commande créée, en attente de paiement
+  CONFIRMED // Paiement réussi, commande validée
+  ACTIVE // Commande activée par l'utilisateur (provider reçoit paiement)
+  COMPLETED // Commande terminée (retrait validé ou livraison confirmée)
+  CANCELLED // Annulée
 }
 
 enum PaymentStatus {
@@ -56,10 +56,10 @@ enum SubscriptionDuration {
   WEEK
   TWO_WEEKS
   MONTH
-  WORK_WEEK       // 5 jours (Lundi-Vendredi)
-  WORK_WEEK_2     // 10 jours (2 semaines de travail)
-  WORK_MONTH      // 20 jours (4 semaines de travail)
-  WEEKEND         // 2 jours (Samedi-Dimanche)
+  WORK_WEEK // 5 jours (Lundi-Vendredi)
+  WORK_WEEK_2 // 10 jours (2 semaines de travail)
+  WORK_MONTH // 20 jours (4 semaines de travail)
+  WEEKEND // 2 jours (Samedi-Dimanche)
 }
 
 enum MealType {
@@ -158,6 +158,9 @@ enum NotificationType {
   SUBSCRIPTION_RENEWED
   REFERRAL_REWARD
   SYSTEM
+  SUBSCRIPTION_PROPOSAL_RECEIVED
+  SUBSCRIPTION_PROPOSAL_APPROVED
+  SUBSCRIPTION_PROPOSAL_REJECTED
 }
 
 enum ReferralStatus {
@@ -166,39 +169,46 @@ enum ReferralStatus {
   EXPIRED
 }
 
+enum SubscriptionProposalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 // ============================================
 // MODELS
 // ============================================
 
 model User {
-  id            String        @id @default(uuid()) @db.Uuid
-  email         String        @unique
-  password      String
-  name          String
-  phone         String?       @unique
-  role          UserRole      @default(USER)
-  isVerified    Boolean       @default(false)
-  isActive      Boolean       @default(true)
-  passwordResetToken        String?   @unique
-  passwordResetExpires      DateTime?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id                   String    @id @default(uuid()) @db.Uuid
+  email                String    @unique
+  password             String
+  name                 String
+  phone                String?   @unique
+  role                 UserRole  @default(USER)
+  isVerified           Boolean   @default(false)
+  isActive             Boolean   @default(true)
+  passwordResetToken   String?   @unique
+  passwordResetExpires DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   // Relations
-  profile            UserProfile?
-  provider           Provider?
-  admin              Admin?
-  orders             Order[]
-  payments           Payment[]
-  proposals          CustomProposal[]
-  reviews            Review[]
-  tickets            SupportTicket[]
-  notifications      Notification[]
-  refreshTokens      RefreshToken[]
-  referrals          Referral[]     @relation("Referrer")
-  referredBy         Referral[]     @relation("Referee")
-  ticketMessages     TicketMessage[]
-  activeSubscriptions ActiveSubscription[]
+  profile               UserProfile?
+  provider              Provider?
+  admin                 Admin?
+  orders                Order[]
+  payments              Payment[]
+  proposals             CustomProposal[]
+  subscriptionProposals SubscriptionProposal[]
+  reviews               Review[]
+  tickets               SupportTicket[]
+  notifications         Notification[]
+  refreshTokens         RefreshToken[]
+  referrals             Referral[]             @relation("Referrer")
+  referredBy            Referral[]             @relation("Referee")
+  ticketMessages        TicketMessage[]
+  activeSubscriptions   ActiveSubscription[]
 
   @@index([email])
   @@index([phone])
@@ -206,46 +216,47 @@ model User {
 }
 
 model UserProfile {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @unique @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @db.Uuid
   avatar      String?
   address     String?
-  cityId      String?   @db.Uuid
+  cityId      String?  @db.Uuid
   preferences Json?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  city        City?     @relation(fields: [cityId], references: [id])
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City? @relation(fields: [cityId], references: [id])
 
   @@map("user_profiles")
 }
 
 model Provider {
-  id              String          @id @default(uuid()) @db.Uuid
-  userId          String          @unique @db.Uuid
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @unique @db.Uuid
   businessName    String
-  description     String?         @db.Text
+  description     String?        @db.Text
   businessAddress String
   logo            String
-  cityId          String          @db.Uuid
-  acceptsDelivery Boolean         @default(false)
-  acceptsPickup   Boolean         @default(false)
+  cityId          String         @db.Uuid
+  acceptsDelivery Boolean        @default(false)
+  acceptsPickup   Boolean        @default(false)
   deliveryZones   Json?
   documentUrl     String?
-  status          ProviderStatus  @default(PENDING)
-  rating          Float           @default(0)
-  totalReviews    Int             @default(0)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  status          ProviderStatus @default(PENDING)
+  rating          Float          @default(0)
+  totalReviews    Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   // Relations
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  city            City            @relation(fields: [cityId], references: [id])
-  subscriptions   Subscription[]
-  meals           Meal[]
-  landmarks       ProviderLandmark[]
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city                  City                   @relation(fields: [cityId], references: [id])
+  subscriptions         Subscription[]
+  meals                 Meal[]
+  landmarks             ProviderLandmark[]
+  subscriptionProposals SubscriptionProposal[]
 
   @@index([status])
   @@index([cityId])
@@ -269,9 +280,10 @@ model Meal {
   updatedAt      DateTime      @updatedAt
 
   // Relations
-  provider             Provider          @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider             Provider                   @relation(fields: [providerId], references: [id], onDelete: Cascade)
   mealsInSubscriptions SubscriptionMeal[]
   pricings             MealPricing[]
+  proposalMeals        SubscriptionProposalMeal[]
 
   @@index([providerId])
   @@index([mealType])
@@ -279,45 +291,46 @@ model Meal {
 }
 
 model MealPricing {
-  id      String @id @default(uuid()) @db.Uuid
-  mealId  String @db.Uuid
-  label   String
-  price   Float
+  id     String @id @default(uuid()) @db.Uuid
+  mealId String @db.Uuid
+  label  String
+  price  Float
 
-  meal    Meal   @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  meal Meal @relation(fields: [mealId], references: [id], onDelete: Cascade)
 
   @@index([mealId])
   @@map("meal_pricings")
 }
 
 model Subscription {
-  id               String             @id @default(uuid()) @db.Uuid
-  providerId       String             @db.Uuid
-  name             String
-  description      String             @db.Text
-  price           Float
-  junaCommissionPercent Float          @default(10) // Pourcentage de commission JUNA (0-100)
-  type             SubscriptionType
-  category         SubscriptionCategory
-  duration        SubscriptionDuration
-  isActive         Boolean            @default(true)
-  isPublic         Boolean            @default(true)
-  isImmediate      Boolean            @default(true)
-  preparationHours Int                @default(0)
-  imageUrl         String
-  subscriberCount  Int                @default(0)
-  rating           Float              @default(0)
-  totalReviews     Int                @default(0)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                    String               @id @default(uuid()) @db.Uuid
+  providerId            String               @db.Uuid
+  name                  String
+  description           String               @db.Text
+  price                 Float
+  junaCommissionPercent Float                @default(10) // Pourcentage de commission JUNA (0-100)
+  type                  SubscriptionType
+  category              SubscriptionCategory
+  duration              SubscriptionDuration
+  isActive              Boolean              @default(true)
+  isPublic              Boolean              @default(true)
+  isImmediate           Boolean              @default(true)
+  preparationHours      Int                  @default(0)
+  imageUrl              String
+  subscriberCount       Int                  @default(0)
+  rating                Float                @default(0)
+  totalReviews          Int                  @default(0)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
 
   // Relations
-  provider              Provider                @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  orders                Order[]
-  reviews               Review[]
-  proposals             CustomProposal[]
-  mealsInSubscriptions  SubscriptionMeal[]
-  activeSubscriptions   ActiveSubscription[]
+  provider             Provider              @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  orders               Order[]
+  reviews              Review[]
+  proposals            CustomProposal[]
+  mealsInSubscriptions SubscriptionMeal[]
+  activeSubscriptions  ActiveSubscription[]
+  originProposal       SubscriptionProposal?
 
   @@index([providerId])
   @@index([type])
@@ -329,45 +342,45 @@ model Subscription {
 }
 
 model SubscriptionMeal {
-  id             String      @id @default(uuid()) @db.Uuid
-  subscriptionId String      @db.Uuid
-  mealId         String      @db.Uuid
-  quantity       Int         @default(1)
+  id             String @id @default(uuid()) @db.Uuid
+  subscriptionId String @db.Uuid
+  mealId         String @db.Uuid
+  quantity       Int    @default(1)
 
   // Relations
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  meal           Meal        @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  meal         Meal         @relation(fields: [mealId], references: [id], onDelete: Cascade)
 
   @@unique([subscriptionId, mealId])
   @@map("subscription_meals")
 }
 
 model Order {
-  id              String          @id @default(uuid()) @db.Uuid
-  userId          String          @db.Uuid
-  subscriptionId  String          @db.Uuid
-  orderNumber     String          @unique
+  id              String         @id @default(uuid()) @db.Uuid
+  userId          String         @db.Uuid
+  subscriptionId  String         @db.Uuid
+  orderNumber     String         @unique
   amount          Float
-  status          OrderStatus     @default(PENDING)
+  status          OrderStatus    @default(PENDING)
   deliveryMethod  DeliveryMethod
   deliveryAddress String?
   deliveryCity    String?
-  deliveryCost    Float           @default(0)
+  deliveryCost    Float          @default(0)
   pickupLocation  String?
   scheduledFor    DateTime?
   completedAt     DateTime?
-  qrCode          String?         @unique
+  qrCode          String?        @unique
   metadata        Json?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   // Relations
-  user                 User                  @relation(fields: [userId], references: [id])
-  subscription         Subscription          @relation(fields: [subscriptionId], references: [id])
-  payment              Payment?
-  review               Review?
-  tickets              SupportTicket[]
-  activeSubscription   ActiveSubscription?
+  user               User                @relation(fields: [userId], references: [id])
+  subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
+  payment            Payment?
+  review             Review?
+  tickets            SupportTicket[]
+  activeSubscription ActiveSubscription?
 
   @@index([userId])
   @@index([subscriptionId])
@@ -391,8 +404,8 @@ model Payment {
   updatedAt       DateTime      @updatedAt
 
   // Relations
-  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  user            User          @relation(fields: [userId], references: [id])
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([status])
@@ -401,27 +414,27 @@ model Payment {
 }
 
 model CustomProposal {
-  id                    String         @id @default(uuid()) @db.Uuid
-  userId                String         @db.Uuid
-  foodType              String
-  frequency             String
-  mealType              MealType
-  budget                Float
-  zone                  String
-  cityId                String         @db.Uuid
-  details               String?        @db.Text
-  isPublic              Boolean        @default(false)
-  status                ProposalStatus @default(PENDING)
-  rejectionReason       String?        @db.Text
-  assignedSubscriptionId String?       @unique @db.Uuid
-  validatedAt           DateTime?
-  createdAt             DateTime       @default(now())
-  updatedAt             DateTime       @updatedAt
+  id                     String         @id @default(uuid()) @db.Uuid
+  userId                 String         @db.Uuid
+  foodType               String
+  frequency              String
+  mealType               MealType
+  budget                 Float
+  zone                   String
+  cityId                 String         @db.Uuid
+  details                String?        @db.Text
+  isPublic               Boolean        @default(false)
+  status                 ProposalStatus @default(PENDING)
+  rejectionReason        String?        @db.Text
+  assignedSubscriptionId String?        @unique @db.Uuid
+  validatedAt            DateTime?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
   // Relations
-  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscription          Subscription?  @relation(fields: [assignedSubscriptionId], references: [id])
-  city                  City           @relation(fields: [cityId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription? @relation(fields: [assignedSubscriptionId], references: [id])
+  city         City          @relation(fields: [cityId], references: [id])
 
   @@index([userId])
   @@index([status])
@@ -429,23 +442,72 @@ model CustomProposal {
   @@map("custom_proposals")
 }
 
-model Review {
-  id              String       @id @default(uuid()) @db.Uuid
-  userId          String       @db.Uuid
-  subscriptionId  String       @db.Uuid
-  orderId         String       @unique @db.Uuid
-  rating          Int
-  comment         String?      @db.Text
-  status          ReviewStatus @default(PENDING)
-  moderatedAt     DateTime?
-  moderatedBy     String?      @db.Uuid
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+// Proposition d'abonnement composée par un user à partir du catalogue
+// d'un provider précis. Le provider valide/ajuste/rejette ; en cas
+// d'approbation, un nouvel abonnement public est créé.
+model SubscriptionProposal {
+  id                      String                     @id @default(uuid()) @db.Uuid
+  userId                  String                     @db.Uuid
+  providerId              String                     @db.Uuid
+  type                    SubscriptionType
+  category                SubscriptionCategory
+  duration                SubscriptionDuration
+  message                 String?                    @db.Text
+  status                  SubscriptionProposalStatus @default(PENDING)
+  rejectionReason         String?                    @db.Text
+  resultingSubscriptionId String?                    @unique @db.Uuid
+  respondedAt             DateTime?
+  createdAt               DateTime                   @default(now())
+  updatedAt               DateTime                   @updatedAt
 
   // Relations
-  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  order           Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user                  User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider              Provider                   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  resultingSubscription Subscription?              @relation(fields: [resultingSubscriptionId], references: [id])
+  meals                 SubscriptionProposalMeal[]
+
+  @@index([userId, status])
+  @@index([providerId, status])
+  @@map("subscription_proposals")
+}
+
+model SubscriptionProposalMeal {
+  id               String  @id @default(uuid()) @db.Uuid
+  proposalId       String  @db.Uuid
+  mealId           String  @db.Uuid
+  // Snapshot du label de la variante choisie pour un plat MULTIPLE (ex: "Demi").
+  // Volontairement pas une FK vers MealPricing : replacePricings() recrée les
+  // lignes de prix à chaque édition, ce qui invaliderait silencieusement la
+  // sélection du user via cascade.
+  mealPricingLabel String?
+  quantity         Int     @default(1)
+
+  // Relations
+  proposal SubscriptionProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  meal     Meal                 @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@unique([proposalId, mealId])
+  @@index([mealId])
+  @@map("subscription_proposal_meals")
+}
+
+model Review {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @db.Uuid
+  subscriptionId String       @db.Uuid
+  orderId        String       @unique @db.Uuid
+  rating         Int
+  comment        String?      @db.Text
+  status         ReviewStatus @default(PENDING)
+  moderatedAt    DateTime?
+  moderatedBy    String?      @db.Uuid
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([subscriptionId])
@@ -454,23 +516,23 @@ model Review {
 }
 
 model SupportTicket {
-  id          String          @id @default(uuid()) @db.Uuid
-  userId      String          @db.Uuid
-  orderId     String?         @db.Uuid
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String         @db.Uuid
+  orderId     String?        @db.Uuid
   category    TicketCategory
   subject     String
-  description String          @db.Text
-  status      TicketStatus    @default(OPEN)
-  priority    TicketPriority  @default(MEDIUM)
-  assignedTo  String?         @db.Uuid
+  description String         @db.Text
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  assignedTo  String?        @db.Uuid
   resolvedAt  DateTime?
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   // Relations
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order       Order?          @relation(fields: [orderId], references: [id])
-  messages    TicketMessage[]
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order    Order?          @relation(fields: [orderId], references: [id])
+  messages TicketMessage[]
 
   @@index([userId])
   @@index([status])
@@ -479,16 +541,16 @@ model SupportTicket {
 }
 
 model TicketMessage {
-  id          String        @id @default(uuid()) @db.Uuid
-  ticketId    String        @db.Uuid
-  senderId    String        @db.Uuid
-  message     String        @db.Text
+  id          String   @id @default(uuid()) @db.Uuid
+  ticketId    String   @db.Uuid
+  senderId    String   @db.Uuid
+  message     String   @db.Text
   attachments Json?
-  createdAt   DateTime      @default(now())
+  createdAt   DateTime @default(now())
 
   // Relations
-  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  sender      User          @relation(fields: [senderId], references: [id])
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderId], references: [id])
 
   @@index([ticketId])
   @@map("ticket_messages")
@@ -506,7 +568,7 @@ model Notification {
   createdAt DateTime         @default(now())
 
   // Relations
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isRead])
@@ -516,13 +578,13 @@ model Notification {
 model RefreshToken {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
-  token     String   @unique  @db.Text
+  token     String   @unique @db.Text
   expiresAt DateTime
   isRevoked Boolean  @default(false)
   createdAt DateTime @default(now())
 
   // Relations
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
@@ -544,18 +606,18 @@ model EmailVerificationCode {
 }
 
 model Referral {
-  id            String         @id @default(uuid()) @db.Uuid
-  referrerId    String         @db.Uuid
-  refereeId     String?        @db.Uuid
-  code          String         @unique
-  status        ReferralStatus @default(PENDING)
-  rewardAmount  Float          @default(0)
-  completedAt   DateTime?
-  createdAt     DateTime       @default(now())
+  id           String         @id @default(uuid()) @db.Uuid
+  referrerId   String         @db.Uuid
+  refereeId    String?        @db.Uuid
+  code         String         @unique
+  status       ReferralStatus @default(PENDING)
+  rewardAmount Float          @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime       @default(now())
 
   // Relations
-  referrer      User           @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
-  referee       User?          @relation("Referee", fields: [refereeId], references: [id])
+  referrer User  @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User? @relation("Referee", fields: [refereeId], references: [id])
 
   @@index([referrerId])
   @@index([code])
@@ -571,7 +633,7 @@ model Admin {
   updatedAt   DateTime @updatedAt
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admins")
 }
@@ -582,26 +644,26 @@ model Admin {
 
 model Country {
   id           String   @id @default(uuid()) @db.Uuid
-  code         String   @unique              // "BJ", "CI", "SN"
-  translations Json                          // { "fr": "Bénin", "en": "Benin" }
+  code         String   @unique // "BJ", "CI", "SN"
+  translations Json // { "fr": "Bénin", "en": "Benin" }
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
 
   // Relations
-  cities       City[]
+  cities City[]
 
   @@map("countries")
 }
 
 model City {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String                            // "Lokossa", "Cotonou"
+  name      String // "Lokossa", "Cotonou"
   countryId String   @db.Uuid
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
   // Relations
-  country      Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  country      Country          @relation(fields: [countryId], references: [id], onDelete: Cascade)
   landmarks    Landmark[]
   providers    Provider[]
   userProfiles UserProfile[]
@@ -614,7 +676,7 @@ model City {
 
 model Landmark {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String                            // "IUT de Lokossa", "Mairie de Lokossa"
+  name      String // "IUT de Lokossa", "Mairie de Lokossa"
   cityId    String   @db.Uuid
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -629,12 +691,12 @@ model Landmark {
 }
 
 model ProviderLandmark {
-  providerId  String   @db.Uuid
-  landmarkId  String   @db.Uuid
+  providerId String @db.Uuid
+  landmarkId String @db.Uuid
 
   // Relations
-  provider    Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  landmark    Landmark @relation(fields: [landmarkId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  landmark Landmark @relation(fields: [landmarkId], references: [id], onDelete: Cascade)
 
   @@id([providerId, landmarkId])
   @@map("provider_landmarks")
@@ -678,19 +740,19 @@ model Analytics {
 // ============================================
 
 model ActiveSubscription {
-  id              String                @id @default(uuid()) @db.Uuid
-  userId          String                @db.Uuid
-  orderId         String                @unique @db.Uuid
-  subscriptionId  String                @db.Uuid
-  startedAt       DateTime
-  endsAt          DateTime
-  duration        SubscriptionDuration
-  createdAt       DateTime              @default(now())
+  id             String               @id @default(uuid()) @db.Uuid
+  userId         String               @db.Uuid
+  orderId        String               @unique @db.Uuid
+  subscriptionId String               @db.Uuid
+  startedAt      DateTime
+  endsAt         DateTime
+  duration       SubscriptionDuration
+  createdAt      DateTime             @default(now())
 
   // Relations
-  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order           Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  subscription    Subscription          @relation(fields: [subscriptionId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
 
   @@index([userId])
   @@index([endsAt])

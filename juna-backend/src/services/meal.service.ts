@@ -4,7 +4,12 @@ import { ConflictError, NotFoundError, ForbiddenError } from '@/utils/errors.uti
 import { ERROR_CODES } from '@/constants/errors';
 import { CreateMealInput, UpdateMealInput, MealFiltersInput } from '@/validators/meal.validator';
 
-function serializeMealProvider(provider: { id: string; businessName: string; logo: string; status: string }) {
+function serializeMealProvider(provider: {
+  id: string;
+  businessName: string;
+  logo: string;
+  status: string;
+}) {
   return {
     id: provider.id,
     businessName: provider.businessName,
@@ -32,7 +37,8 @@ function resolvePriceFields(data: CreateMealInput | UpdateMealInput) {
 export class MealService {
   async create(providerId: string, data: CreateMealInput) {
     const provider = await providerRepository.findById(providerId);
-    if (!provider) throw new NotFoundError('Fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
+    if (!provider)
+      throw new NotFoundError('Fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
     if (provider.status !== 'APPROVED') {
       throw new ForbiddenError(
         'Votre compte fournisseur doit être approuvé avant de créer des repas',
@@ -41,7 +47,8 @@ export class MealService {
     }
 
     const existing = await mealRepository.findByProviderAndName(providerId, data.name);
-    if (existing) throw new ConflictError('Un repas avec ce nom existe déjà', ERROR_CODES.MEAL_ALREADY_EXISTS);
+    if (existing)
+      throw new ConflictError('Un repas avec ce nom existe déjà', ERROR_CODES.MEAL_ALREADY_EXISTS);
 
     const { price, priceType, priceMin, priceMax } = resolvePriceFields(data);
 
@@ -88,20 +95,29 @@ export class MealService {
 
   async getAll(filters?: MealFiltersInput) {
     const meals = await mealRepository.findAll(filters);
-    return meals.map((meal) => ({ ...meal, provider: serializeMealProvider((meal as any).provider) }));
+    return meals.map((meal) => ({
+      ...meal,
+      provider: serializeMealProvider((meal as any).provider),
+    }));
   }
 
   async update(id: string, providerId: string, data: UpdateMealInput) {
     const meal = await mealRepository.findById(id);
     if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError('Vous n\'êtes pas autorisé à modifier ce repas', ERROR_CODES.FORBIDDEN);
+      throw new ForbiddenError(
+        "Vous n'êtes pas autorisé à modifier ce repas",
+        ERROR_CODES.FORBIDDEN
+      );
     }
 
     if (data.name && data.name !== meal.name) {
       const existing = await mealRepository.findByProviderAndName(providerId, data.name);
       if (existing && existing.id !== id) {
-        throw new ConflictError('Un repas avec ce nom existe déjà', ERROR_CODES.MEAL_ALREADY_EXISTS);
+        throw new ConflictError(
+          'Un repas avec ce nom existe déjà',
+          ERROR_CODES.MEAL_ALREADY_EXISTS
+        );
       }
     }
 
@@ -141,7 +157,10 @@ export class MealService {
     const meal = await mealRepository.findById(id);
     if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError('Vous n\'êtes pas autorisé à modifier ce repas', ERROR_CODES.FORBIDDEN);
+      throw new ForbiddenError(
+        "Vous n'êtes pas autorisé à modifier ce repas",
+        ERROR_CODES.FORBIDDEN
+      );
     }
     return mealRepository.toggleActive(id);
   }
@@ -150,13 +169,23 @@ export class MealService {
     const meal = await mealRepository.findById(id);
     if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
     if (meal.providerId !== providerId) {
-      throw new ForbiddenError('Vous n\'êtes pas autorisé à supprimer ce repas', ERROR_CODES.FORBIDDEN);
+      throw new ForbiddenError(
+        "Vous n'êtes pas autorisé à supprimer ce repas",
+        ERROR_CODES.FORBIDDEN
+      );
     }
     const isUsed = await mealRepository.isUsedInSubscriptions(id);
     if (isUsed) {
       throw new ConflictError(
         'Ce repas est utilisé dans des abonnements et ne peut pas être supprimé',
         ERROR_CODES.MEAL_IN_USE
+      );
+    }
+    const isInPendingProposal = await mealRepository.isUsedInPendingProposals(id);
+    if (isInPendingProposal) {
+      throw new ConflictError(
+        "Ce repas est référencé dans une proposition d'abonnement en attente et ne peut pas être supprimé",
+        ERROR_CODES.MEAL_IN_PENDING_PROPOSAL
       );
     }
     await mealRepository.delete(id);
@@ -170,8 +199,12 @@ export class MealService {
     const errors: string[] = [];
     for (const mealId of mealIds) {
       const meal = await mealRepository.findById(mealId);
-      if (!meal) { errors.push(`Repas avec l'ID ${mealId} introuvable`); continue; }
-      if (meal.providerId !== providerId) errors.push(`Le repas "${meal.name}" n'appartient pas à ce fournisseur`);
+      if (!meal) {
+        errors.push(`Repas avec l'ID ${mealId} introuvable`);
+        continue;
+      }
+      if (meal.providerId !== providerId)
+        errors.push(`Le repas "${meal.name}" n'appartient pas à ce fournisseur`);
       if (!meal.isActive) errors.push(`Le repas "${meal.name}" n'est pas actif`);
     }
     return { valid: errors.length === 0, errors };
