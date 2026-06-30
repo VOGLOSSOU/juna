@@ -35,9 +35,6 @@ Thumbs.db
 coverage/
 .nyc_output/
 
-# Prisma
-prisma/migrations/**/*.sql
-
 # Temporary files
 *.tmp
 temp/
