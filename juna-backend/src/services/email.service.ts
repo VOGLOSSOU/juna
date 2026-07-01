@@ -5,7 +5,7 @@ const brevo = new BrevoClient({
 });
 
 const SENDER = {
-  name: process.env.BREVO_SENDER_NAME ?? 'Juna',
+  name: process.env.BREVO_SENDER_NAME ?? 'Juna Eats',
   email: process.env.BREVO_SENDER_EMAIL ?? 'noreply@juna.app',
 };
 
@@ -71,10 +71,10 @@ function layout(title: string, content: string) {
               <table cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td style="vertical-align:middle;padding-right:12px;">
-                    <img src="${LOGO_URL}" alt="Juna" height="36" style="display:block;height:36px;width:auto;border:0;" />
+                    <img src="${LOGO_URL}" alt="Juna Eats" height="36" style="display:block;height:36px;width:auto;border:0;" />
                   </td>
                   <td style="vertical-align:middle;">
-                    <span style="font-size:22px;font-weight:800;color:${C.orange};letter-spacing:1px;">JUNA</span>
+                    <span style="font-size:22px;font-weight:800;color:${C.orange};letter-spacing:1px;">JUNA EATS</span>
                   </td>
                 </tr>
               </table>
@@ -97,7 +97,7 @@ function layout(title: string, content: string) {
           <!-- Footer -->
           <tr>
             <td align="center" style="padding:24px 40px;color:${C.muted};font-size:12px;line-height:1.6;">
-              &copy; ${year} <strong style="color:${C.navy};">Juna</strong> &mdash; Abonnements de nourriture<br/>
+              &copy; ${year} <strong style="color:${C.navy};">Juna Eats</strong> &mdash; Abonnements de nourriture<br/>
               <span style="color:${C.border};">&#9679;</span>&nbsp;
               Si vous n'êtes pas à l'origine de cette action, ignorez simplement cet email.
             </td>
@@ -175,18 +175,18 @@ function otpBox(code: string) {
 // ─── Emails ───────────────────────────────────────────────────────────────────
 
 export async function sendVerificationCodeEmail(email: string, code: string) {
-  const html = layout('Votre code de confirmation — Juna', `
+  const html = layout('Votre code de confirmation — Juna Eats', `
     ${heading('Voici votre code de confirmation')}
-    ${paragraph('Entrez ce code dans l\'application Juna pour valider votre adresse et continuer.')}
+    ${paragraph('Entrez ce code dans l\'application Juna Eats pour valider votre adresse et continuer.')}
     ${otpBox(code)}
     ${notice('⏱', 'Ce code est valable <strong>10 minutes</strong>. Ne le partagez avec personne.')}
     <p style="margin:16px 0 0;color:${C.muted};font-size:13px;text-align:center;">Vous n'avez pas demandé ce code ? Ignorez cet email.</p>
   `);
-  await send({ email }, 'Votre code de confirmation Juna', html);
+  await send({ email }, 'Votre code de confirmation Juna Eats', html);
 }
 
 export async function sendWelcomeEmail(email: string, name: string) {
-  const html = layout('Bienvenue sur Juna !', `
+  const html = layout('Bienvenue sur Juna Eats !', `
     ${heading(`Bienvenue, ${name} ! 🎉`)}
     ${paragraph('Votre compte est maintenant <strong>actif et vérifié</strong>. Vous pouvez dès à présent explorer nos abonnements repas et passer commande auprès de nos prestataires.')}
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
@@ -199,14 +199,14 @@ export async function sendWelcomeEmail(email: string, name: string) {
         </td>
       </tr>
     </table>
-    ${paragraph('Ouvrez l\'application Juna pour découvrir les abonnements disponibles près de chez vous.')}
+    ${paragraph('Ouvrez l\'application Juna Eats pour découvrir les abonnements disponibles près de chez vous.')}
   `);
-  await send({ email, name }, 'Bienvenue sur Juna — Votre compte est actif !', html);
+  await send({ email, name }, 'Bienvenue sur Juna Eats — Votre compte est actif !', html);
 }
 
 export async function sendPasswordResetEmail(email: string, name: string, token: string) {
   const link = `${APP_URL}/auth/reset-password?token=${token}`;
-  const html = layout('Réinitialisation de mot de passe — Juna', `
+  const html = layout('Réinitialisation de mot de passe — Juna Eats', `
     ${heading('Réinitialisez votre mot de passe')}
     ${paragraph(`Bonjour <strong>${name}</strong>, nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.`)}
     ${paragraph('Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe :')}
@@ -215,7 +215,7 @@ export async function sendPasswordResetEmail(email: string, name: string, token:
     <p style="margin:16px 0 0;color:${C.muted};font-size:13px;">Si vous n'avez pas demandé cette réinitialisation, ignorez cet email — votre mot de passe reste inchangé.</p>
     <p style="margin:12px 0 0;color:${C.muted};font-size:12px;word-break:break-all;">Lien : <a href="${link}" style="color:${C.orange};">${link}</a></p>
   `);
-  await send({ email, name }, 'Réinitialisation de votre mot de passe — Juna', html);
+  await send({ email, name }, 'Réinitialisation de votre mot de passe — Juna Eats', html);
 }
 
 export async function sendOrderConfirmedEmail(
@@ -223,7 +223,7 @@ export async function sendOrderConfirmedEmail(
   name: string,
   order: { orderNumber: string; subscriptionName: string; amount: number; currency?: string }
 ) {
-  const html = layout('Commande confirmée — Juna', `
+  const html = layout('Commande confirmée — Juna Eats', `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
       <tr>
         <td align="center" style="background-color:#F0FDF4;border-radius:50%;width:56px;height:56px;padding:0;">
@@ -240,11 +240,11 @@ export async function sendOrderConfirmedEmail(
     )}
     ${paragraph('Pour démarrer votre abonnement, activez votre commande depuis l\'application.')}
   `);
-  await send({ email, name }, `Commande confirmée #${order.orderNumber} — Juna`, html);
+  await send({ email, name }, `Commande confirmée #${order.orderNumber} — Juna Eats`, html);
 }
 
 export async function sendProviderApprovedEmail(email: string, name: string, businessName: string) {
-  const html = layout('Candidature approuvée — Juna', `
+  const html = layout('Candidature approuvée — Juna Eats', `
     ${heading('Félicitations, vous êtes prestataire ! 🎊')}
     ${paragraph(`Bonjour <strong>${name}</strong>, nous avons le plaisir de vous annoncer que votre candidature pour <strong>${businessName}</strong> a été <strong style="color:${C.success};">approuvée</strong>.`)}
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
@@ -257,8 +257,8 @@ export async function sendProviderApprovedEmail(email: string, name: string, bus
         </td>
       </tr>
     </table>
-    ${paragraph('Connectez-vous à l\'application Juna pour accéder à votre espace prestataire.')}
-    ${paragraph('Bienvenue dans la famille Juna !')}
+    ${paragraph('Connectez-vous à l\'application Juna Eats pour accéder à votre espace prestataire.')}
+    ${paragraph('Bienvenue dans la famille Juna Eats !')}
   `);
   await send({ email, name }, 'Félicitations — Votre compte prestataire est approuvé !', html);
 }
@@ -269,23 +269,23 @@ export async function sendProviderRejectedEmail(
   businessName: string,
   reason: string
 ) {
-  const html = layout('Mise à jour de votre candidature — Juna', `
+  const html = layout('Mise à jour de votre candidature — Juna Eats', `
     ${heading('Mise à jour de votre candidature')}
     ${paragraph(`Bonjour <strong>${name}</strong>, après examen de votre dossier pour <strong>${businessName}</strong>, nous ne sommes pas en mesure de donner suite à votre candidature pour le motif suivant :`)}
     ${notice('📋', reason)}
     ${paragraph('Si vous pensez qu\'il s\'agit d\'une erreur ou si vous souhaitez soumettre une nouvelle candidature avec des informations corrigées, vous pouvez soumettre une nouvelle demande depuis l\'application.')}
     ${paragraph('Merci de votre compréhension.')}
   `);
-  await send({ email, name }, 'Mise à jour de votre candidature prestataire — Juna', html);
+  await send({ email, name }, 'Mise à jour de votre candidature prestataire — Juna Eats', html);
 }
 
 export async function sendPasswordChangedEmail(email: string, name: string) {
-  const html = layout('Mot de passe modifié — Juna', `
+  const html = layout('Mot de passe modifié — Juna Eats', `
     ${heading('Votre mot de passe a été modifié')}
-    ${paragraph(`Bonjour <strong>${name}</strong>, votre mot de passe Juna vient d'être réinitialisé avec succès.`)}
+    ${paragraph(`Bonjour <strong>${name}</strong>, votre mot de passe Juna Eats vient d'être réinitialisé avec succès.`)}
     ${notice('🔒', 'Si vous êtes à l\'origine de cette action, vous pouvez ignorer ce message. Sinon, contactez-nous immédiatement.')}
   `);
-  await send({ email, name }, 'Votre mot de passe Juna a été modifié', html);
+  await send({ email, name }, 'Votre mot de passe Juna Eats a été modifié', html);
 }
 
 export async function sendProviderNewOrderEmail(
@@ -293,7 +293,7 @@ export async function sendProviderNewOrderEmail(
   name: string,
   order: { orderNumber: string; subscriptionName: string; customerName: string }
 ) {
-  const html = layout('Nouvelle commande — Juna', `
+  const html = layout('Nouvelle commande — Juna Eats', `
     ${heading('Vous avez une nouvelle commande ! 🍽️')}
     ${paragraph(`Bonjour <strong>${name}</strong>, une nouvelle commande vient d'être confirmée pour votre abonnement <strong>${order.subscriptionName}</strong>.`)}
     ${infoTable(
@@ -302,5 +302,5 @@ export async function sendProviderNewOrderEmail(
     )}
     ${notice('ℹ️', 'Le client activera sa commande depuis l\'application. Vous recevrez sa confirmation au moment de l\'activation.')}
   `);
-  await send({ email, name }, `Nouvelle commande #${order.orderNumber} — Juna`, html);
+  await send({ email, name }, `Nouvelle commande #${order.orderNumber} — Juna Eats`, html);
 }

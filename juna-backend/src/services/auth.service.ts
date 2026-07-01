@@ -142,7 +142,7 @@ export class AuthService {
     createNotification(
       user.id,
       'SYSTEM',
-      'Bienvenue sur Juna ! 🎉',
+      'Bienvenue sur Juna Eats ! 🎉',
       'Votre inscription est confirmée. Explorez les abonnements disponibles près de chez vous.'
     );
 
