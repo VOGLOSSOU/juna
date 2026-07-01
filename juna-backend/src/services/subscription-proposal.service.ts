@@ -229,6 +229,8 @@ export class SubscriptionProposalService {
       businessName: proposal.provider.businessName,
       subscriptionName: data.name,
       price: data.price,
+      isImmediate: data.isImmediate ?? true,
+      preparationHours: data.preparationHours ?? 0,
     }).catch(() => {});
     sendProposalApprovedToProvider(proposal.provider.user.email, proposal.provider.user.name, {
       businessName: proposal.provider.businessName,
