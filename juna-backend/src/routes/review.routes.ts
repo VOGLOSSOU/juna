@@ -2,7 +2,7 @@ import { Router } from 'express';
 import reviewController from '@/controllers/review.controller';
 import { authenticate, authorize } from '@/middlewares/auth.middleware';
 import { validate, validateParams, validateQuery } from '@/middlewares/validation.middleware';
-import { createReviewSchema, updateReviewSchema, reviewIdSchema, reviewFiltersSchema } from '@/validators/review.validator';
+import { createReviewSchema, updateReviewSchema, reviewIdSchema, reviewFiltersSchema, subscriptionIdSchema, orderIdSchema } from '@/validators/review.validator';
 import { UserRole } from '@prisma/client';
 
 const router = Router();
@@ -50,18 +50,21 @@ router.delete(
 // Avis d'un abonnement (approuvés uniquement)
 router.get(
   '/subscription/:subscriptionId',
+  validateParams(subscriptionIdSchema),
   reviewController.getBySubscriptionId.bind(reviewController)
 );
 
 // Statistiques d'un abonnement
 router.get(
   '/subscription/:subscriptionId/stats',
+  validateParams(subscriptionIdSchema),
   reviewController.getSubscriptionStats.bind(reviewController)
 );
 
 // Avis par ID de commande
 router.get(
   '/order/:orderId',
+  validateParams(orderIdSchema),
   reviewController.getByOrderId.bind(reviewController)
 );
 
