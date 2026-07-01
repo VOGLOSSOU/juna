@@ -11,16 +11,6 @@ import { z } from 'zod';
 const router = Router();
 
 /**
- * GET /api/v1/providers/:id
- * Page publique d'un prestataire — route publique, pas d'auth
- */
-router.get(
-  '/:id',
-  validateParams(z.object({ id: z.string().uuid('ID prestataire invalide') })),
-  providerController.getPublicProfile.bind(providerController)
-);
-
-/**
  * GET /api/v1/providers/me
  * Obtenir mon profil fournisseur
  */
@@ -28,6 +18,16 @@ router.get(
   '/me',
   authenticate,
   providerController.getMyProfile.bind(providerController)
+);
+
+/**
+ * GET /api/v1/providers/:id
+ * Page publique d'un prestataire — route publique, pas d'auth
+ */
+router.get(
+  '/:id',
+  validateParams(z.object({ id: z.string().uuid('ID prestataire invalide') })),
+  providerController.getPublicProfile.bind(providerController)
 );
 
 /**
