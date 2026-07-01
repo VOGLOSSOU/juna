@@ -123,7 +123,10 @@ Le provider fixe **librement** tous les détails finaux de l'abonnement créé (
 }
 ```
 
-- `name`, `description`, `price`, `imageUrl` : requis.
+- `name`, `description`, `price`, `imageUrl` : **requis**.
+- `junaCommissionPercent` : optionnel — commission Juna en %. Valeur entre `0` et `100`, **défaut `10`** si non envoyé. Le provider peut ajuster selon l'accord commercial.
+- `isImmediate` : optionnel — `true` si l'abonnement est disponible immédiatement après commande, `false` si un délai de préparation s'applique. **Défaut `true`** si non envoyé. **⚠️ Le formulaire doit exposer ce champ explicitement.**
+- `preparationHours` : optionnel si `isImmediate: true` (ignoré). **Requis et > 0 si `isImmediate: false`** — nombre d'heures de préparation avant livraison/retrait. Entier positif.
 - `type`, `category`, `duration` : optionnels — si omis, on reprend ceux proposés par le user.
 - `meals` : optionnel — si omis, on reprend exactement les plats/quantités proposés par le user. Si fourni, **remplace entièrement** la liste (permet au provider d'ajuster avant de publier).
 - Réponse `200` avec l'abonnement créé (objet `Subscription` standard, `isPublic: true`, `isActive: true`).
