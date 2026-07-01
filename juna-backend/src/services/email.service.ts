@@ -304,3 +304,101 @@ export async function sendProviderNewOrderEmail(
   `);
   await send({ email, name }, `Nouvelle commande #${order.orderNumber} — Juna Eats`, html);
 }
+
+// ─── Proposition d'abonnement ─────────────────────────────────────────────────
+
+export async function sendProposalCreatedToConsumer(
+  email: string,
+  name: string,
+  data: { providerName: string; mealsCount: number }
+) {
+  const html = layout('Proposition envoyée — Juna Eats', `
+    ${heading('Votre proposition a bien été envoyée ✅')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, votre proposition d'abonnement personnalisé a bien été transmise à <strong>${data.providerName}</strong>.`)}
+    ${infoTable(
+      infoRow('Prestataire', data.providerName) +
+      infoRow('Nombre de plats proposés', `${data.mealsCount}`)
+    )}
+    ${notice('⏳', 'Le prestataire va examiner votre demande et vous répondra prochainement. Vous serez notifié par email dès qu\'une décision est prise.')}
+  `);
+  await send({ email, name }, `Proposition envoyée à ${data.providerName} — Juna Eats`, html);
+}
+
+export async function sendProposalReceivedToProvider(
+  email: string,
+  name: string,
+  data: { businessName: string; consumerName: string; mealsCount: number }
+) {
+  const html = layout('Nouvelle proposition reçue — Juna Eats', `
+    ${heading('Vous avez reçu une nouvelle proposition ! 📬')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, <strong>${data.consumerName}</strong> vous a envoyé une proposition d'abonnement personnalisé à partir de votre catalogue.`)}
+    ${infoTable(
+      infoRow('Client', data.consumerName) +
+      infoRow('Nombre de plats sélectionnés', `${data.mealsCount}`)
+    )}
+    ${notice('👀', 'Connectez-vous à votre dashboard pour consulter les détails de la proposition et y répondre (approuver ou rejeter).')}
+  `);
+  await send({ email, name }, `Nouvelle proposition d'abonnement de ${data.consumerName} — Juna Eats`, html);
+}
+
+export async function sendProposalApprovedToConsumer(
+  email: string,
+  name: string,
+  data: { businessName: string; subscriptionName: string; price: number }
+) {
+  const html = layout('Proposition acceptée — Juna Eats', `
+    ${heading('Votre proposition a été acceptée 🎉')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, excellente nouvelle ! <strong>${data.businessName}</strong> a accepté votre proposition d'abonnement.`)}
+    ${infoTable(
+      infoRow('Prestataire', data.businessName) +
+      infoRow('Abonnement créé', data.subscriptionName) +
+      infoRow('Prix', `${data.price.toLocaleString('fr-FR')} FCFA`, true)
+    )}
+    ${paragraph('L\'abonnement est maintenant disponible dans le catalogue. Ouvrez l\'application Juna Eats pour le retrouver et passer commande.')}
+  `);
+  await send({ email, name }, `Votre proposition a été acceptée par ${data.businessName} 🎉 — Juna Eats`, html);
+}
+
+export async function sendProposalApprovedToProvider(
+  email: string,
+  name: string,
+  data: { businessName: string; consumerName: string; subscriptionName: string }
+) {
+  const html = layout('Proposition approuvée — Juna Eats', `
+    ${heading('Confirmation d\'approbation ✅')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, vous avez approuvé la proposition d'abonnement de <strong>${data.consumerName}</strong>.`)}
+    ${infoTable(
+      infoRow('Client', data.consumerName) +
+      infoRow('Abonnement publié', data.subscriptionName)
+    )}
+    ${notice('📢', `L'abonnement <strong>${data.subscriptionName}</strong> est maintenant visible dans le catalogue de <strong>${data.businessName}</strong> et ouvert à tous les clients.`)}
+  `);
+  await send({ email, name }, `Abonnement "${data.subscriptionName}" publié — Juna Eats`, html);
+}
+
+export async function sendProposalRejectedToConsumer(
+  email: string,
+  name: string,
+  data: { businessName: string; rejectionReason: string }
+) {
+  const html = layout('Mise à jour de votre proposition — Juna Eats', `
+    ${heading('Réponse à votre proposition')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, <strong>${data.businessName}</strong> a examiné votre proposition d'abonnement et n'est pas en mesure de la retenir pour le moment.`)}
+    ${notice('📋', `Motif communiqué par le prestataire : <em>${data.rejectionReason}</em>`)}
+    ${paragraph('Vous pouvez soumettre une nouvelle proposition à ce prestataire ou explorer d\'autres prestataires disponibles dans l\'application Juna Eats.')}
+  `);
+  await send({ email, name }, `Mise à jour de votre proposition chez ${data.businessName} — Juna Eats`, html);
+}
+
+export async function sendProposalRejectedToProvider(
+  email: string,
+  name: string,
+  data: { businessName: string; consumerName: string }
+) {
+  const html = layout('Proposition rejetée — Juna Eats', `
+    ${heading('Confirmation de rejet')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, vous avez rejeté la proposition d'abonnement de <strong>${data.consumerName}</strong>. Le client en a été informé par email.`)}
+    ${notice('ℹ️', 'Si vous changez d\'avis, le client peut soumettre une nouvelle proposition depuis l\'application.')}
+  `);
+  await send({ email, name }, `Proposition de ${data.consumerName} rejetée — Juna Eats`, html);
+}

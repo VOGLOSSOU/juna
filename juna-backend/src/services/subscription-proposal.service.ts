@@ -3,6 +3,14 @@ import mealService from '@/services/meal.service';
 import providerRepository from '@/repositories/provider.repository';
 import subscriptionProposalRepository from '@/repositories/subscription-proposal.repository';
 import { createNotification } from '@/services/notification.service';
+import {
+  sendProposalCreatedToConsumer,
+  sendProposalReceivedToProvider,
+  sendProposalApprovedToConsumer,
+  sendProposalApprovedToProvider,
+  sendProposalRejectedToConsumer,
+  sendProposalRejectedToProvider,
+} from '@/services/email.service';
 import { ConflictError, ForbiddenError, NotFoundError } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
 import {
@@ -87,7 +95,22 @@ export class SubscriptionProposalService {
       { proposalId: proposal.id }
     );
 
-    return subscriptionProposalRepository.findById(proposal.id);
+    const fullProposal = await subscriptionProposalRepository.findById(proposal.id);
+
+    if (fullProposal) {
+      const mealsCount = fullProposal.meals.length;
+      sendProposalCreatedToConsumer(fullProposal.user.email, fullProposal.user.name, {
+        providerName: fullProposal.provider.businessName,
+        mealsCount,
+      }).catch(() => {});
+      sendProposalReceivedToProvider(
+        fullProposal.provider.user.email,
+        fullProposal.provider.user.name,
+        { businessName: fullProposal.provider.businessName, consumerName: fullProposal.user.name, mealsCount }
+      ).catch(() => {});
+    }
+
+    return fullProposal;
   }
 
   /**
@@ -202,6 +225,17 @@ export class SubscriptionProposalService {
       { proposalId: id, subscriptionId: subscription.id }
     );
 
+    sendProposalApprovedToConsumer(proposal.user.email, proposal.user.name, {
+      businessName: proposal.provider.businessName,
+      subscriptionName: data.name,
+      price: data.price,
+    }).catch(() => {});
+    sendProposalApprovedToProvider(proposal.provider.user.email, proposal.provider.user.name, {
+      businessName: proposal.provider.businessName,
+      consumerName: proposal.user.name,
+      subscriptionName: data.name,
+    }).catch(() => {});
+
     return subscription;
   }
 
@@ -248,6 +282,15 @@ export class SubscriptionProposalService {
       `Votre proposition d'abonnement chez ${proposal.provider.businessName} n'a pas été retenue : ${data.rejectionReason}`,
       { proposalId: id }
     );
+
+    sendProposalRejectedToConsumer(proposal.user.email, proposal.user.name, {
+      businessName: proposal.provider.businessName,
+      rejectionReason: data.rejectionReason,
+    }).catch(() => {});
+    sendProposalRejectedToProvider(proposal.provider.user.email, proposal.provider.user.name, {
+      businessName: proposal.provider.businessName,
+      consumerName: proposal.user.name,
+    }).catch(() => {});
 
     return { id, status: 'REJECTED' as const, rejectionReason: data.rejectionReason };
   }

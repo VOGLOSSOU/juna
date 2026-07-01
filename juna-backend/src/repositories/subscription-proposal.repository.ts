@@ -3,7 +3,14 @@ import { Prisma, SubscriptionProposal, SubscriptionProposalStatus } from '@prism
 
 const PROPOSAL_DETAIL_INCLUDE = {
   user: { select: { id: true, name: true, email: true } },
-  provider: { select: { id: true, businessName: true, logo: true } },
+  provider: {
+    select: {
+      id: true,
+      businessName: true,
+      logo: true,
+      user: { select: { id: true, email: true, name: true } },
+    },
+  },
   resultingSubscription: { select: { id: true, name: true, isPublic: true } },
   meals: {
     select: {
