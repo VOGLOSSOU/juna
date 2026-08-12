@@ -1,7 +1,7 @@
 import { countryRepository, cityRepository, landmarkRepository } from '@/repositories/geography.repository';
 import { ConflictError, NotFoundError } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
-import { CreateCountryInput, CreateCityInput, CreateLandmarkInput } from '@/validators/geography.validator';
+import { CreateCountryInput, CreateCityInput, CreateLandmarkInput, UpdateCityStatusInput } from '@/validators/geography.validator';
 
 // ============================================
 // COUNTRY
@@ -62,12 +62,12 @@ export const cityService = {
     return cityRepository.findByCountry(country.id);
   },
 
-  async delete(id: string) {
+  async updateStatus(id: string, data: UpdateCityStatusInput) {
     const city = await cityRepository.findById(id);
     if (!city) {
       throw new NotFoundError('Ville introuvable', ERROR_CODES.RESOURCE_NOT_FOUND);
     }
-    return cityRepository.delete(id);
+    return cityRepository.updateStatus(id, data.isActive);
   },
 };
 

@@ -58,10 +58,11 @@ export class CityController {
     }
   }
 
-  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      await cityService.delete(req.params.id);
-      sendSuccess(res, 'Ville supprimée');
+      const result = await cityService.updateStatus(req.params.id, req.body);
+      const message = req.body.isActive ? 'Ville activée avec succès' : 'Ville désactivée avec succès';
+      sendSuccess(res, message, result);
     } catch (error) {
       next(error);
     }

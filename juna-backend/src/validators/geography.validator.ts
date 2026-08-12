@@ -32,6 +32,10 @@ export const cityIdSchema = z.object({
   id: z.string().uuid('ID ville invalide'),
 });
 
+export const updateCityStatusSchema = z.object({
+  isActive: z.boolean({ required_error: 'isActive est requis' }),
+});
+
 // ============================================
 // LANDMARK
 // ============================================
@@ -51,4 +55,5 @@ export const landmarkIdSchema = z.object({
 
 export type CreateCountryInput = z.infer<typeof createCountrySchema>;
 export type CreateCityInput = z.infer<typeof createCitySchema>;
+export type UpdateCityStatusInput = z.infer<typeof updateCityStatusSchema>;
 export type CreateLandmarkInput = z.infer<typeof createLandmarkSchema>;

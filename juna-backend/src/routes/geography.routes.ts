@@ -8,6 +8,7 @@ import {
   createLandmarkSchema,
   cityIdSchema,
   landmarkIdSchema,
+  updateCityStatusSchema,
 } from '@/validators/geography.validator';
 import { UserRole } from '@prisma/client';
 
@@ -55,12 +56,13 @@ router.post(
   cityController.create.bind(cityController)
 );
 
-router.delete(
-  '/admin/cities/:id',
+router.patch(
+  '/admin/cities/:id/status',
   authenticate,
   authorize([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
   validateParams(cityIdSchema),
-  cityController.delete.bind(cityController)
+  validate(updateCityStatusSchema),
+  cityController.updateStatus.bind(cityController)
 );
 
 // Landmarks

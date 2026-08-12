@@ -62,8 +62,8 @@ export const cityRepository = {
     });
   },
 
-  async delete(id: string) {
-    return prisma.city.update({ where: { id }, data: { isActive: false } });
+  async updateStatus(id: string, isActive: boolean) {
+    return prisma.city.update({ where: { id }, data: { isActive } });
   },
 };
 
