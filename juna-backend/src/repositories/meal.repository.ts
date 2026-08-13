@@ -8,6 +8,15 @@ const MEAL_WITH_PRICINGS = {
   },
 } as const;
 
+const MEAL_WITH_SUBSCRIPTIONS = {
+  mealsInSubscriptions: {
+    where: { subscription: { isActive: true, isPublic: true } },
+    select: {
+      subscription: { select: { id: true, name: true } },
+    },
+  },
+} as const;
+
 export class MealRepository {
   async create(data: Prisma.MealCreateInput): Promise<Meal> {
     return prisma.meal.create({ data });
@@ -25,6 +34,7 @@ export class MealRepository {
       where: { id },
       include: {
         ...MEAL_WITH_PRICINGS,
+        ...MEAL_WITH_SUBSCRIPTIONS,
         provider: { select: { id: true, businessName: true, logo: true, status: true } },
       },
     });
@@ -97,6 +107,7 @@ export class MealRepository {
       where,
       include: {
         ...MEAL_WITH_PRICINGS,
+        ...MEAL_WITH_SUBSCRIPTIONS,
         provider: { select: { id: true, businessName: true, logo: true, status: true } },
       },
       orderBy: { createdAt: 'desc' },

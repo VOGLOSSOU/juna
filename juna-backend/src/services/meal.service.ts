@@ -18,6 +18,12 @@ function serializeMealProvider(provider: {
   };
 }
 
+function serializeMealSubscriptions(
+  mealsInSubscriptions: { subscription: { id: string; name: string } }[]
+) {
+  return mealsInSubscriptions.map((m) => m.subscription);
+}
+
 function resolvePriceFields(data: CreateMealInput | UpdateMealInput) {
   const priceType = data.priceType ?? 'FIXED';
 
@@ -82,7 +88,12 @@ export class MealService {
   async getByIdWithProvider(id: string) {
     const meal = await mealRepository.findByIdWithProvider(id);
     if (!meal) throw new NotFoundError('Repas introuvable', ERROR_CODES.MEAL_NOT_FOUND);
-    return { ...meal, provider: serializeMealProvider((meal as any).provider) };
+    const { mealsInSubscriptions, provider, ...rest } = meal as any;
+    return {
+      ...rest,
+      provider: serializeMealProvider(provider),
+      subscriptions: serializeMealSubscriptions(mealsInSubscriptions),
+    };
   }
 
   async getByProviderId(providerId: string) {
@@ -95,10 +106,14 @@ export class MealService {
 
   async getAll(filters?: MealFiltersInput) {
     const meals = await mealRepository.findAll(filters);
-    return meals.map((meal) => ({
-      ...meal,
-      provider: serializeMealProvider((meal as any).provider),
-    }));
+    return meals.map((meal) => {
+      const { mealsInSubscriptions, provider, ...rest } = meal as any;
+      return {
+        ...rest,
+        provider: serializeMealProvider(provider),
+        subscriptions: serializeMealSubscriptions(mealsInSubscriptions),
+      };
+    });
   }
 
   async update(id: string, providerId: string, data: UpdateMealInput) {
