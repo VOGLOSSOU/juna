@@ -57,7 +57,8 @@ export class AdminService {
       totalOrders,
       completedOrders,
       pendingOrders,
-      totalRevenue,
+      totalPaymentsVolume,
+      junaRevenueResult,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: 'PROVIDER' } }),
@@ -69,7 +70,19 @@ export class AdminService {
         _sum: { amount: true },
         where: { status: { equals: 'SUCCESS' } as any },
       }),
+      // Revenu réel de Juna : commission (variable par abonnement) appliquée
+      // au prix de l'abonnement, pas au montant payé en entier (qui pourrait un
+      // jour réintégrer des frais de livraison non commissionnés).
+      prisma.$queryRaw<{ juna_revenue: number | null }[]>`
+        SELECT SUM(s.price * s."junaCommissionPercent" / 100) as juna_revenue
+        FROM payments p
+        JOIN orders o ON o.id = p."orderId"
+        JOIN subscriptions s ON s.id = o."subscriptionId"
+        WHERE p.status = 'SUCCESS'
+      `,
     ]);
+
+    const junaRevenue = junaRevenueResult[0]?.juna_revenue ?? 0;
 
     // Statistiques par jour pour les 7 derniers jours
     const sevenDaysAgo = new Date();
@@ -97,7 +110,8 @@ export class AdminService {
         totalOrders,
         completedOrders,
         pendingOrders,
-        totalRevenue: totalRevenue._sum.amount ?? 0,
+        totalPaymentsVolume: totalPaymentsVolume._sum.amount ?? 0,
+        junaRevenue,
       },
       charts: {
         ordersByDay: ordersByDay.map(d => ({
