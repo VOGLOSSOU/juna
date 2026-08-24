@@ -140,7 +140,18 @@ export class OrderService {
     if (!order) {
       throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
     }
-    return order;
+
+    const { user, ...providerRest } = order.subscription.provider;
+    return {
+      ...order,
+      subscription: {
+        ...order.subscription,
+        provider: {
+          ...providerRest,
+          phone: user.phone,
+        },
+      },
+    };
   }
 
   /**

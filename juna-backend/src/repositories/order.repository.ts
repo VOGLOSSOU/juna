@@ -26,11 +26,15 @@ export class OrderRepository {
   async findByIdWithRelations(id: string): Promise<
     | (Order & {
         user: { id: string; name: string; email: string; phone: string | null };
-        subscription: { 
-          id: string; 
-          name: string; 
+        subscription: {
+          id: string;
+          name: string;
           price: number;
-          provider: { id: string; businessName: string };
+          provider: {
+            id: string;
+            businessName: string;
+            user: { phone: string | null };
+          };
         };
         payment: { id: string; status: string; amount: number; method: string } | null;
       })
@@ -56,6 +60,7 @@ export class OrderRepository {
               select: {
                 id: true,
                 businessName: true,
+                user: { select: { phone: true } },
               },
             },
           },
