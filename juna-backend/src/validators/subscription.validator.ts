@@ -58,11 +58,6 @@ export const createSubscriptionSchema = z.object({
     .number({ required_error: 'Prix requis' })
     .positive('Le prix doit être positif')
     .min(100, 'Prix minimum: 100 XOF'),
-  junaCommissionPercent: z
-    .number()
-    .min(0, 'Commission minimum: 0%')
-    .max(100, 'Commission maximum: 100%')
-    .default(10),
   type: subscriptionTypeEnum,
   category: subscriptionCategoryEnum,
   duration: subscriptionDurationEnum,
@@ -101,11 +96,6 @@ export const updateSubscriptionSchema = z.object({
     .number()
     .positive('Le prix doit être positif')
     .min(100, 'Prix minimum: 100 XOF')
-    .optional(),
-  junaCommissionPercent: z
-    .number()
-    .min(0, 'Commission minimum: 0%')
-    .max(100, 'Commission maximum: 100%')
     .optional(),
   type: subscriptionTypeEnum.optional(),
   category: subscriptionCategoryEnum.optional(),

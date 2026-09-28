@@ -10,6 +10,11 @@ import { ERROR_CODES } from '@/constants/errors';
 import { CreateSubscriptionInput, UpdateSubscriptionInput, SubscriptionFiltersInput } from '@/validators/subscription.validator';
 import { Subscription } from '@prisma/client';
 
+// Commission Juna fixe, appliquée à tous les abonnements. Les prestataires ne
+// la choisissent plus eux-mêmes — plus simple pour eux, et ça protège le
+// revenu de la plateforme d'un taux mis à 0% par un prestataire.
+export const JUNA_COMMISSION_PERCENT = 10;
+
 export class SubscriptionService {
   /**
    * Créer un abonnement
@@ -57,7 +62,7 @@ export class SubscriptionService {
       name: data.name,
       description: data.description,
       price: data.price,
-      junaCommissionPercent: data.junaCommissionPercent ?? 10,
+      junaCommissionPercent: JUNA_COMMISSION_PERCENT,
       type: data.type,
       category: data.category,
       duration: data.duration,
@@ -289,7 +294,6 @@ export class SubscriptionService {
       name: data.name,
       description: data.description,
       price: data.price,
-      junaCommissionPercent: data.junaCommissionPercent,
       type: data.type,
       category: data.category,
       duration: data.duration,

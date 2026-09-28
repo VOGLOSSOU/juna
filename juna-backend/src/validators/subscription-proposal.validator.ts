@@ -80,7 +80,6 @@ export const approveSubscriptionProposalSchema = z
       .number({ required_error: 'Prix requis' })
       .positive('Le prix doit être positif')
       .min(100, 'Prix minimum: 100 XOF'),
-    junaCommissionPercent: z.number().min(0).max(100).default(10),
     type: subscriptionTypeEnum.optional(),
     category: subscriptionCategoryEnum.optional(),
     duration: subscriptionDurationEnum.optional(),

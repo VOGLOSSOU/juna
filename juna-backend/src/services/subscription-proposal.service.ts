@@ -19,6 +19,7 @@ import {
   RejectSubscriptionProposalInput,
   SubscriptionProposalFiltersInput,
 } from '@/validators/subscription-proposal.validator';
+import { JUNA_COMMISSION_PERCENT } from '@/services/subscription.service';
 
 export class SubscriptionProposalService {
   /**
@@ -197,7 +198,7 @@ export class SubscriptionProposalService {
         name: data.name,
         description: data.description,
         price: data.price,
-        junaCommissionPercent: data.junaCommissionPercent,
+        junaCommissionPercent: JUNA_COMMISSION_PERCENT,
         type: data.type ?? proposal.type,
         category: data.category ?? proposal.category,
         duration: data.duration ?? proposal.duration,
