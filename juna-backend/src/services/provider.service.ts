@@ -343,6 +343,7 @@ export class ProviderService {
       id: sub.id,
       name: sub.name,
       description: sub.description,
+      instructions: sub.instructions ?? null,
       price: sub.price,
       type: sub.type,
       category: sub.category,

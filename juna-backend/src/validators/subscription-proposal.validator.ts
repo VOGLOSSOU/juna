@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { subscriptionInstructionsSchema } from './subscription.validator';
 
 const subscriptionTypeEnum = z.enum([
   'BREAKFAST',
@@ -76,6 +77,7 @@ export const approveSubscriptionProposalSchema = z
       .min(10, 'Minimum 10 caractères')
       .max(1000, 'Maximum 1000 caractères')
       .trim(),
+    instructions: subscriptionInstructionsSchema,
     price: z
       .number({ required_error: 'Prix requis' })
       .positive('Le prix doit être positif')

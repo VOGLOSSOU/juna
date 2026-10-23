@@ -9,6 +9,7 @@ export class SubscriptionRepository {
     providerId: string;
     name: string;
     description: string;
+    instructions?: string | null;
     price: number;
     junaCommissionPercent?: number;
     type: SubscriptionType;
@@ -144,6 +145,7 @@ export class SubscriptionRepository {
       select: {
         id: true,
         name: true,
+        instructions: true,
         price: true,
         type: true,
         category: true,
@@ -197,6 +199,7 @@ export class SubscriptionRepository {
   async updateWithMeals(id: string, data: {
     name?: string;
     description?: string;
+    instructions?: string | null;
     price?: number;
     junaCommissionPercent?: number;
     type?: SubscriptionType;
@@ -316,6 +319,7 @@ export class SubscriptionRepository {
     const select = {
       id: true,
       name: true,
+      instructions: true,
       description: true,
       price: true,
       type: true,

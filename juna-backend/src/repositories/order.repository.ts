@@ -29,6 +29,7 @@ export class OrderRepository {
         subscription: {
           id: string;
           name: string;
+          instructions: string | null;
           price: number;
           provider: {
             id: string;
@@ -55,6 +56,7 @@ export class OrderRepository {
           select: {
             id: true,
             name: true,
+            instructions: true,
             price: true,
             provider: {
               select: {
@@ -106,6 +108,7 @@ export class OrderRepository {
           select: {
             id: true,
             name: true,
+            instructions: true,
             provider: {
               select: {
                 businessName: true,
@@ -147,6 +150,7 @@ export class OrderRepository {
           select: {
             id: true,
             name: true,
+            instructions: true,
             provider: {
               select: {
                 businessName: true,
@@ -219,6 +223,7 @@ export class OrderRepository {
             select: {
               id: true,
               name: true,
+              instructions: true,
               provider: { select: { businessName: true } },
             },
           },

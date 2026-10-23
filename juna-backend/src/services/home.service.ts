@@ -23,6 +23,7 @@ function formatSubscription(sub: any) {
     id: sub.id,
     name: sub.name,
     description: sub.description,
+    instructions: sub.instructions ?? null,
     price: sub.price,
     currency: 'XOF',
     category: sub.category,

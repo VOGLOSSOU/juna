@@ -209,6 +209,7 @@ export class ProviderRepository {
             id: true,
             name: true,
             description: true,
+            instructions: true,
             price: true,
             type: true,
             category: true,

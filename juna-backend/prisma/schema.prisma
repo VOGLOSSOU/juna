@@ -303,6 +303,7 @@ model MealPricing {
 }
 
 model Subscription {
+  instructions          String?              @db.Text
   id                    String               @id @default(uuid()) @db.Uuid
   providerId            String               @db.Uuid
   name                  String

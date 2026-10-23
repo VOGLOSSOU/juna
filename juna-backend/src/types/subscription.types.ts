@@ -3,6 +3,7 @@ import { SubscriptionCategory, SubscriptionDuration, SubscriptionType } from '@p
 export interface CreateSubscriptionDTO {
   name: string;
   description: string;
+  instructions?: string | null;
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;
@@ -15,6 +16,7 @@ export interface CreateSubscriptionDTO {
 export interface UpdateSubscriptionDTO {
   name?: string;
   description?: string;
+  instructions?: string | null;
   price?: number;
   type?: SubscriptionType;
   category?: SubscriptionCategory;
@@ -48,6 +50,7 @@ export interface SubscriptionWithMeals {
   providerId: string;
   name: string;
   description: string;
+  instructions: string | null;
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;

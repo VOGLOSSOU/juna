@@ -911,3 +911,20 @@ curl -X POST http://localhost:5000/api/v1/providers/me/subscriptions \
 - **Subscription.type** définit la composition de l'abonnement
 - **Subscription.category** définit la cuisine du fournisseur
 - **Validation** : Backend vérifie automatiquement cohérence type/meals
+
+
+## [2026-10-23] Instructions facultatives des abonnements
+
+Le champ `instructions` contient les précisions libres du prestataire propres à une formule. Il ne modifie pas le prix.
+
+- Accepté dans `POST /api/v1/subscriptions`, `PUT /api/v1/subscriptions/:id` et `POST /api/v1/subscription-proposals/:id/approve`.
+- Type : texte facultatif ou `null`, maximum 2 000 caractères après suppression des espaces aux extrémités.
+- À la création, un champ omis vaut `null`. À la modification, l’omettre conserve la valeur ; envoyer `null` efface la valeur. Une chaîne vide est également acceptée.
+- Renvoyé sur les abonnements (détails, listes publiques, accueil, profil prestataire, administration) et dans l’abonnement associé aux commandes et abonnements actifs.
+- Les interfaces peuvent afficher ce texte s’il est renseigné et masquer le bloc sinon. Aucun texte par défaut n’est fourni.
+
+### Migration de base de données
+
+La migration `20261023000000_add_subscription_instructions` ajoute uniquement une colonne `TEXT` nullable à `subscriptions`. Les enregistrements existants restent inchangés, avec `instructions = null`.
+
+Appliquer les migrations avec `npm run prisma:migrate:deploy` dans l’environnement cible, puis déployer le backend avec le client Prisma régénéré (`npm run prisma:generate`).

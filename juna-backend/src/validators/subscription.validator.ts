@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { SubscriptionType, SubscriptionCategory, SubscriptionDuration } from '@prisma/client';
 
+// Texte libre du prestataire ; null permet d'effacer les instructions.
+export const subscriptionInstructionsSchema = z.string().trim().max(2000, 'Maximum 2000 caractères').nullable().optional();
+
 // Validation pour SubscriptionType
 const subscriptionTypeEnum = z.enum([
   'BREAKFAST',
@@ -54,6 +57,7 @@ export const createSubscriptionSchema = z.object({
     .min(10, 'Minimum 10 caractères')
     .max(1000, 'Maximum 1000 caractères')
     .trim(),
+  instructions: subscriptionInstructionsSchema,
   price: z
     .number({ required_error: 'Prix requis' })
     .positive('Le prix doit être positif')
@@ -92,6 +96,7 @@ export const updateSubscriptionSchema = z.object({
     .max(1000, 'Maximum 1000 caractères')
     .trim()
     .optional(),
+  instructions: subscriptionInstructionsSchema,
   price: z
     .number()
     .positive('Le prix doit être positif')

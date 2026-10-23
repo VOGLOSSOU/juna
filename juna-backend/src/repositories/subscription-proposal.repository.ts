@@ -144,6 +144,7 @@ export class SubscriptionProposalRepository {
     subscriptionData: {
       name: string;
       description: string;
+      instructions?: string | null;
       price: number;
       junaCommissionPercent: number;
       type: Prisma.SubscriptionCreateInput['type'];
@@ -170,6 +171,7 @@ export class SubscriptionProposalRepository {
           provider: { connect: { id: providerId } },
           name: subscriptionData.name,
           description: subscriptionData.description,
+          instructions: subscriptionData.instructions,
           price: subscriptionData.price,
           junaCommissionPercent: subscriptionData.junaCommissionPercent,
           type: subscriptionData.type,

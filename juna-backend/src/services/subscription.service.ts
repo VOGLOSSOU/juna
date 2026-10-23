@@ -61,6 +61,7 @@ export class SubscriptionService {
       providerId,
       name: data.name,
       description: data.description,
+      instructions: data.instructions,
       price: data.price,
       junaCommissionPercent: JUNA_COMMISSION_PERCENT,
       type: data.type,
@@ -130,6 +131,7 @@ export class SubscriptionService {
     const providerSubscriptions = otherSubs.map((s: any) => ({
       id: s.id,
       name: s.name,
+      instructions: s.instructions ?? null,
       price: s.price,
       currency: 'XOF',
       type: s.type,
@@ -145,6 +147,7 @@ export class SubscriptionService {
       id: raw.id,
       name: raw.name,
       description: raw.description,
+      instructions: raw.instructions ?? null,
       price: raw.price,
       currency: 'XOF',
       type: raw.type,
@@ -223,6 +226,7 @@ export class SubscriptionService {
     const subscriptions = sorted.map((s: any) => ({
       id: s.id,
       name: s.name,
+      instructions: s.instructions ?? null,
       description: s.description,
       price: s.price,
       currency: 'XOF',
@@ -293,6 +297,7 @@ export class SubscriptionService {
     return subscriptionRepository.updateWithMeals(id, {
       name: data.name,
       description: data.description,
+      instructions: data.instructions,
       price: data.price,
       type: data.type,
       category: data.category,

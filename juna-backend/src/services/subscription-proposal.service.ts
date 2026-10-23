@@ -197,6 +197,7 @@ export class SubscriptionProposalService {
       {
         name: data.name,
         description: data.description,
+        instructions: data.instructions,
         price: data.price,
         junaCommissionPercent: JUNA_COMMISSION_PERCENT,
         type: data.type ?? proposal.type,
