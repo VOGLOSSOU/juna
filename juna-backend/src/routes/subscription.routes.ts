@@ -1,6 +1,7 @@
 import { Router } from 'express';
+import { personalizeResponse } from '@/middlewares/personalization.middleware';
 import subscriptionController from '@/controllers/subscription.controller';
-import { authenticate } from '@/middlewares/auth.middleware';
+import { authenticate, optionalAuth } from '@/middlewares/auth.middleware';
 import { validate, validateQuery, validateParams } from '@/middlewares/validation.middleware';
 import { createSubscriptionSchema, updateSubscriptionSchema, subscriptionIdSchema, subscriptionFiltersSchema } from '@/validators/subscription.validator';
 
@@ -53,12 +54,16 @@ router.delete(
 // Routes publiques
 router.get(
   '/',
+  optionalAuth,
+  personalizeResponse,
   validateQuery(subscriptionFiltersSchema),
   subscriptionController.getPublic.bind(subscriptionController)
 );
 
 router.get(
   '/:id',
+  optionalAuth,
+  personalizeResponse,
   validateParams(subscriptionIdSchema),
   subscriptionController.getById.bind(subscriptionController)
 );

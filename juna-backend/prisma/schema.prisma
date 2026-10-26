@@ -208,6 +208,7 @@ model User {
   referrals             Referral[]             @relation("Referrer")
   referredBy            Referral[]             @relation("Referee")
   ticketMessages        TicketMessage[]
+  favorites             Favorite[]
   activeSubscriptions   ActiveSubscription[]
 
   @@index([email])
@@ -331,6 +332,7 @@ model Subscription {
   proposals            CustomProposal[]
   mealsInSubscriptions SubscriptionMeal[]
   activeSubscriptions  ActiveSubscription[]
+  favorites            Favorite[]
   originProposal       SubscriptionProposal?
 
   @@index([providerId])
@@ -759,4 +761,18 @@ model ActiveSubscription {
   @@index([endsAt])
   @@index([subscriptionId])
   @@map("active_subscriptions")
+}
+
+// Favoris privés du compte ; la clé composée interdit les doublons.
+model Favorite {
+  userId         String   @db.Uuid
+  subscriptionId String   @db.Uuid
+  createdAt      DateTime @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, subscriptionId])
+  @@index([userId, createdAt])
+  @@index([subscriptionId])
+  @@map("favorites")
 }

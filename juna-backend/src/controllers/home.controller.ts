@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import favoriteService from '@/services/favorite.service';
 import { z } from 'zod';
 import homeService from '@/services/home.service';
 import { sendSuccess } from '@/utils/response.util';
@@ -20,7 +21,10 @@ export class HomeController {
       }
       const { cityId, limit } = parsed.data;
       const data = await homeService.getHomeFeed(cityId, limit);
-      sendSuccess(res, 'Feed de la page d\'accueil', data);
+      const items = await favoriteService.annotate([...data.popular, ...data.recent], req.user?.id);
+      sendSuccess(res, 'Feed de la page d\'accueil', {
+        ...data, popular: items.slice(0, data.popular.length), recent: items.slice(data.popular.length),
+      });
     } catch (error) {
       next(error);
     }

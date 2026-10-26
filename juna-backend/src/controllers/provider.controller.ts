@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import favoriteService from '@/services/favorite.service';
 import providerService from '@/services/provider.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
@@ -116,7 +117,9 @@ export class ProviderController {
     try {
       const { id } = req.params;
       const result = await providerService.getPublicProfile(id);
-      sendSuccess(res, 'Profil prestataire', result);
+      sendSuccess(res, 'Profil prestataire', {
+        ...result, subscriptions: await favoriteService.annotate(result.subscriptions, req.user?.id),
+      });
     } catch (error) {
       next(error);
     }

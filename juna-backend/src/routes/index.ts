@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import favoriteRoutes from './favorite.routes';
 import authRoutes from './auth.routes';
 import userRoutes from './user.routes';
 import providerRoutes from './provider.routes';
@@ -23,6 +24,7 @@ const router = Router();
 
 // Monter les routes
 router.use('/auth', authRoutes);
+router.use('/favorites', favoriteRoutes);
 router.use('/users', userRoutes);
 router.use('/providers', providerRoutes);
 router.use('/admin', adminRoutes);

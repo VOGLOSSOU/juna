@@ -1807,3 +1807,8 @@ await prisma.activeSubscription.deleteMany({
 ---
 
 *Cette section complète la documentation API avec la gestion des abonnements actifs.*
+
+
+## Favoris d’abonnements
+
+Voir [les routes, contrats et règles des favoris](favorites-api-documentation.md).

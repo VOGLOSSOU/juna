@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import favoriteService from '@/services/favorite.service';
 import subscriptionService from '@/services/subscription.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
@@ -26,7 +27,11 @@ export class SubscriptionController {
     try {
       const { id } = req.params;
       const subscription = await subscriptionService.getByIdWithDetails(id);
-      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTION_FETCHED, subscription);
+      const [item, ...others] = await favoriteService.annotate(
+        [subscription, ...subscription.providerSubscriptions], req.user?.id);
+      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTION_FETCHED, {
+        ...item, providerSubscriptions: others,
+      });
     } catch (error) {
       next(error);
     }
@@ -71,7 +76,9 @@ export class SubscriptionController {
         limit: req.query.limit ? Math.min(100, Math.max(1, parseInt(req.query.limit as string))) : 20,
       };
       const result = await subscriptionService.getPublic(filters);
-      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTIONS_FETCHED, result);
+      sendSuccess(res, SUCCESS_MESSAGES.SUBSCRIPTIONS_FETCHED, {
+        ...result, subscriptions: await favoriteService.annotate(result.subscriptions, req.user?.id),
+      });
     } catch (error) {
       next(error);
     }

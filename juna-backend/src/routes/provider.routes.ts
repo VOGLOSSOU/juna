@@ -1,7 +1,8 @@
 import { Router } from 'express';
+import { personalizeResponse } from '@/middlewares/personalization.middleware';
 import providerController from '@/controllers/provider.controller';
 import { validate, validateParams } from '@/middlewares/validation.middleware';
-import { authenticate } from '@/middlewares/auth.middleware';
+import { authenticate, optionalAuth } from '@/middlewares/auth.middleware';
 import {
   registerProviderSchema,
   updateProviderSchema,
@@ -26,6 +27,8 @@ router.get(
  */
 router.get(
   '/:id',
+  optionalAuth,
+  personalizeResponse,
   validateParams(z.object({ id: z.string().uuid('ID prestataire invalide') })),
   providerController.getPublicProfile.bind(providerController)
 );

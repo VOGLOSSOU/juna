@@ -1,5 +1,17 @@
 # Nouveaux changements API — App Web
 
+## [2026-10-26] Favoris d'abonnements liés au compte
+
+- `POST /api/v1/favorites` avec `{ "subscriptionId": "UUID" }` : ajouter, sans doublon.
+- `DELETE /api/v1/favorites/:subscriptionId` : retirer, même si déjà absent.
+- `GET /api/v1/favorites?page=1&limit=20` : liste paginée du compte, plus récents d'abord.
+- Connexion requise pour ces trois routes. Le compte vient du token, pas du corps de requête.
+- `isFavorite` est maintenant présent sur les abonnements de l'accueil, du catalogue, du détail et du profil public prestataire. Envoyer le token pour connaître l'état du cœur ; sans token valide, il vaut `false`.
+- La liste des favoris conserve les abonnements indisponibles avec `isAvailable: false`.
+- Invalider les caches concernés après ajout/retrait et les séparer par compte.
+
+Contrats, exemples et déploiement : [Documentation API favoris](favorites-api-documentation.md).
+
 ## [2026-10-23] Instructions facultatives des abonnements
 
 Le champ `instructions` contient les précisions libres du prestataire propres à une formule. Il ne modifie pas le prix.
