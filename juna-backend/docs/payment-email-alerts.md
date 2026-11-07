@@ -11,7 +11,10 @@ telle, sans inventer une date de paiement.
 
 ## Déploiement Railway
 
-- Déployer ce code. `npm start` exécute déjà `prisma migrate deploy` avant le serveur.
+- Déployer ce code. Attention : `npm start` utilise `prisma migrate deploy`, mais
+  le `Dockerfile` actuel utilise encore `prisma db push`, qui n'exécute pas les
+  rattrapages SQL. Ne pas basculer une base existante vers les migrations sans
+  vérifier d'abord son historique et sa baseline.
 - Garder la configuration Brevo existante : `BREVO_API_KEY`,
   `BREVO_SENDER_EMAIL`, et éventuellement `BREVO_SENDER_NAME`.
 - `NODE_ENV=production` active les alertes automatiquement.
@@ -46,3 +49,18 @@ envoyer d'alertes à partir des données locales. Les tests simulent Brevo et Fe
 
 La racine `GET /` renvoie maintenant un accueil JSON et les liens vers le site,
 l'API, la santé du service et la version. Les routes inconnues restent en 404.
+
+## Diagnostic des déploiements historiques
+
+Pour les déploiements historiques faits avec `db push`, les alertes incluent aussi
+les paiements réussis restés étiquetés `PAWAPAY` uniquement lorsque
+`gatewayResponse.reference` correspond exactement à `transactionId`, comme dans
+le rattrapage SQL FeexPay. Cette sélection ne modifie ni le statut, ni le montant,
+ni la passerelle en base. Les références inconnues et les vraies réponses PawaPay
+restent exclues.
+
+Les logs `[Payment email]` indiquent au démarrage si le service est désactivé et
+pourquoi, les nombres de succès par passerelle, le nombre de paiements éligibles
+et déjà notifiés, puis les nombres sélectionnés et envoyés dans chaque lot.
+En cas de refus, le statut HTTP et le code d'erreur sont journalisés, jamais la
+clé API ni l'objet HTTP complet.

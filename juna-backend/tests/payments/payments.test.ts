@@ -613,6 +613,27 @@ describe('administrator payment emails', () => {
     expect(await new PaymentEmailService().deliver(payment.id)).toBe(false);
     expect(sendAdminPaymentReceivedEmail).not.toHaveBeenCalled();
   });
+  test('historical FeexPay success created by db push is notified without reclassifying the ledger', async () => {
+    const payment = await successfulPayment('PAWAPAY');
+    await prisma.payment.update({where:{id:payment.id},data:{
+      gatewayResponse:{reference:payment.transactionId!,status:'SUCCESSFUL'},
+    }});
+    await new PaymentEmailService().processPending();
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledTimes(1);
+    const after = await prisma.payment.findUniqueOrThrow({where:{id:payment.id}});
+    expect(after.gateway).toBe('PAWAPAY');
+    expect(after.status).toBe('SUCCESS');
+    expect(after.amount).toBe(payment.amount);
+    expect(after.adminEmailSentAt).not.toBeNull();
+  });
+  test('mismatched legacy references are never treated as FeexPay', async () => {
+    const payment = await successfulPayment('PAWAPAY');
+    await prisma.payment.update({where:{id:payment.id},data:{
+      gatewayResponse:{reference:'another-reference',status:'SUCCESSFUL'},
+    }});
+    await new PaymentEmailService().processPending();
+    expect(sendAdminPaymentReceivedEmail).not.toHaveBeenCalled();
+  });
   test('legacy gateways and missing email configuration are excluded', async () => {
     const payment = await successfulPayment('PAWAPAY');
     expect(await new PaymentEmailService().deliver(payment.id)).toBe(false);
