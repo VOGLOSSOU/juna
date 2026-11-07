@@ -76,7 +76,7 @@ export const startCronJobs = () => {
   };
   // Also catches up successful payments made before this feature was deployed.
   void sendPaymentEmails();
-  cron.schedule('* * * * *', sendPaymentEmails, { timezone: 'UTC' });
+  cron.schedule('*/15 * * * *', sendPaymentEmails, { timezone: 'UTC' });
   cron.schedule('* * * * *', async () => {
     try {
       await paymentService.reconcilePendingPayments();

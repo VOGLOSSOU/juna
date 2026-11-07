@@ -24,7 +24,7 @@ telle, sans inventer une date de paiement.
   l'active explicitement, y compris hors production.
 
 Au premier démarrage, le serveur rattrape les paiements FeexPay déjà réussis,
-par lots de 20. Il poursuit chaque minute, sans modifier les commandes ni
+par lots de 20. Il poursuit toutes les 15 minutes, sans modifier les commandes ni
 redemander un paiement. Il n'est pas nécessaire de renvoyer les webhooks.
 
 Les futurs succès déclenchent un envoi en arrière-plan après la validation du
@@ -34,7 +34,8 @@ paiement. Une interruption du processus est rattrapée par le même job.
 
 Les champs `Payment.adminEmailSentAt`, `adminEmailClaimToken` et
 `adminEmailNextAttemptAt` assurent le suivi durable, la réservation atomique entre
-instances et une reprise après cinq minutes en cas d'échec ou de redémarrage.
+instances et une reprise au prochain passage du job après un délai minimal de
+cinq minutes en cas d'échec ou de redémarrage.
 Un email accepté par Brevo est marqué envoyé et n'est plus repris. Ce statut
 signifie « accepté par Brevo », pas « arrivé dans la boîte principale ».
 
@@ -59,8 +60,9 @@ le rattrapage SQL FeexPay. Cette sélection ne modifie ni le statut, ni le monta
 ni la passerelle en base. Les références inconnues et les vraies réponses PawaPay
 restent exclues.
 
-Les logs `[Payment email]` indiquent au démarrage si le service est désactivé et
-pourquoi, les nombres de succès par passerelle, le nombre de paiements éligibles
-et déjà notifiés, puis les nombres sélectionnés et envoyés dans chaque lot.
+Les lots vides ne produisent aucun log ni comptage statistique supplémentaire.
+Les logs `[Payment email]` indiquent les nombres sélectionnés et envoyés uniquement
+pour les lots non vides. Un avertissement de configuration reste émis si le
+service est désactivé.
 En cas de refus, le statut HTTP et le code d'erreur sont journalisés, jamais la
 clé API ni l'objet HTTP complet.

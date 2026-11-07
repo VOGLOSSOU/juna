@@ -116,29 +116,11 @@ export class PaymentEmailService {
     }
     this.running = true;
     try {
-      if (!this.reportedStartup) {
-        const successful = await prisma.payment.groupBy({
-          by: ['gateway'],
-          where: { status: 'SUCCESS' },
-          _count: { _all: true },
-        });
-        const [delivery] = await prisma.$queryRaw<Array<{ eligible: number; sent: number }>>`
-          SELECT COUNT(*)::int AS eligible,
-            COUNT("adminEmailSentAt")::int AS sent
-          FROM "payments" WHERE ${feexPayEmailSource} AND "status" = 'SUCCESS'
-        `;
-        console.info('[Payment email] Worker started', {
-          recipient: paymentEmailRecipient(),
-          successfulByGateway: successful,
-          eligible: delivery.eligible,
-          alreadySent: delivery.sent,
-        });
-        this.reportedStartup = true;
-      }
       const payments = await prisma.$queryRaw<Array<{ id: string }>>`
         SELECT "id" FROM "payments" WHERE ${pendingPaymentEmails()}
         ORDER BY "paidAt" ASC NULLS LAST, "id" ASC LIMIT ${limit}
       `;
+      if (payments.length === 0) return;
       let sent = 0;
       for (const payment of payments) if (await this.deliver(payment.id)) sent++;
       console.info('[Payment email] Batch completed', { selected: payments.length, sent });
