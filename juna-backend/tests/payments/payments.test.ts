@@ -9,7 +9,8 @@ import feexPayService, {
   normalizePaymentPhone,
   resolveNetwork,
 } from '@/services/feexpay.service';
-import { sendOrderConfirmedEmail, sendProviderNewOrderEmail } from '@/services/email.service';
+import { sendOrderConfirmedEmail, sendProviderNewOrderEmail, sendAdminPaymentReceivedEmail } from '@/services/email.service';
+import { PaymentEmailService } from '@/services/payment-email.service';
 import { createNotification } from '@/services/notification.service';
 import paymentRoutes from '@/routes/payment.routes';
 import { errorHandler } from '@/middlewares/error.middleware';
@@ -29,6 +30,7 @@ jest.mock('@/services/feexpay.service', () => ({
 jest.mock('@/services/email.service', () => ({
   sendOrderConfirmedEmail: jest.fn(),
   sendProviderNewOrderEmail: jest.fn(),
+  sendAdminPaymentReceivedEmail: jest.fn(),
 }));
 jest.mock('@/services/notification.service', () => ({ createNotification: jest.fn() }));
 
@@ -528,4 +530,95 @@ test('confirmation email outage does not fail or duplicate a successful payment'
   });
   expect((await attempt()).status).toBe('SUCCESS');
   expect(sendOrderConfirmedEmail).toHaveBeenCalledTimes(1);
+});
+
+// The API success path is exercised above. These tests use the same isolated
+// payment fixtures to exercise durable alert delivery without contacting Brevo.
+describe('administrator payment emails', () => {
+  let originalEnabled: string | undefined;
+  let originalBrevo: string | undefined;
+  let originalRecipient: string | undefined;
+  beforeEach(() => {
+    originalEnabled = process.env.PAYMENT_NOTIFICATIONS_ENABLED;
+    originalBrevo = process.env.BREVO_API_KEY;
+    originalRecipient = process.env.PAYMENT_NOTIFICATION_EMAIL;
+    process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'true';
+    process.env.BREVO_API_KEY = 'test-not-a-real-key';
+    process.env.PAYMENT_NOTIFICATION_EMAIL = 'n969601@gmail.com';
+    jest.mocked(sendAdminPaymentReceivedEmail).mockReset().mockResolvedValue(undefined);
+  });
+  afterEach(() => {
+    for (const [key, value] of Object.entries({
+      PAYMENT_NOTIFICATIONS_ENABLED: originalEnabled,
+      BREVO_API_KEY: originalBrevo,
+      PAYMENT_NOTIFICATION_EMAIL: originalRecipient,
+    })) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  });
+  async function successfulPayment(gateway = 'FEEXPAY') {
+    return prisma.payment.create({ data: {
+      orderId, userId, gateway, status: 'SUCCESS', amount: 3111,
+      method: 'MOBILE_MONEY_MTN', paidAt: new Date('2026-11-01T12:00:00Z'),
+      transactionId: randomUUID(),
+    } });
+  }
+  test('a historical success is sent to the requested address only once', async () => {
+    const payment = await successfulPayment();
+    const emails = new PaymentEmailService();
+    await emails.processPending();
+    await emails.processPending();
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledTimes(1);
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledWith('n969601@gmail.com', expect.objectContaining({
+      paymentId: payment.id, reference: payment.transactionId, amount: 3111,
+      orderNumber: expect.any(String), paidAt: payment.paidAt,
+    }));
+    expect((await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } })).adminEmailSentAt).not.toBeNull();
+  });
+  test('two API replicas cannot send the same payment simultaneously', async () => {
+    const payment = await successfulPayment();
+    const gate = deferred<void>();
+    jest.mocked(sendAdminPaymentReceivedEmail).mockImplementation(() => gate.promise);
+    const first = new PaymentEmailService().deliver(payment.id);
+    const second = new PaymentEmailService().deliver(payment.id);
+    gate.resolve();
+    await Promise.all([first, second]);
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledTimes(1);
+  });
+  test('email failures leave the payment successful and allow a later retry', async () => {
+    const payment = await successfulPayment();
+    const emails = new PaymentEmailService();
+    jest.mocked(sendAdminPaymentReceivedEmail).mockRejectedValueOnce(new Error('Brevo unavailable'));
+    expect(await emails.deliver(payment.id)).toBe(false);
+    const after = await prisma.payment.findUniqueOrThrow({ where: { id: payment.id } });
+    expect(after.status).toBe('SUCCESS');
+    expect(after.adminEmailSentAt).toBeNull();
+    expect(after.adminEmailNextAttemptAt!.getTime()).toBeGreaterThan(Date.now());
+    expect(await emails.deliver(payment.id)).toBe(false);
+    await prisma.payment.update({where:{id:payment.id},data:{adminEmailNextAttemptAt:new Date(0)}});
+    expect(await emails.deliver(payment.id)).toBe(true);
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledTimes(2);
+  });
+  test('a crashed worker lease expires and is recovered', async () => {
+    const payment = await successfulPayment();
+    await prisma.payment.update({where:{id:payment.id},data:{
+      adminEmailClaimToken:randomUUID(), adminEmailNextAttemptAt:new Date(0),
+    }});
+    expect(await new PaymentEmailService().deliver(payment.id)).toBe(true);
+    expect(sendAdminPaymentReceivedEmail).toHaveBeenCalledTimes(1);
+  });
+  test.each(['PENDING', 'PROCESSING', 'FAILED', 'REFUNDED'] as const)('does not notify a %s payment', async status => {
+    const payment = await successfulPayment();
+    await prisma.payment.update({where:{id:payment.id},data:{status}});
+    expect(await new PaymentEmailService().deliver(payment.id)).toBe(false);
+    expect(sendAdminPaymentReceivedEmail).not.toHaveBeenCalled();
+  });
+  test('legacy gateways and missing email configuration are excluded', async () => {
+    const payment = await successfulPayment('PAWAPAY');
+    expect(await new PaymentEmailService().deliver(payment.id)).toBe(false);
+    await prisma.payment.update({where:{id:payment.id},data:{gateway:'FEEXPAY'}});
+    delete process.env.BREVO_API_KEY;
+    expect(await new PaymentEmailService().deliver(payment.id)).toBe(false);
+    expect(sendAdminPaymentReceivedEmail).not.toHaveBeenCalled();
+  });
 });

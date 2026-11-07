@@ -15,6 +15,7 @@ import { lockPaymentOrder } from '@/utils/payment-lock.util';
 import { sendOrderConfirmedEmail, sendProviderNewOrderEmail } from '@/services/email.service';
 import { createNotification } from '@/services/notification.service';
 import type { FeexPayWebhook } from '@/validators/payment.validator';
+import paymentEmailService from './payment-email.service';
 
 const pendingStatuses: PaymentStatus[] = [PaymentStatus.PENDING, PaymentStatus.PROCESSING];
 const json = (value: unknown): Prisma.InputJsonValue =>
@@ -258,10 +259,17 @@ export class PaymentService {
           });
         }
       }
-      return { confirmed: confirmed.count === 1 };
+      return { confirmed: confirmed.count === 1, paymentSucceeded: true };
     });
     if (result.mismatch)
       throw new ConflictError('Données de paiement incohérentes.', 'PAYMENT_DATA_MISMATCH');
+    if (result.paymentSucceeded) {
+      // The durable worker retries if sending fails or the process restarts.
+      // Sending this email must not delay the checkout or webhook response.
+      void paymentEmailService.deliver(initial.payment.id).catch(() => {
+        console.error('[Payment email] Delivery deferred for payment %s', initial.payment.id);
+      });
+    }
     if (result.confirmed) {
       // Only the transaction that changes PENDING -> CONFIRMED sends notifications.
       // Notification outages must not make a confirmed payment look failed.

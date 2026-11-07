@@ -53,6 +53,15 @@ app.use(httpLogger);
 // Rate limiting global
 app.use(globalRateLimiter);
 
+app.get('/', (_req, res) => {
+  sendSuccess(res, 'Bienvenue sur l’API Juna Eats, la plateforme d’abonnements repas.', {
+    website: 'https://junaeats.com',
+    api: `/api/${env.apiVersion}`,
+    health: '/api/health',
+    version: '/api/version',
+  });
+});
+
 // ============================================
 // HEALTH CHECK
 // ============================================

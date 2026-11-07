@@ -3,6 +3,7 @@ import prisma from '@/config/database';
 import emailVerificationCodeRepository from '@/repositories/emailVerificationCode.repository';
 import { logInfo, logError } from '@/utils/logger.util';
 import paymentService from '@/services/payment.service';
+import paymentEmailService from '@/services/payment-email.service';
 
 /**
  * Job cron pour nettoyer les abonnements actifs expirés
@@ -66,6 +67,16 @@ export const startCronJobs = () => {
   logInfo('Starting cron jobs...');
   cleanupExpiredSubscriptions();
   cleanupExpiredOtpCodes();
+  const sendPaymentEmails = async () => {
+    try {
+      await paymentEmailService.processPending();
+    } catch (error) {
+      logError('Payment email delivery failed', error);
+    }
+  };
+  // Also catches up successful payments made before this feature was deployed.
+  void sendPaymentEmails();
+  cron.schedule('* * * * *', sendPaymentEmails, { timezone: 'UTC' });
   cron.schedule('* * * * *', async () => {
     try {
       await paymentService.reconcilePendingPayments();

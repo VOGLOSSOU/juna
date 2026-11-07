@@ -414,3 +414,59 @@ export async function sendProposalRejectedToProvider(
   `);
   await send({ email, name }, `Proposition de ${data.consumerName} rejetée - Juna Eats`, html);
 }
+
+export interface AdminPaymentEmail {
+  paymentId: string;
+  reference: string;
+  orderNumber: string;
+  customerName: string;
+  subscriptionName: string;
+  providerName: string;
+  amount: number;
+  currency: string;
+  method: string;
+  paidAt: Date | null;
+  createdAt: Date;
+}
+
+function escapeEmailHtml(value: string) {
+  return value.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char]!));
+}
+
+// Unlike user-facing best-effort emails, delivery errors must reach the retry worker.
+export async function sendAdminPaymentReceivedEmail(email: string, payment: AdminPaymentEmail) {
+  if (!process.env.BREVO_API_KEY) throw new Error('BREVO_API_KEY is required');
+  const esc = escapeEmailHtml;
+  const amount = `${payment.amount.toLocaleString('fr-FR')} ${payment.currency === 'XOF' ? 'FCFA' : esc(payment.currency)}`;
+  const paidAt = (payment.paidAt ?? payment.createdAt).toLocaleString('fr-FR', { timeZone: 'Africa/Porto-Novo' });
+  const htmlContent = layout('Paiement reçu - Juna Eats', `
+    ${heading('Paiement FeexPay confirmé')}
+    ${paragraph('Un paiement réussi a été enregistré sur Juna Eats. La date ci-dessous est celle du paiement, y compris pour une notification envoyée en rattrapage.')}
+    ${infoTable(
+      infoRow('Montant reçu', amount, true) +
+      infoRow(payment.paidAt ? 'Date du paiement (Bénin)' : 'Date d’enregistrement (Bénin)', esc(paidAt)) +
+      infoRow('Commande', esc(payment.orderNumber)) +
+      infoRow('Client', esc(payment.customerName)) +
+      infoRow('Abonnement', esc(payment.subscriptionName)) +
+      infoRow('Prestataire', esc(payment.providerName)) +
+      infoRow('Mode de paiement', esc(payment.method)) +
+      infoRow('Référence FeexPay', esc(payment.reference))
+    )}
+  `);
+  try {
+    await brevo.transactionalEmails.sendTransacEmail({
+      sender: SENDER, to: [{ email }],
+      subject: `Paiement reçu : ${payment.amount} ${payment.currency} - ${payment.orderNumber}`,
+      htmlContent,
+      headers: { idempotencyKey: payment.paymentId },
+      tags: ['payment-admin'],
+    }, { timeoutInSeconds: 20, maxRetries: 0 });
+  } catch (error) {
+    const body = (error as { body?: { code?: string; message?: string } }).body;
+    // Brevo has already accepted this exact email in its idempotency window.
+    if (body?.code === 'duplicate_parameter' && /idempotency/i.test(body.message ?? '')) return;
+    throw error;
+  }
+}
