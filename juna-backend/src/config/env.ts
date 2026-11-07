@@ -106,6 +106,10 @@ export const validateEnv = (): void => {
     'JWT_REFRESH_SECRET',
   ];
 
+  if (env.nodeEnv === 'production') {
+    requiredVars.push('FEEXPAY_API_TOKEN', 'FEEXPAY_SHOP_ID', 'FEEXPAY_WEBHOOK_SECRET');
+  }
+
   const missingVars = requiredVars.filter((varName) => !process.env[varName]);
 
   if (missingVars.length > 0) {

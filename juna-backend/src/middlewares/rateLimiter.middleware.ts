@@ -7,6 +7,11 @@ import { sendError } from '@/utils/response.util';
  * Rate limiter global (100 requêtes / 15 minutes)
  */
 export const globalRateLimiter = rateLimit({
+  // A shared client/IP quota must not block the machine-to-machine callback.
+  // Its body is verified against FeexPay's authenticated API in the service.
+  skip: (req) => req.method === 'POST' &&
+    [ `/api/${env.apiVersion}/payments/webhook/feexpay`,
+      `/api/${env.apiVersion}/payments/webhook/feexpay/` ].includes(req.path),
   windowMs: env.rateLimitWindowMs,
   max: env.rateLimitMaxRequests,
   message: 'Trop de requêtes, veuillez réessayer plus tard',

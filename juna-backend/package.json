@@ -5,8 +5,8 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
-    "build": "tsc && tsc-alias",
-    "start": "npx prisma db push --accept-data-loss && node dist/server.js",
+    "build": "prisma generate && tsc && tsc-alias",
+    "start": "prisma migrate deploy && node dist/server.js",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:integration": "jest --testPathPattern=integration",
@@ -23,7 +23,8 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
-    "test:favorites": "jest --config jest.favorites.config.js --runInBand"
+    "test:favorites": "jest --config jest.favorites.config.js --runInBand",
+    "test:payments": "jest --config jest.payments.config.js --runInBand"
   },
   "keywords": [
     "api",

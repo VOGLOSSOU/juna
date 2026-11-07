@@ -366,8 +366,8 @@ Le backend envoie automatiquement les emails suivants. Aucune action n'est requi
 | `POST /auth/send-verification-code` | User | Code OTP à 6 chiffres (valable 10 min) |
 | `POST /auth/register` (succès) | User | Email de bienvenue sur Juna |
 | `POST /auth/forgot-password` | User | Lien de réinitialisation de mot de passe |
-| Paiement confirmé (webhook PawaPay) | User | Récapitulatif de commande confirmée |
-| Paiement confirmé (webhook PawaPay) | Prestataire | Notification nouvelle commande |
+| Paiement confirmé (confirmation FeexPay) | User | Récapitulatif de commande confirmée |
+| Paiement confirmé (confirmation FeexPay) | Prestataire | Notification nouvelle commande |
 | Admin approuve un prestataire | Prestataire | Email d'approbation |
 | Admin rejette un prestataire | Prestataire | Email de rejet avec motif |
 

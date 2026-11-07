@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import prisma from '@/config/database';
 import emailVerificationCodeRepository from '@/repositories/emailVerificationCode.repository';
 import { logInfo, logError } from '@/utils/logger.util';
+import paymentService from '@/services/payment.service';
 
 /**
  * Job cron pour nettoyer les abonnements actifs expirés
@@ -65,5 +66,12 @@ export const startCronJobs = () => {
   logInfo('Starting cron jobs...');
   cleanupExpiredSubscriptions();
   cleanupExpiredOtpCodes();
+  cron.schedule('* * * * *', async () => {
+    try {
+      await paymentService.reconcilePendingPayments();
+    } catch (error) {
+      logError('Payment reconciliation failed', error);
+    }
+  }, { timezone: 'UTC' });
   logInfo('Cron jobs started successfully');
 };

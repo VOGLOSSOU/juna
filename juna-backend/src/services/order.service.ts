@@ -11,6 +11,7 @@ import {
 import { ERROR_CODES } from '@/constants/errors';
 import { OrderStatus, DeliveryMethod, SubscriptionDuration } from '@prisma/client';
 import prisma from '@/config/database';
+import { lockPaymentOrder } from '@/utils/payment-lock.util';
 
 const DURATION_DAYS: Record<SubscriptionDuration, number> = {
   DAY:        1,
@@ -321,33 +322,27 @@ export class OrderService {
    * Annuler une commande
    */
   async cancel(id: string, userId: string, userRole: string) {
-    const order = await orderRepository.findById(id);
-    if (!order) {
-      throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
-    }
-
-    // Vérifier les permissions (propriétaire ou admin)
-    if (order.userId !== userId && userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à annuler cette commande',
-        ERROR_CODES.FORBIDDEN
-      );
-    }
-
-    // Vérifier si annulable (seulement PENDING ou CONFIRMED)
-    if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.CONFIRMED) {
-      throw new ConflictError(
-        'Cette commande ne peut plus être annulée',
-        ERROR_CODES.ORDER_CANNOT_BE_CANCELLED
-      );
-    }
-
-    const cancelledOrder = await orderRepository.updateStatus(id, OrderStatus.CANCELLED);
-
-    // Décrémenter le nombre d'abonnés
-    await subscriptionRepository.decrementSubscriberCount(order.subscriptionId);
-
-    return cancelledOrder;
+    return prisma.$transaction(async tx => {
+      await lockPaymentOrder(tx, id);
+      const order = await tx.order.findUnique({where: {id}});
+      if (!order) throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
+      if (order.userId !== userId && userRole !== 'ADMIN' && userRole !== 'SUPER_ADMIN') {
+        throw new ForbiddenError("Vous n'êtes pas autorisé à annuler cette commande", ERROR_CODES.FORBIDDEN);
+      }
+      if (order.status !== OrderStatus.PENDING && order.status !== OrderStatus.CONFIRMED) {
+        throw new ConflictError('Cette commande ne peut plus être annulée', ERROR_CODES.ORDER_CANNOT_BE_CANCELLED);
+      }
+      const payment = await tx.payment.findUnique({where: {orderId: id}});
+      if (payment && ['PENDING', 'PROCESSING', 'SUCCESS'].includes(payment.status)) {
+        throw new ConflictError(
+          "Un paiement est en cours ou a été reçu. Contactez l'assistance pour annuler cette commande.",
+          'PAYMENT_CANCELLATION_REQUIRES_SUPPORT'
+        );
+      }
+      const cancelled = await tx.order.update({where: {id}, data: {status: OrderStatus.CANCELLED}});
+      await tx.subscription.update({where: {id: order.subscriptionId}, data: {subscriberCount: {decrement: 1}}});
+      return cancelled;
+    });
   }
 
   /**

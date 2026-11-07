@@ -402,6 +402,8 @@ model Payment {
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
   transactionId   String?       @unique
+  // Existing rows remain PawaPay unless the migration can identify FeexPay.
+  gateway         String        @default("PAWAPAY")
   gatewayResponse Json?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
@@ -410,11 +412,38 @@ model Payment {
   // Relations
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id])
+  attempts PaymentAttempt[]
 
   @@index([userId])
   @@index([status])
   @@index([transactionId])
   @@map("payments")
+}
+
+model PaymentAttempt {
+  id              String        @id @default(uuid()) @db.Uuid
+  paymentId       String        @db.Uuid
+  gateway         String        @default("FEEXPAY")
+  status          PaymentStatus @default(PROCESSING)
+  reference       String?       @unique
+  callbackInfo    String
+  amount          Float
+  currency        String        @default("XOF")
+  method          PaymentMethod
+  phoneNumber     String?
+  network         String?
+  gatewayResponse Json?
+  needsReview     Boolean       @default(false)
+  reviewReason    String?
+  lastCheckedAt   DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId, createdAt])
+  @@index([gateway, status, lastCheckedAt])
+  @@map("payment_attempts")
 }
 
 model CustomProposal {
