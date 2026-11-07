@@ -12,12 +12,18 @@ interface RequestToPayPayload {
 
 interface RequestToPayResponse {
   reference: string;
-  message: string;
-  status: 'PENDING';
-  amount: number;
-  description: string;
-  callback_info: string | null;
-  phoneNumber: string;
+  message?: string;
+  // Pour MTN/Celtiis, le statut initial est quasi toujours PENDING (confirmation
+  // via polling ensuite). Pour Moov, la réponse peut déjà contenir le statut final
+  // (ex: FAILED si solde insuffisant, SUCCESSFUL si le client a déjà confirmé).
+  status: 'PENDING' | 'SUCCESSFUL' | 'FAILED';
+  amount?: number;
+  description?: string;
+  callback_info?: string | null;
+  phoneNumber?: string;
+  statusCode?: string;
+  response_operator?: unknown;
+  normal_response?: string;
 }
 
 interface DepositStatusResponse {
@@ -37,14 +43,14 @@ interface DepositStatusResponse {
 }
 
 // Réseaux Mobile Money disponibles au Bénin, tels que documentés par FeexPay.
-// Celtiis/Coris existent côté FeexPay mais n'ont pas d'équivalent dans l'enum
-// PaymentMethod actuel (MTN/MOOV/ORANGE/WAVE uniquement) — à ajouter si besoin.
-const SUPPORTED_NETWORKS = ['mtn', 'moov'] as const;
+// Coris n'a pas de documentation d'endpoint disponible pour l'instant — non géré.
+const SUPPORTED_NETWORKS = ['mtn', 'moov', 'celtiis_bj'] as const;
 type Network = (typeof SUPPORTED_NETWORKS)[number];
 
 export function resolveNetwork(provider: string | undefined): Network {
   const p = (provider ?? 'MTN').toUpperCase();
   if (p.startsWith('MOOV')) return 'moov';
+  if (p.startsWith('CELTIIS')) return 'celtiis_bj';
   return 'mtn';
 }
 

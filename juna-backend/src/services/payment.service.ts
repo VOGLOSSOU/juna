@@ -14,7 +14,14 @@ export function resolvePaymentMethod(provider: string): PaymentMethod {
   if (p.startsWith('MOOV')) return PaymentMethod.MOBILE_MONEY_MOOV;
   if (p.startsWith('ORANGE')) return PaymentMethod.MOBILE_MONEY_ORANGE;
   if (p.startsWith('WAVE')) return PaymentMethod.MOBILE_MONEY_WAVE;
+  if (p.startsWith('CELTIIS')) return PaymentMethod.MOBILE_MONEY_CELTIIS;
   return PaymentMethod.MOBILE_MONEY_MTN;
+}
+
+// FeexPay refuse les caractères spéciaux dans `description` — on ne garde que
+// lettres, chiffres et espaces pour éviter un rejet silencieux de la requête.
+function sanitizeDescription(text: string): string {
+  return text.replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
 }
 
 async function applyFinalStatus(paymentId: string, orderId: string, gatewayStatus: string, raw: any) {
@@ -110,7 +117,7 @@ export class PaymentService {
     const feexpayResponse = await feexPayService.requestToPay(network, {
       phoneNumber: data.phoneNumber,
       amount: Math.round(order.amount),
-      description: `Commande ${order.orderNumber}`,
+      description: sanitizeDescription(`Commande ${order.orderNumber}`),
       callback_info: order.id,
     });
 
@@ -123,6 +130,23 @@ export class PaymentService {
       transactionId: feexpayResponse.reference,
       gatewayResponse: feexpayResponse,
     });
+
+    // Moov (contrairement à MTN/Celtiis) peut renvoyer le statut final dès la
+    // réponse d'initiation (ex: FAILED si solde insuffisant) — on l'applique
+    // immédiatement plutôt que de laisser le paiement bloqué en PROCESSING.
+    if (feexpayResponse.status === 'SUCCESSFUL' || feexpayResponse.status === 'FAILED') {
+      await applyFinalStatus(payment.id, order.id, feexpayResponse.status, feexpayResponse);
+      const updated = await paymentRepository.findById(payment.id);
+      return {
+        paymentId: payment.id,
+        reference: feexpayResponse.reference,
+        status: updated!.status,
+        message:
+          feexpayResponse.status === 'SUCCESSFUL'
+            ? 'Paiement confirmé.'
+            : "Paiement refusé par l'opérateur.",
+      };
+    }
 
     return {
       paymentId: payment.id,
