@@ -24,6 +24,15 @@ export function computeClientPrice(providerPrice: number): number {
 
 export class SubscriptionService {
   /**
+   * Prévisualiser le prix client pour un prix prestataire donné, sans rien créer.
+   * Permet au frontend d'afficher un aperçu en direct sans jamais calculer le
+   * prix lui-même.
+   */
+  previewPrice(providerPrice: number) {
+    return { providerPrice, price: computeClientPrice(providerPrice) };
+  }
+
+  /**
    * Créer un abonnement
    */
   async create(providerId: string, data: CreateSubscriptionInput): Promise<Subscription> {

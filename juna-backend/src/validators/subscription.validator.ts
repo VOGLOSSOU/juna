@@ -153,6 +153,16 @@ export const subscriptionIdSchema = z.object({
 });
 
 /**
+ * Schéma de validation pour la prévisualisation de prix
+ */
+export const pricePreviewSchema = z.object({
+  providerPrice: z.coerce
+    .number({ required_error: 'Prix requis' })
+    .positive('Le prix doit être positif')
+    .min(100, 'Prix minimum: 100 XOF'),
+});
+
+/**
  * Type inféré pour créer un abonnement
  */
 export type CreateSubscriptionInput = z.infer<typeof createSubscriptionSchema>;

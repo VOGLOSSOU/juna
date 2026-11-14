@@ -6,6 +6,19 @@ import { SUCCESS_MESSAGES } from '@/constants/messages';
 
 export class SubscriptionController {
   /**
+   * Prévisualiser le prix client pour un prix prestataire donné
+   */
+  async pricePreview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { providerPrice } = req.query as unknown as { providerPrice: number };
+      const result = subscriptionService.previewPrice(providerPrice);
+      sendSuccess(res, 'Aperçu du prix', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Créer un abonnement
    */
   async create(req: Request, res: Response, next: NextFunction) {
