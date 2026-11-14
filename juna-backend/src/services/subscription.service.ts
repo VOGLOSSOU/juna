@@ -13,7 +13,7 @@ import { Subscription } from '@prisma/client';
 // Commission Juna fixe, appliquée à tous les abonnements. Les prestataires ne
 // la choisissent plus eux-mêmes — plus simple pour eux, et ça protège le
 // revenu de la plateforme d'un taux mis à 0% par un prestataire.
-export const JUNA_COMMISSION_PERCENT = 10;
+export const JUNA_COMMISSION_PERCENT = 3.3;
 
 export class SubscriptionService {
   /**
