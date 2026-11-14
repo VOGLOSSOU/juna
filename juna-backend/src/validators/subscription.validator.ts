@@ -58,7 +58,9 @@ export const createSubscriptionSchema = z.object({
     .max(1000, 'Maximum 1000 caractères')
     .trim(),
   instructions: subscriptionInstructionsSchema,
-  price: z
+  // Prix que le prestataire veut recevoir — le backend calcule et fige le prix
+  // client à partir de ça, en appliquant la commission Juna en vigueur.
+  providerPrice: z
     .number({ required_error: 'Prix requis' })
     .positive('Le prix doit être positif')
     .min(100, 'Prix minimum: 100 XOF'),
@@ -97,7 +99,7 @@ export const updateSubscriptionSchema = z.object({
     .trim()
     .optional(),
   instructions: subscriptionInstructionsSchema,
-  price: z
+  providerPrice: z
     .number()
     .positive('Le prix doit être positif')
     .min(100, 'Prix minimum: 100 XOF')

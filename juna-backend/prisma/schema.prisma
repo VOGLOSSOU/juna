@@ -310,8 +310,9 @@ model Subscription {
   providerId            String               @db.Uuid
   name                  String
   description           String               @db.Text
-  price                 Float
-  junaCommissionPercent Float                @default(10) // Pourcentage de commission JUNA (0-100)
+  price                 Float // Prix payé par le client — calculé par le backend, jamais saisi directement
+  providerPrice         Float                @default(0) // Ce que le prestataire reçoit réellement — saisi par le prestataire
+  junaCommissionPercent Float                @default(3.3) // Pourcentage de commission JUNA (0-100)
   type                  SubscriptionType
   category              SubscriptionCategory
   duration              SubscriptionDuration

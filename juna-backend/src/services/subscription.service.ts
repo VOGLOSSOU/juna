@@ -15,6 +15,13 @@ import { Subscription } from '@prisma/client';
 // revenu de la plateforme d'un taux mis à 0% par un prestataire.
 export const JUNA_COMMISSION_PERCENT = 3.3;
 
+// Calcule le prix client à partir de ce que le prestataire veut recevoir,
+// en appliquant la commission Juna en vigueur. Seul le backend fait ce calcul —
+// aucune app ne doit recalculer ça de son côté.
+export function computeClientPrice(providerPrice: number): number {
+  return Math.round(providerPrice / (1 - JUNA_COMMISSION_PERCENT / 100));
+}
+
 export class SubscriptionService {
   /**
    * Créer un abonnement
@@ -62,7 +69,8 @@ export class SubscriptionService {
       name: data.name,
       description: data.description,
       instructions: data.instructions,
-      price: data.price,
+      price: computeClientPrice(data.providerPrice),
+      providerPrice: data.providerPrice,
       junaCommissionPercent: JUNA_COMMISSION_PERCENT,
       type: data.type,
       category: data.category,
@@ -133,6 +141,7 @@ export class SubscriptionService {
       name: s.name,
       instructions: s.instructions ?? null,
       price: s.price,
+      providerPrice: s.providerPrice,
       currency: 'XOF',
       type: s.type,
       category: s.category,
@@ -149,6 +158,7 @@ export class SubscriptionService {
       description: raw.description,
       instructions: raw.instructions ?? null,
       price: raw.price,
+      providerPrice: raw.providerPrice,
       currency: 'XOF',
       type: raw.type,
       category: raw.category,
@@ -229,6 +239,7 @@ export class SubscriptionService {
       instructions: s.instructions ?? null,
       description: s.description,
       price: s.price,
+      providerPrice: s.providerPrice,
       currency: 'XOF',
       type: s.type,
       category: s.category,
@@ -298,7 +309,10 @@ export class SubscriptionService {
       name: data.name,
       description: data.description,
       instructions: data.instructions,
-      price: data.price,
+      ...(data.providerPrice !== undefined && {
+        price: computeClientPrice(data.providerPrice),
+        providerPrice: data.providerPrice,
+      }),
       type: data.type,
       category: data.category,
       duration: data.duration,

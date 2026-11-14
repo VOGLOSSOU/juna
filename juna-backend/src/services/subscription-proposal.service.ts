@@ -19,7 +19,7 @@ import {
   RejectSubscriptionProposalInput,
   SubscriptionProposalFiltersInput,
 } from '@/validators/subscription-proposal.validator';
-import { JUNA_COMMISSION_PERCENT } from '@/services/subscription.service';
+import { JUNA_COMMISSION_PERCENT, computeClientPrice } from '@/services/subscription.service';
 
 export class SubscriptionProposalService {
   /**
@@ -198,7 +198,8 @@ export class SubscriptionProposalService {
         name: data.name,
         description: data.description,
         instructions: data.instructions,
-        price: data.price,
+        price: computeClientPrice(data.providerPrice),
+        providerPrice: data.providerPrice,
         junaCommissionPercent: JUNA_COMMISSION_PERCENT,
         type: data.type ?? proposal.type,
         category: data.category ?? proposal.category,
@@ -230,7 +231,7 @@ export class SubscriptionProposalService {
     sendProposalApprovedToConsumer(proposal.user.email, proposal.user.name, {
       businessName: proposal.provider.businessName,
       subscriptionName: data.name,
-      price: data.price,
+      price: subscription.price,
       isImmediate: data.isImmediate ?? true,
       preparationHours: data.preparationHours ?? 0,
     }).catch(() => {});

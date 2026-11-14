@@ -78,7 +78,7 @@ export const approveSubscriptionProposalSchema = z
       .max(1000, 'Maximum 1000 caractères')
       .trim(),
     instructions: subscriptionInstructionsSchema,
-    price: z
+    providerPrice: z
       .number({ required_error: 'Prix requis' })
       .positive('Le prix doit être positif')
       .min(100, 'Prix minimum: 100 XOF'),

@@ -11,6 +11,7 @@ export class SubscriptionRepository {
     description: string;
     instructions?: string | null;
     price: number;
+    providerPrice: number;
     junaCommissionPercent?: number;
     type: SubscriptionType;
     category: SubscriptionCategory;
@@ -147,6 +148,7 @@ export class SubscriptionRepository {
         name: true,
         instructions: true,
         price: true,
+        providerPrice: true,
         type: true,
         category: true,
         duration: true,
@@ -201,6 +203,7 @@ export class SubscriptionRepository {
     description?: string;
     instructions?: string | null;
     price?: number;
+    providerPrice?: number;
     junaCommissionPercent?: number;
     type?: SubscriptionType;
     category?: SubscriptionCategory;
@@ -322,6 +325,7 @@ export class SubscriptionRepository {
       instructions: true,
       description: true,
       price: true,
+      providerPrice: true,
       type: true,
       category: true,
       duration: true,
