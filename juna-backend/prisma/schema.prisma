@@ -53,6 +53,13 @@ enum PayoutNetwork {
   MOOV
 }
 
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
 enum DeliveryMethod {
   DELIVERY
   PICKUP
@@ -270,6 +277,7 @@ model Provider {
   meals                 Meal[]
   landmarks             ProviderLandmark[]
   subscriptionProposals SubscriptionProposal[]
+  payouts               Payout[]
 
   @@index([status])
   @@index([cityId])
@@ -377,6 +385,9 @@ model Order {
   subscriptionId  String         @db.Uuid
   orderNumber     String         @unique
   amount          Float
+  // Ce que le prestataire doit recevoir pour cette commande précise, figé à la
+  // création — ne change jamais, même si le prix de l'abonnement change après.
+  providerAmount  Float          @default(0)
   status          OrderStatus    @default(PENDING)
   deliveryMethod  DeliveryMethod
   deliveryAddress String?
@@ -394,6 +405,7 @@ model Order {
   user               User                @relation(fields: [userId], references: [id])
   subscription       Subscription        @relation(fields: [subscriptionId], references: [id])
   payment            Payment?
+  payout             Payout?
   review             Review?
   tickets            SupportTicket[]
   activeSubscription ActiveSubscription?
@@ -461,6 +473,36 @@ model PaymentAttempt {
   @@index([paymentId, createdAt])
   @@index([gateway, status, lastCheckedAt])
   @@map("payment_attempts")
+}
+
+model Payout {
+  id          String       @id @default(uuid()) @db.Uuid
+  orderId     String       @unique @db.Uuid
+  providerId  String       @db.Uuid
+  // Figé au moment de l'activation — jamais recalculé depuis le profil du
+  // prestataire, qui peut avoir changé entre temps.
+  amount      Float
+  // Null si le prestataire n'avait pas encore configuré son numéro au moment
+  // de la tentative — le Payout existe quand même, pour rester visible/traçable.
+  phoneNumber String?
+  network     PayoutNetwork?
+  status      PayoutStatus @default(PENDING)
+  reference   String?      @unique
+  gatewayResponse Json?
+  needsReview Boolean      @default(false)
+  reviewReason String?
+  lastCheckedAt DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId])
+  @@index([status, lastCheckedAt])
+  @@map("payouts")
 }
 
 model CustomProposal {

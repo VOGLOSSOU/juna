@@ -25,6 +25,24 @@ const depositStatusSchema = initiationSchema.extend({
 });
 export type DepositStatusResponse = z.infer<typeof depositStatusSchema>;
 
+const payoutInitiationSchema = z
+  .object({
+    reference: feexPayReferenceSchema,
+    status: statusSchema,
+  })
+  .passthrough();
+const payoutStatusSchema = payoutInitiationSchema.extend({
+  amount: z.coerce.number().finite().positive().optional(),
+});
+export type PayoutStatusResponse = z.infer<typeof payoutStatusSchema>;
+
+export type PayoutNetworkCode = 'MTN' | 'MOOV';
+
+// FeexPay payouts : 30 caractères maximum, pas de caractères spéciaux.
+export function sanitizeMotif(text: string): string {
+  return text.replace(/[^a-zA-Z0-9 ]/g, ' ').trim().slice(0, 30);
+}
+
 export interface RequestToPayPayload {
   phoneNumber: string;
   amount: number;
@@ -191,6 +209,84 @@ export class FeexPayService {
         'PAYMENT_REVIEW_REQUIRED'
       );
     return matches[0]?.reference ?? null;
+  }
+
+  // Same recovery mechanism as findReference, for the payout side of the history endpoint.
+  async findPayoutReference(callbackInfo: string, createdAt: Date): Promise<string | null> {
+    this.assertConfigured();
+    if (Date.now() - createdAt.getTime() > 30 * 86400000) return null;
+    const end = new Date(Math.min(Date.now(), createdAt.getTime() + 86400000));
+    const { data } = await this.client.post<unknown>('/transactions/history', {
+      start_date: createdAt.toISOString().slice(0, 10),
+      end_date: end.toISOString().slice(0, 10),
+      shop: this.shop,
+      type: 'PAYOUT',
+      status: 'ALL',
+    });
+    const history = z
+      .object({
+        success: z.literal(true),
+        data: z.array(
+          z
+            .object({
+              reference: feexPayReferenceSchema,
+              callback_info: callbackSchema,
+            })
+            .passthrough()
+        ),
+      })
+      .safeParse(data);
+    if (!history.success)
+      throw new ServiceUnavailableError('Historique FeexPay indisponible.', 'FEEXPAY_ERROR');
+    const matches = history.data.data.filter(
+      (row) => callbackValue(row.callback_info) === callbackInfo
+    );
+    if (matches.length > 1)
+      throw new ServiceUnavailableError(
+        'Plusieurs versements nécessitent un contrôle.',
+        'PAYMENT_REVIEW_REQUIRED'
+      );
+    return matches[0]?.reference ?? null;
+  }
+
+  async initiatePayout(
+    network: PayoutNetworkCode,
+    payload: { phoneNumber: string; amount: number; motif: string; callback_info: string }
+  ) {
+    this.assertConfigured();
+    try {
+      const { data } = await this.client.post<unknown>('/payouts/public/transfer/global', {
+        ...payload,
+        network,
+        shop: this.shop,
+      });
+      const parsed = payoutInitiationSchema.safeParse(data);
+      if (!parsed.success) throw new FeexPayRequestError(false);
+      return parsed.data;
+    } catch (error) {
+      if (error instanceof FeexPayRequestError) throw error;
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      // Same rule as for collections: an ambiguous failure (timeout, 5xx) must
+      // never be treated as a clean rejection — money may already be in transit.
+      throw new FeexPayRequestError(
+        status !== undefined && [400, 401, 403, 404, 422].includes(status)
+      );
+    }
+  }
+
+  async getPayoutStatus(reference: string): Promise<PayoutStatusResponse> {
+    this.assertConfigured();
+    const safeReference = feexPayReferenceSchema.parse(reference);
+    try {
+      const { data } = await this.client.get<unknown>(
+        `/payouts/status/public/${encodeURIComponent(safeReference)}`
+      );
+      const result = payoutStatusSchema.safeParse(data);
+      if (!result.success) throw new Error('Invalid FeexPay payout status response');
+      return result.data;
+    } catch {
+      throw new ServiceUnavailableError('Vérification FeexPay indisponible.', 'FEEXPAY_ERROR');
+    }
   }
 }
 

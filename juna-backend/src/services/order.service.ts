@@ -12,6 +12,7 @@ import { ERROR_CODES } from '@/constants/errors';
 import { OrderStatus, DeliveryMethod, SubscriptionDuration } from '@prisma/client';
 import prisma from '@/config/database';
 import { lockPaymentOrder } from '@/utils/payment-lock.util';
+import payoutService from '@/services/payout.service';
 
 const DURATION_DAYS: Record<SubscriptionDuration, number> = {
   DAY:        1,
@@ -117,6 +118,9 @@ export class OrderService {
       subscription: { connect: { id: data.subscriptionId } },
       orderNumber,
       amount: subscription.price + deliveryCost,
+      // Figé ici, définitivement — c'est ce montant précis que le prestataire
+      // recevra à l'activation, quel que soit le prix de l'abonnement plus tard.
+      providerAmount: subscription.providerPrice,
       status: OrderStatus.PENDING,
       deliveryMethod: data.deliveryMethod,
       deliveryAddress: data.deliveryAddress,
@@ -226,47 +230,46 @@ export class OrderService {
    * Activer la commande (user)
    */
   async activate(id: string, userId: string) {
-    const order = await orderRepository.findById(id);
-    if (!order) {
-      throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
-    }
+    await prisma.$transaction(async (tx) => {
+      await lockPaymentOrder(tx, id);
 
-    if (order.userId !== userId) {
-      throw new ForbiddenError(
-        'Vous n\'êtes pas autorisé à activer cette commande',
-        ERROR_CODES.FORBIDDEN
-      );
-    }
+      const order = await tx.order.findUnique({ where: { id } });
+      if (!order) {
+        throw new NotFoundError('Commande introuvable', ERROR_CODES.ORDER_NOT_FOUND);
+      }
 
-    if (order.status !== OrderStatus.CONFIRMED) {
-      throw new ValidationError(
-        'La commande doit être confirmée avant d\'être activée',
-        ERROR_CODES.INVALID_INPUT
-      );
-    }
+      if (order.userId !== userId) {
+        throw new ForbiddenError(
+          'Vous n\'êtes pas autorisé à activer cette commande',
+          ERROR_CODES.FORBIDDEN
+        );
+      }
 
-    // Récupérer la subscription complète pour avoir la duration
-    const subscription = await subscriptionRepository.findById(order.subscriptionId);
-    if (!subscription) {
-      throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
-    }
+      if (order.status !== OrderStatus.CONFIRMED) {
+        throw new ValidationError(
+          'La commande doit être confirmée avant d\'être activée',
+          ERROR_CODES.INVALID_INPUT
+        );
+      }
 
-    // La durée part du moment de l'activation, pas de scheduledFor
-    // scheduledFor reste utile pour le provider (info de préparation)
-    const activatedAt = new Date();
-    const durationDays = DURATION_DAYS[subscription.duration];
-    const endsAt = new Date(activatedAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      // Récupérer la subscription complète pour avoir la duration
+      const subscription = await tx.subscription.findUnique({ where: { id: order.subscriptionId } });
+      if (!subscription) {
+        throw new NotFoundError('Abonnement introuvable', ERROR_CODES.SUBSCRIPTION_NOT_FOUND);
+      }
 
-    // TODO: Déclencher le paiement au provider ici
-    // providerService.processPayment(subscription.providerId, order.amount);
+      // La durée part du moment de l'activation, pas de scheduledFor
+      // scheduledFor reste utile pour le provider (info de préparation)
+      const activatedAt = new Date();
+      const durationDays = DURATION_DAYS[subscription.duration];
+      const endsAt = new Date(activatedAt.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
-    // Activer la commande ET créer l'abonnement actif
-    await prisma.$transaction([
-      prisma.order.update({
+      // Activer la commande ET créer l'abonnement actif
+      await tx.order.update({
         where: { id },
         data: { status: OrderStatus.ACTIVE }
-      }),
-      prisma.activeSubscription.create({
+      });
+      await tx.activeSubscription.create({
         data: {
           userId: order.userId,
           orderId: order.id,
@@ -275,8 +278,14 @@ export class OrderService {
           endsAt: endsAt,
           duration: subscription.duration,
         }
-      })
-    ]);
+      });
+    });
+
+    // Déclenché après coup, hors transaction : un appel FeexPay lent ou en
+    // échec ne doit jamais remettre en cause l'activation déjà actée.
+    payoutService.initiateForOrder(id).catch((error) => {
+      console.error('[Order] Payout initiation failed for order %s', id, error);
+    });
 
     return { message: 'Commande activée avec succès' };
   }

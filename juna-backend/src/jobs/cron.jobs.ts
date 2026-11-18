@@ -4,6 +4,7 @@ import emailVerificationCodeRepository from '@/repositories/emailVerificationCod
 import { logInfo, logError } from '@/utils/logger.util';
 import paymentService from '@/services/payment.service';
 import paymentEmailService from '@/services/payment-email.service';
+import payoutService from '@/services/payout.service';
 
 /**
  * Job cron pour nettoyer les abonnements actifs expirés
@@ -82,6 +83,13 @@ export const startCronJobs = () => {
       await paymentService.reconcilePendingPayments();
     } catch (error) {
       logError('Payment reconciliation failed', error);
+    }
+  }, { timezone: 'UTC' });
+  cron.schedule('* * * * *', async () => {
+    try {
+      await payoutService.reconcilePendingPayouts();
+    } catch (error) {
+      logError('Payout reconciliation failed', error);
     }
   }, { timezone: 'UTC' });
   logInfo('Cron jobs started successfully');
