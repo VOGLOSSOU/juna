@@ -81,6 +81,7 @@ export class ProviderService {
         ERROR_CODES.PROVIDER_NOT_FOUND
       );
     }
+    const user = await userRepository.findById(userId);
 
     return {
       id: provider.id,
@@ -94,6 +95,10 @@ export class ProviderService {
       deliveryZones: provider.deliveryZones,
       landmarks: (provider as any).landmarks ?? [],
       documentUrl: provider.documentUrl,
+      // Numéro de contact du compte — brut, tel qu'enregistré à l'inscription.
+      // Distinct de payoutPhoneNumber : pas forcément au bon format, jamais
+      // utilisé directement pour un versement sans passer par cette page.
+      phone: user?.phone ?? null,
       payoutPhoneNumber: provider.payoutPhoneNumber,
       payoutNetwork: provider.payoutNetwork,
       status: provider.status,
