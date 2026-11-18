@@ -279,6 +279,36 @@ export async function sendProviderRejectedEmail(
   await send({ email, name }, 'Mise à jour de votre candidature prestataire - Juna Eats', html);
 }
 
+function formatPayoutPhoneForDisplay(phone: string): string {
+  const local = phone.startsWith('229') ? phone.slice(3) : phone;
+  return `+229 ${local.match(/.{1,2}/g)?.join(' ') ?? local}`;
+}
+
+export async function sendPayoutInfoUpdatedEmail(
+  email: string,
+  name: string,
+  data: { payoutPhoneNumber: string; payoutNetwork: string }
+) {
+  const formattedPhone = formatPayoutPhoneForDisplay(data.payoutPhoneNumber);
+  const html = layout('Numéro de versement confirmé - Juna Eats', `
+    ${heading('Vos informations de versement sont enregistrées ✅')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, votre numéro Mobile Money de réception des versements vient d'être enregistré.`)}
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+      <tr>
+        <td style="background-color:${C.bg};border-radius:10px;padding:20px 24px;">
+          <p style="margin:0 0 6px;color:${C.muted};font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Opérateur</p>
+          <p style="margin:0 0 16px;color:${C.navy};font-size:16px;font-weight:700;">${data.payoutNetwork}</p>
+          <p style="margin:0 0 6px;color:${C.muted};font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Numéro</p>
+          <p style="margin:0;color:${C.navy};font-size:16px;font-weight:700;">${formattedPhone}</p>
+        </td>
+      </tr>
+    </table>
+    ${paragraph(`C'est désormais sur ce numéro que vous recevrez automatiquement le paiement de chaque abonnement, dès que votre client l'active.`)}
+    ${notice('⚠️', "Si vous n'êtes pas à l'origine de cette modification, connectez-vous immédiatement à votre espace prestataire pour corriger ce numéro, ou contactez-nous.")}
+  `);
+  await send({ email, name }, 'Numéro de versement enregistré - Juna Eats', html);
+}
+
 export async function sendPasswordChangedEmail(email: string, name: string) {
   const html = layout('Mot de passe modifié - Juna Eats', `
     ${heading('Votre mot de passe a été modifié')}

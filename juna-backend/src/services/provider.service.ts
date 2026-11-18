@@ -1,7 +1,7 @@
 import prisma from '@/config/database';
 import providerRepository from '@/repositories/provider.repository';
 import userRepository from '@/repositories/user.repository';
-import { sendProviderApprovedEmail, sendProviderRejectedEmail } from '@/services/email.service';
+import { sendProviderApprovedEmail, sendProviderRejectedEmail, sendPayoutInfoUpdatedEmail } from '@/services/email.service';
 import { createNotification } from '@/services/notification.service';
 import {
   ConflictError,
@@ -183,6 +183,14 @@ export class ProviderService {
       payoutPhoneNumber: data.payoutPhoneNumber,
       payoutNetwork: data.payoutNetwork,
     });
+
+    const user = await userRepository.findById(userId);
+    if (user && updated.payoutPhoneNumber && updated.payoutNetwork) {
+      sendPayoutInfoUpdatedEmail(user.email, user.name, {
+        payoutPhoneNumber: updated.payoutPhoneNumber,
+        payoutNetwork: updated.payoutNetwork,
+      }).catch(() => {});
+    }
 
     return {
       payoutPhoneNumber: updated.payoutPhoneNumber,
