@@ -6,6 +6,7 @@ import { authenticate, optionalAuth } from '@/middlewares/auth.middleware';
 import {
   registerProviderSchema,
   updateProviderSchema,
+  setPayoutInfoSchema,
 } from '@/validators/provider.validator';
 import { z } from 'zod';
 
@@ -53,6 +54,17 @@ router.put(
   authenticate,
   validate(updateProviderSchema),
   providerController.updateProfile.bind(providerController)
+);
+
+/**
+ * PUT /api/v1/providers/me/payout
+ * Définir le numéro Mobile Money de réception des versements
+ */
+router.put(
+  '/me/payout',
+  authenticate,
+  validate(setPayoutInfoSchema),
+  providerController.setPayoutInfo.bind(providerController)
 );
 
 export default router;

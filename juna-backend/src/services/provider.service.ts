@@ -12,6 +12,7 @@ import { ERROR_CODES } from '@/constants/errors';
 import {
   RegisterProviderDTO,
   UpdateProviderDTO,
+  SetPayoutInfoDTO,
 } from '@/validators/provider.validator';
 import { ProviderStatus } from '@prisma/client';
 
@@ -93,6 +94,8 @@ export class ProviderService {
       deliveryZones: provider.deliveryZones,
       landmarks: (provider as any).landmarks ?? [],
       documentUrl: provider.documentUrl,
+      payoutPhoneNumber: provider.payoutPhoneNumber,
+      payoutNetwork: provider.payoutNetwork,
       status: provider.status,
       rating: provider.rating,
       totalReviews: provider.totalReviews,
@@ -155,6 +158,35 @@ export class ProviderService {
       acceptsPickup: updatedProvider.acceptsPickup,
       deliveryZones: updatedProvider.deliveryZones,
       status: updatedProvider.status,
+    };
+  }
+
+  /**
+   * Définir le numéro Mobile Money de réception des versements automatiques.
+   * Action distincte de updateProfile : c'est un réglage financier sensible,
+   * on ne veut pas qu'il change par effet de bord d'une modif de profil générale.
+   */
+  async setPayoutInfo(userId: string, data: SetPayoutInfoDTO) {
+    const provider = await providerRepository.findByUserId(userId);
+    if (!provider) {
+      throw new NotFoundError('Profil fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
+    }
+
+    if (provider.status !== 'APPROVED') {
+      throw new ForbiddenError(
+        'Vous devez etre approuve pour configurer vos versements',
+        ERROR_CODES.PROVIDER_NOT_APPROVED
+      );
+    }
+
+    const updated = await providerRepository.update(provider.id, {
+      payoutPhoneNumber: data.payoutPhoneNumber,
+      payoutNetwork: data.payoutNetwork,
+    });
+
+    return {
+      payoutPhoneNumber: updated.payoutPhoneNumber,
+      payoutNetwork: updated.payoutNetwork,
     };
   }
 
@@ -305,6 +337,8 @@ export class ProviderService {
       deliveryZones: provider.deliveryZones,
       landmarks: (provider as any).landmarks ?? [],
       documentUrl: provider.documentUrl,
+      payoutPhoneNumber: provider.payoutPhoneNumber,
+      payoutNetwork: provider.payoutNetwork,
       status: provider.status,
       rating: provider.rating,
       totalReviews: provider.totalReviews,

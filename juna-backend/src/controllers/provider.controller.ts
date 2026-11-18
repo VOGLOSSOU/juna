@@ -3,7 +3,7 @@ import favoriteService from '@/services/favorite.service';
 import providerService from '@/services/provider.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
-import { RegisterProviderDTO, UpdateProviderDTO, ApproveProviderDTO, RejectProviderDTO } from '@/validators/provider.validator';
+import { RegisterProviderDTO, UpdateProviderDTO, ApproveProviderDTO, RejectProviderDTO, SetPayoutInfoDTO } from '@/validators/provider.validator';
 
 export class ProviderController {
   /**
@@ -45,6 +45,21 @@ export class ProviderController {
       const data: UpdateProviderDTO = req.body;
       const result = await providerService.updateProfile(userId, data);
       sendSuccess(res, SUCCESS_MESSAGES.PROVIDER_PROFILE_UPDATED, result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Définir le numéro Mobile Money de réception des versements
+   * PUT /api/v1/providers/me/payout
+   */
+  async setPayoutInfo(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user!.id;
+      const data: SetPayoutInfoDTO = req.body;
+      const result = await providerService.setPayoutInfo(userId, data);
+      sendSuccess(res, SUCCESS_MESSAGES.PROVIDER_PAYOUT_INFO_UPDATED, result);
     } catch (error) {
       next(error);
     }

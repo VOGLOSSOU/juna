@@ -78,6 +78,7 @@ export const SUCCESS_MESSAGES = {
   // Provider
   PROVIDER_REGISTERED: 'Demande soumise, en attente de validation',
   PROVIDER_PROFILE_UPDATED: 'Profil fournisseur mis à jour',
+  PROVIDER_PAYOUT_INFO_UPDATED: 'Numéro de réception des versements mis à jour',
   PROVIDER_APPROVED: 'Fournisseur approuvé avec succès',
   PROVIDER_REJECTED: 'Demande rejetée',
   QR_SCANNED: 'Retrait validé avec succès',

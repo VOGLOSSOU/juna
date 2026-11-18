@@ -83,3 +83,21 @@ export const rejectProviderSchema = z.object({
 });
 
 export type RejectProviderDTO = z.infer<typeof rejectProviderSchema>;
+
+/**
+ * Schéma pour le numéro Mobile Money de réception des versements (payout FeexPay).
+ * Format strict exigé par FeexPay : indicatif pays + 10 chiffres, sans espace ni "+".
+ * Pas de normalisation automatique ici — un mauvais format doit être rejeté,
+ * jamais "corrigé" silencieusement, pour ne pas risquer d'envoyer de l'argent
+ * au mauvais numéro.
+ */
+export const setPayoutInfoSchema = z.object({
+  payoutPhoneNumber: z
+    .string({ required_error: 'Numéro de réception requis' })
+    .regex(/^229\d{10}$/, 'Format attendu : 229 suivi de 10 chiffres (ex: 2290163000000)'),
+  payoutNetwork: z.enum(['MTN', 'MOOV'], {
+    required_error: 'Opérateur requis (MTN ou MOOV)',
+  }),
+});
+
+export type SetPayoutInfoDTO = z.infer<typeof setPayoutInfoSchema>;

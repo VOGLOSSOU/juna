@@ -46,6 +46,13 @@ enum PaymentMethod {
   CASH
 }
 
+// Réseaux supportés par l'API payout FeexPay (/payouts/public/transfer/global).
+// Celtiis n'y figure pas dans la doc — à ajouter seulement si/quand documenté.
+enum PayoutNetwork {
+  MTN
+  MOOV
+}
+
 enum DeliveryMethod {
   DELIVERY
   PICKUP
@@ -246,6 +253,10 @@ model Provider {
   acceptsPickup   Boolean        @default(false)
   deliveryZones   Json?
   documentUrl     String?
+  // Numéro Mobile Money sur lequel le prestataire reçoit ses versements (FeexPay payout).
+  // Format attendu : indicatif pays + 10 chiffres, ex "2290163000000".
+  payoutPhoneNumber String?       @db.VarChar(20)
+  payoutNetwork     PayoutNetwork?
   status          ProviderStatus @default(PENDING)
   rating          Float          @default(0)
   totalReviews    Int            @default(0)
