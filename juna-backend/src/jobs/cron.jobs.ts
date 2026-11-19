@@ -5,6 +5,7 @@ import { logInfo, logError } from '@/utils/logger.util';
 import paymentService from '@/services/payment.service';
 import paymentEmailService from '@/services/payment-email.service';
 import payoutService from '@/services/payout.service';
+import adminEventEmailService from '@/services/admin-event-email.service';
 
 /**
  * Job cron pour nettoyer les abonnements actifs expirés
@@ -70,7 +71,7 @@ export const startCronJobs = () => {
   cleanupExpiredOtpCodes();
   const sendPaymentEmails = async () => {
     try {
-      await paymentEmailService.processPending();
+      await Promise.all([paymentEmailService.processPending(), adminEventEmailService.processPending()]);
     } catch (error) {
       logError('Payment email delivery failed', error);
     }

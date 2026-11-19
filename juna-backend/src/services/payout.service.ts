@@ -11,6 +11,7 @@ import feexPayService, {
 import { sendPayoutSuccessEmail, sendManualPayoutConfirmedEmail } from './email.service';
 import { ValidationError } from '@/utils/errors.util';
 import { lockPaymentOrder } from '@/utils/payment-lock.util';
+import adminEventEmailService from './admin-event-email.service';
 
 const PENDING_STATUSES: PayoutStatus[] = ['PENDING', 'PROCESSING'];
 const EMAIL_RETRY_MS = 5 * 60 * 1000;
@@ -318,19 +319,29 @@ export class PayoutService {
 
     // Transition conditionnelle : une seule exécution concurrente peut faire
     // gagner ce updateMany, donc un seul email de succès peut jamais partir.
-    const applied = await prisma.payout.updateMany({
-      where: { id: payoutId, status: { in: PENDING_STATUSES }, reference: expectedReference },
-      data: {
-        reference: remote.reference,
-        gatewayResponse: json(remote),
-        lastCheckedAt: new Date(),
-        needsReview: finalStatus === 'FAILED',
-        reviewReason: finalStatus === 'FAILED' ? 'PAYOUT_REJECTED' : null,
-        status: finalStatus,
-        ...(finalStatus === 'SUCCESS' ? { paidAt: new Date() } : {}),
-      },
+    const applied = await prisma.$transaction(async (tx) => {
+      await lockPaymentOrder(tx, payout.orderId);
+      const changed = await tx.payout.updateMany({
+        where: { id: payoutId, status: { in: PENDING_STATUSES }, reference: expectedReference },
+        data: {
+          reference: remote.reference,
+          gatewayResponse: json(remote),
+          lastCheckedAt: new Date(),
+          needsReview: finalStatus === 'FAILED',
+          reviewReason: finalStatus === 'FAILED' ? 'PAYOUT_REJECTED' : null,
+          status: finalStatus,
+          ...(finalStatus === 'SUCCESS' ? { paidAt: new Date() } : {}),
+        },
+      });
+      if (changed.count === 1 && finalStatus === 'SUCCESS') {
+        await adminEventEmailService.enqueue(tx, 'PAYOUT_SUCCEEDED', payout.orderId);
+      }
+      return changed;
     });
     if (applied.count === 1 && finalStatus === 'SUCCESS') {
+      void adminEventEmailService.deliverForOrder('PAYOUT_SUCCEEDED', payout.orderId).catch(() => {
+        console.error('[Admin email] Payout alert deferred for order %s', payout.orderId);
+      });
       await this.deliverSuccessEmail(payoutId);
     }
   }
@@ -621,11 +632,16 @@ export class PayoutService {
         needsReview: false,
         reviewReason: null,
       };
-      return existing
+      const recorded = await (existing
         ? tx.payout.update({ where: { id: existing.id }, data })
         : tx.payout.create({
             data: { orderId, providerId: order.subscription.providerId, ...data },
-          });
+          }));
+      await adminEventEmailService.enqueue(tx, 'PAYOUT_SUCCEEDED', orderId);
+      return recorded;
+    });
+    void adminEventEmailService.deliverForOrder('PAYOUT_SUCCEEDED', orderId).catch(() => {
+      console.error('[Admin email] Manual payout alert deferred for order %s', orderId);
     });
     // Same durable lease and retry path for manual and FeexPay confirmation emails.
     await this.deliverSuccessEmail(payout.id).catch((error) => {

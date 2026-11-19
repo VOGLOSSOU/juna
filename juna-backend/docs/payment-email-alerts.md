@@ -66,3 +66,33 @@ pour les lots non vides. Un avertissement de configuration reste émis si le
 service est désactivé.
 En cas de refus, le statut HTTP et le code d'erreur sont journalisés, jamais la
 clé API ni l'objet HTTP complet.
+
+## Alertes destinées à l'administrateur
+
+La même adresse `PAYMENT_NOTIFICATION_EMAIL` (par défaut `n969601@gmail.com`)
+reçoit maintenant trois familles d'alertes, activées par
+`PAYMENT_NOTIFICATIONS_ENABLED=true` et la configuration Brevo existante :
+
+- Paiement FeexPay confirmé : suivi historique `Payment.adminEmail*`.
+- Activation d'une commande : événement `ORDER_ACTIVATED`.
+- Reversement confirmé : événement `PAYOUT_SUCCEEDED`, avec le montant réellement
+  enregistré et le mode `AUTOMATIC`, `MANUAL` ou `TRIGGERED`.
+
+L'alerte d'activation ne signifie pas que le prestataire a déjà reçu son argent.
+L'alerte manuelle signifie qu'un administrateur atteste un paiement effectué hors
+du système ; elle ne prétend pas qu'un transfert FeexPay a eu lieu.
+
+Les deux nouvelles alertes sont réservées dans `admin_email_events` dans la même
+transaction que l'événement métier. Chaque événement a une clé unique, un bail
+atomique, un suivi d'envoi et une clé d'idempotence email distincte de celle du
+prestataire. Une panne d'email n'altère jamais le paiement ou l'activation.
+Les erreurs sont reprises par le job email existant toutes les 15 minutes, après
+un délai minimal de cinq minutes. Aucun nouveau cron n'est ajouté et les lots
+vides restent silencieux.
+
+Appliquer la migration `20261119093000_admin_event_emails` lors du déploiement
+(ou vérifier la création de cette table avec le mécanisme de schéma réellement
+utilisé par l'hébergement). Les alertes activation/reversement concernent les
+événements enregistrés avec cette version ; les anciens événements ne sont pas
+recréés automatiquement. Le rattrapage existant des paiements FeexPay réussis
+reste inchangé.

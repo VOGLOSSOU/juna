@@ -575,3 +575,51 @@ export async function sendAdminPaymentReceivedEmail(email: string, payment: Admi
     throw error;
   }
 }
+
+export interface AdminEventEmail {
+  eventId: string;
+  kind: 'ORDER_ACTIVATED' | 'PAYOUT_SUCCEEDED';
+  orderNumber: string;
+  customerName: string;
+  providerName: string;
+  subscriptionName: string;
+  amount: number;
+  occurredAt: Date;
+  mode?: 'AUTOMATIC' | 'MANUAL' | 'TRIGGERED';
+  reference?: string | null;
+}
+
+export async function sendAdminEventEmail(email: string, event: AdminEventEmail) {
+  if (!process.env.BREVO_API_KEY?.trim()) throw new Error('BREVO_API_KEY is required');
+  const esc = escapeEmailHtml;
+  const mode = { AUTOMATIC: 'Automatique', MANUAL: 'Manuel confirmé par un administrateur', TRIGGERED: 'Déclenché par un administrateur via FeexPay' };
+  const title = event.kind === 'ORDER_ACTIVATED' ? 'Abonnement activé' : 'Reversement confirmé';
+  const htmlContent = layout(`${title} - Juna Eats`, `
+    ${heading(title)}
+    ${paragraph(event.kind === 'ORDER_ACTIVATED'
+      ? 'Le client a activé son abonnement. Cette alerte confirme l’activation, pas la réception du reversement par le prestataire.'
+      : event.mode === 'MANUAL'
+        ? 'Un administrateur a confirmé un versement effectué hors du système. Cette action ne déclenche aucun nouveau transfert FeexPay.'
+        : 'Le reversement au prestataire a été confirmé par FeexPay.')}
+    ${infoTable(
+      infoRow('Commande', esc(event.orderNumber)) +
+      infoRow('Client', esc(event.customerName)) +
+      infoRow('Abonnement', esc(event.subscriptionName)) +
+      infoRow('Prestataire', esc(event.providerName)) +
+      infoRow(event.kind === 'ORDER_ACTIVATED' ? 'Montant de la commande' : 'Montant reversé', `${event.amount.toLocaleString('fr-FR')} FCFA`, true) +
+      infoRow('Date (Bénin)', esc(event.occurredAt.toLocaleString('fr-FR', { timeZone: 'Africa/Porto-Novo' }))) +
+      (event.mode ? infoRow('Mode de reversement', mode[event.mode]) : '') +
+      (event.reference ? infoRow('Référence FeexPay', esc(event.reference)) : '')
+    )}
+  `);
+  try {
+    await brevo.transactionalEmails.sendTransacEmail({
+      sender: SENDER, to: [{ email }], subject: `${title} - ${event.orderNumber} - Juna Eats`,
+      htmlContent, headers: { idempotencyKey: event.eventId }, tags: ['admin-business-event'],
+    }, { timeoutInSeconds: 20, maxRetries: 0 });
+  } catch (error) {
+    const body = (error as { body?: { code?: string; message?: string } }).body;
+    if (body?.code === 'duplicate_parameter' && /idempotency/i.test(body.message ?? '')) return;
+    throw error;
+  }
+}

@@ -423,12 +423,30 @@ model Order {
   review             Review?
   tickets            SupportTicket[]
   activeSubscription ActiveSubscription?
+  adminEmailEvents   AdminEmailEvent[]
 
   @@index([userId])
   @@index([subscriptionId])
   @@index([status])
   @@index([orderNumber])
   @@map("orders")
+}
+
+// Durable administrator alerts. The id is also the email provider idempotency key,
+// distinct from customer/provider notification keys for the same business event.
+model AdminEmailEvent {
+  id            String   @id @default(uuid()) @db.Uuid
+  eventKey      String   @unique
+  kind          String
+  orderId       String   @db.Uuid
+  sentAt        DateTime?
+  claimToken    String?  @db.Uuid
+  nextAttemptAt DateTime?
+  createdAt     DateTime @default(now())
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([sentAt, nextAttemptAt])
+  @@map("admin_email_events")
 }
 
 model Payment {

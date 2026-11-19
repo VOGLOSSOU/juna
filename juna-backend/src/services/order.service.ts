@@ -13,6 +13,7 @@ import { OrderStatus, DeliveryMethod, SubscriptionDuration } from '@prisma/clien
 import prisma from '@/config/database';
 import { lockPaymentOrder } from '@/utils/payment-lock.util';
 import payoutService from '@/services/payout.service';
+import adminEventEmailService from '@/services/admin-event-email.service';
 
 const DURATION_DAYS: Record<SubscriptionDuration, number> = {
   DAY:        1,
@@ -283,9 +284,14 @@ export class OrderService {
       // L'intention de versement est créée DANS cette même transaction : même si
       // le process s'arrête juste après le commit, la ligne existe déjà et la
       // réconciliation la reprendra — rien n'est perdu.
-      return payoutService.createIntent(tx, order.id, subscription.providerId, order.providerAmount);
+      const intent = await payoutService.createIntent(tx, order.id, subscription.providerId, order.providerAmount);
+      await adminEventEmailService.enqueue(tx, 'ORDER_ACTIVATED', order.id);
+      return intent;
     });
 
+    void adminEventEmailService.deliverForOrder('ORDER_ACTIVATED', id).catch(() => {
+      console.error('[Admin email] Activation alert deferred for order %s', id);
+    });
     if (payout.status === 'PENDING') {
       // Hors transaction : un appel FeexPay lent ou en échec ne doit jamais
       // remettre en cause l'activation déjà actée.

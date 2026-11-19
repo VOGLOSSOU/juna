@@ -17,3 +17,5 @@ process.env.FEEXPAY_API_TOKEN = 'test_not_a_real_key';
 process.env.FEEXPAY_SHOP_ID = 'test_shop';
 
 process.env.FEEXPAY_WEBHOOK_SECRET = 'test_webhook_secret';
+// No background administrator email sends unless a specific test opts in.
+process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'false';

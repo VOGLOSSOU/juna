@@ -401,3 +401,109 @@ describe('administrative payout actions', () => {
     );
   });
 });
+
+describe('administrator activation and payout alerts', () => {
+  test.each(['AUTOMATIC', 'MANUAL', 'TRIGGERED'] as const)(
+    'confirmed %s payout queues a separate durable administrator alert',
+    async (mode) => {
+      const payout = await intent();
+      if (mode === 'MANUAL') await service.adminConfirmManual(orderId, 900);
+      else if (mode === 'TRIGGERED') await service.adminTriggerPayout(orderId);
+      else await service.attemptPayout(payout.id);
+      const events = await prisma.adminEmailEvent.findMany({ where: { orderId } });
+      expect(events).toHaveLength(1);
+      expect(events[0].kind).toBe('PAYOUT_SUCCEEDED');
+      expect(events[0].id).not.toBe(payout.id);
+      expect(events[0].sentAt).toBeNull();
+      process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'true';
+      const { AdminEventEmailService } = await import('@/services/admin-event-email.service');
+      try {
+        const alerts = new AdminEventEmailService();
+        await Promise.all([
+          alerts.deliver(events[0].id),
+          new AdminEventEmailService().deliver(events[0].id),
+        ]);
+        const adminCalls = mockMail.mock.calls.filter(([payload]) =>
+          payload.tags?.includes('admin-business-event')
+        );
+        expect(adminCalls).toHaveLength(1);
+        expect(adminCalls[0][0].to).toEqual([{ email: 'n969601@gmail.com' }]);
+        expect(adminCalls[0][0].headers.idempotencyKey).toBe(events[0].id);
+        const label = {
+          AUTOMATIC: 'Automatique',
+          MANUAL: 'Manuel confirmé',
+          TRIGGERED: 'Déclenché par un administrateur',
+        };
+        expect(adminCalls[0][0].htmlContent).toContain(label[mode]);
+        if (mode === 'MANUAL') expect(adminCalls[0][0].htmlContent).toContain('900 FCFA');
+      } finally {
+        process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'false';
+      }
+    }
+  );
+
+  test('failed administrator email is retried independently of the already delivered provider email', async () => {
+    const payout = await intent();
+    await service.attemptPayout(payout.id);
+    const event = await prisma.adminEmailEvent.findUniqueOrThrow({
+      where: { eventKey: `PAYOUT_SUCCEEDED:${orderId}` },
+    });
+    const { AdminEventEmailService } = await import('@/services/admin-event-email.service');
+    process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'true';
+    try {
+      const alerts = new AdminEventEmailService();
+      mockMail.mockRejectedValueOnce(new Error('Brevo unavailable'));
+      expect(await alerts.deliver(event.id)).toBe(false);
+      expect(
+        (await prisma.adminEmailEvent.findUniqueOrThrow({ where: { id: event.id } })).sentAt
+      ).toBeNull();
+      expect((await stored()).successEmailSentAt).not.toBeNull();
+      await prisma.adminEmailEvent.update({
+        where: { id: event.id },
+        data: { nextAttemptAt: new Date(0) },
+      });
+      await alerts.processPending();
+      expect(
+        (await prisma.adminEmailEvent.findUniqueOrThrow({ where: { id: event.id } })).sentAt
+      ).not.toBeNull();
+      expect(gateway.initiatePayout).toHaveBeenCalledTimes(1);
+    } finally {
+      process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'false';
+    }
+  });
+
+  test('activation alert is committed with activation and identifies the client and subscription', async () => {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'CONFIRMED', activatedAt: null },
+    });
+    const orderService = (await import('@/services/order.service')).default;
+    // Avoid outbound payout processing: no reception number creates a review-only intent.
+    await prisma.provider.update({ where: { id: providerId }, data: { payoutPhoneNumber: null } });
+    try {
+      await orderService.activate(orderId, userId);
+      const event = await prisma.adminEmailEvent.findUniqueOrThrow({
+        where: { eventKey: `ORDER_ACTIVATED:${orderId}` },
+      });
+      expect(
+        (await prisma.order.findUniqueOrThrow({ where: { id: orderId } })).activatedAt
+      ).not.toBeNull();
+      process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'true';
+      const { AdminEventEmailService } = await import('@/services/admin-event-email.service');
+      await new AdminEventEmailService().deliver(event.id);
+      const [payload] = mockMail.mock.calls.find(([payload]) =>
+        payload.tags?.includes('admin-business-event')
+      )!;
+      expect(payload.subject).toContain('Abonnement activé');
+      expect(payload.htmlContent).toContain('Payout Test');
+      expect(payload.htmlContent).toContain('pas la réception du reversement');
+      expect(gateway.initiatePayout).not.toHaveBeenCalled();
+    } finally {
+      process.env.PAYMENT_NOTIFICATIONS_ENABLED = 'false';
+      await prisma.provider.update({
+        where: { id: providerId },
+        data: { payoutPhoneNumber: '2290166000000' },
+      });
+    }
+  });
+});
