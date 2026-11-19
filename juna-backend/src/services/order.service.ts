@@ -267,7 +267,7 @@ export class OrderService {
       // Activer la commande ET créer l'abonnement actif
       await tx.order.update({
         where: { id },
-        data: { status: OrderStatus.ACTIVE }
+        data: { status: OrderStatus.ACTIVE, activatedAt }
       });
       await tx.activeSubscription.create({
         data: {

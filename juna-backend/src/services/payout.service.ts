@@ -50,18 +50,32 @@ function describePayout(payout: Payout | null): PayoutSummary {
       paidAt: null,
     };
   }
+  // Une anomalie détectée pendant la vérification (needsReview) prime toujours
+  // sur le statut brut : un versement encore PROCESSING avec needsReview=true
+  // (ex. AMOUNT_MISMATCH) ne doit jamais s'afficher comme "en cours" au prestataire.
+  if (payout.needsReview) {
+    return {
+      automatic: true,
+      status: 'NEEDS_REVIEW',
+      label:
+        REVIEW_REASON_LABELS[payout.reviewReason ?? ''] ??
+        "Le versement automatique n'a pas pu être confirmé — vérification en cours par Juna",
+      paidAt: null,
+    };
+  }
   if (payout.status === 'SUCCESS') {
     return { automatic: true, status: 'SUCCESS', label: 'Versé automatiquement', paidAt: payout.paidAt };
   }
   if (payout.status === 'PENDING' || payout.status === 'PROCESSING') {
     return { automatic: true, status: 'PROCESSING', label: 'Versement automatique en cours', paidAt: null };
   }
+  // FAILED sans needsReview ne devrait jamais arriver dans ce code : tous les
+  // chemins qui posent status=FAILED posent aussi needsReview=true. Filet de
+  // sécurité uniquement.
   return {
     automatic: true,
     status: 'NEEDS_REVIEW',
-    label:
-      REVIEW_REASON_LABELS[payout.reviewReason ?? ''] ??
-      "Le versement automatique n'a pas pu être confirmé — vérification en cours par Juna",
+    label: "Le versement automatique n'a pas pu être confirmé — vérification en cours par Juna",
     paidAt: null,
   };
 }
@@ -403,10 +417,9 @@ export class PayoutService {
         include: {
           subscription: { select: { name: true } },
           user: { select: { name: true } },
-          activeSubscription: { select: { startedAt: true } },
           payout: true,
         },
-        orderBy: { updatedAt: 'desc' },
+        orderBy: [{ activatedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }],
         skip,
         take: limit,
       }),
@@ -421,7 +434,9 @@ export class PayoutService {
         clientName: order.user.name,
         clientAmount: order.amount,
         providerAmount: order.providerAmount,
-        activatedAt: order.activeSubscription?.startedAt ?? order.updatedAt,
+        // null seulement pour une commande activée avant l'ajout de ce champ —
+        // jamais remplacé par une autre date qui tromperait sur le moment réel.
+        activatedAt: order.activatedAt,
         payout: describePayout(order.payout),
       })),
       total,

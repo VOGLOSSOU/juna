@@ -101,3 +101,15 @@ export const setPayoutInfoSchema = z.object({
 });
 
 export type SetPayoutInfoDTO = z.infer<typeof setPayoutInfoSchema>;
+
+/**
+ * Pagination pour GET /providers/me/payouts.
+ */
+export const listPayoutsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).max(1000000).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+  })
+  .strict();
+
+export type ListPayoutsQueryDTO = z.infer<typeof listPayoutsQuerySchema>;

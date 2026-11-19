@@ -395,6 +395,10 @@ model Order {
   deliveryCost    Float          @default(0)
   pickupLocation  String?
   scheduledFor    DateTime?
+  // Figé une seule fois lors de l'activation — reste correct même après la
+  // suppression de l'ActiveSubscription (nettoyage à l'expiration), contrairement
+  // à updatedAt qui change aussi à la clôture.
+  activatedAt     DateTime?
   completedAt     DateTime?
   qrCode          String?        @unique
   metadata        Json?

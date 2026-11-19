@@ -3,7 +3,7 @@ import favoriteService from '@/services/favorite.service';
 import providerService from '@/services/provider.service';
 import { sendSuccess } from '@/utils/response.util';
 import { SUCCESS_MESSAGES } from '@/constants/messages';
-import { RegisterProviderDTO, UpdateProviderDTO, ApproveProviderDTO, RejectProviderDTO, SetPayoutInfoDTO } from '@/validators/provider.validator';
+import { RegisterProviderDTO, UpdateProviderDTO, ApproveProviderDTO, RejectProviderDTO, SetPayoutInfoDTO, ListPayoutsQueryDTO } from '@/validators/provider.validator';
 
 export class ProviderController {
   /**
@@ -72,8 +72,7 @@ export class ProviderController {
   async listPayouts(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = (req as any).user!.id;
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const { page, limit } = req.query as unknown as ListPayoutsQueryDTO;
       const result = await providerService.listPayouts(userId, { page, limit });
       sendSuccess(res, 'Versements recuperes avec succes', result);
     } catch (error) {

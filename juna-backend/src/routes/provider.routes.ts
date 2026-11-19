@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { personalizeResponse } from '@/middlewares/personalization.middleware';
 import providerController from '@/controllers/provider.controller';
-import { validate, validateParams } from '@/middlewares/validation.middleware';
+import { validate, validateParams, validateQuery } from '@/middlewares/validation.middleware';
 import { authenticate, optionalAuth } from '@/middlewares/auth.middleware';
 import {
   registerProviderSchema,
   updateProviderSchema,
   setPayoutInfoSchema,
+  listPayoutsQuerySchema,
 } from '@/validators/provider.validator';
 import { z } from 'zod';
 
@@ -74,6 +75,7 @@ router.put(
 router.get(
   '/me/payouts',
   authenticate,
+  validateQuery(listPayoutsQuerySchema),
   providerController.listPayouts.bind(providerController)
 );
 
