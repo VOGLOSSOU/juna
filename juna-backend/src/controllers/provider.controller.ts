@@ -66,6 +66,22 @@ export class ProviderController {
   }
 
   /**
+   * Paiements clients reçus et suivi de leur versement automatique
+   * GET /api/v1/providers/me/payouts
+   */
+  async listPayouts(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = (req as any).user!.id;
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+      const result = await providerService.listPayouts(userId, { page, limit });
+      sendSuccess(res, 'Versements recuperes avec succes', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Approuver un fournisseur (Admin)
    * PUT /api/v1/admin/providers/:id/approve
    */

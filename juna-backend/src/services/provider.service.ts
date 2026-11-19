@@ -3,6 +3,7 @@ import providerRepository from '@/repositories/provider.repository';
 import userRepository from '@/repositories/user.repository';
 import { sendProviderApprovedEmail, sendProviderRejectedEmail, sendPayoutInfoUpdatedEmail } from '@/services/email.service';
 import { createNotification } from '@/services/notification.service';
+import payoutService from '@/services/payout.service';
 import {
   ConflictError,
   NotFoundError,
@@ -201,6 +202,18 @@ export class ProviderService {
       payoutPhoneNumber: updated.payoutPhoneNumber,
       payoutNetwork: updated.payoutNetwork,
     };
+  }
+
+  /**
+   * Liste des paiements clients reçus par le prestataire et suivi de leur
+   * versement automatique (ou absence de suivi, pour les commandes antérieures).
+   */
+  async listPayouts(userId: string, opts: { page?: number; limit?: number } = {}) {
+    const provider = await providerRepository.findByUserId(userId);
+    if (!provider) {
+      throw new NotFoundError('Profil fournisseur introuvable', ERROR_CODES.PROVIDER_NOT_FOUND);
+    }
+    return payoutService.listForProvider(provider.id, opts);
   }
 
   /**

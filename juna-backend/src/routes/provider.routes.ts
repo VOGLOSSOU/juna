@@ -67,4 +67,14 @@ router.put(
   providerController.setPayoutInfo.bind(providerController)
 );
 
+/**
+ * GET /api/v1/providers/me/payouts
+ * Paiements clients reçus et suivi du versement automatique
+ */
+router.get(
+  '/me/payouts',
+  authenticate,
+  providerController.listPayouts.bind(providerController)
+);
+
 export default router;

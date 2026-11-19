@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import prisma from '@/config/database';
-import { Prisma, PayoutStatus } from '@prisma/client';
+import { Prisma, PayoutStatus, Payout } from '@prisma/client';
 import feexPayService, {
   callbackValue,
   normalizePaymentPhone,
@@ -17,6 +17,54 @@ const json = (value: unknown) => JSON.parse(JSON.stringify(value)) as Prisma.Inp
 // Never log a raw error: an AxiosError carries the request config, including the
 // Authorization header with the FeexPay merchant token.
 const errorMessage = (error: unknown) => (error instanceof Error ? error.message : 'unknown error');
+
+// Messages pour le prestataire : jamais les codes techniques bruts, mais assez
+// explicites pour qu'il comprenne s'il doit attendre ou nous contacter.
+const REVIEW_REASON_LABELS: Record<string, string> = {
+  PROVIDER_PAYOUT_NOT_CONFIGURED:
+    "Aucun numéro de réception n'était configuré au moment de l'activation",
+  INVALID_PAYOUT_AMOUNT: 'Montant invalide détecté — versement manuel nécessaire',
+  PAYOUT_REJECTED: "Le versement automatique a été refusé par l'opérateur Mobile Money",
+  AMOUNT_MISMATCH: 'Anomalie détectée sur le montant — vérification en cours',
+  RECIPIENT_MISMATCH: 'Anomalie détectée sur le numéro de réception — vérification en cours',
+  CALLBACK_MISMATCH: 'Anomalie détectée — vérification en cours',
+  GATEWAY_DATA_MISMATCH: 'Anomalie détectée — vérification en cours',
+  INITIATION_OUTCOME_UNKNOWN: 'Statut du versement incertain — vérification en cours',
+};
+
+export type PayoutSummaryStatus = 'MANUAL' | 'PROCESSING' | 'SUCCESS' | 'NEEDS_REVIEW';
+
+export interface PayoutSummary {
+  automatic: boolean;
+  status: PayoutSummaryStatus;
+  label: string;
+  paidAt: Date | null;
+}
+
+function describePayout(payout: Payout | null): PayoutSummary {
+  if (!payout) {
+    return {
+      automatic: false,
+      status: 'MANUAL',
+      label: "Versement manuel — commande d'avant la mise en place du versement automatique",
+      paidAt: null,
+    };
+  }
+  if (payout.status === 'SUCCESS') {
+    return { automatic: true, status: 'SUCCESS', label: 'Versé automatiquement', paidAt: payout.paidAt };
+  }
+  if (payout.status === 'PENDING' || payout.status === 'PROCESSING') {
+    return { automatic: true, status: 'PROCESSING', label: 'Versement automatique en cours', paidAt: null };
+  }
+  return {
+    automatic: true,
+    status: 'NEEDS_REVIEW',
+    label:
+      REVIEW_REASON_LABELS[payout.reviewReason ?? ''] ??
+      "Le versement automatique n'a pas pu être confirmé — vérification en cours par Juna",
+    paidAt: null,
+  };
+}
 
 export class PayoutService {
   private reconciling = false;
@@ -334,6 +382,53 @@ export class PayoutService {
     if (remote.reference === reference && !payout.reference)
       await this.bindReference(payoutId, reference, remote);
     await this.applyVerified(payoutId, remote, reference);
+  }
+
+  // Vue prestataire : chaque commande payée et activée, avec le suivi (ou
+  // l'absence de suivi) de son versement — pour que le prestataire voie
+  // lui-même ce qui a été versé automatiquement et ce qui ne l'a pas été.
+  async listForProvider(providerId: string, opts: { page?: number; limit?: number } = {}) {
+    const page = Math.max(1, opts.page ?? 1);
+    const limit = Math.min(50, Math.max(1, opts.limit ?? 20));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.OrderWhereInput = {
+      subscription: { providerId },
+      status: { in: ['ACTIVE', 'COMPLETED'] },
+    };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where,
+        include: {
+          subscription: { select: { name: true } },
+          user: { select: { name: true } },
+          activeSubscription: { select: { startedAt: true } },
+          payout: true,
+        },
+        orderBy: { updatedAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.order.count({ where }),
+    ]);
+
+    return {
+      items: orders.map((order) => ({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        subscriptionName: order.subscription.name,
+        clientName: order.user.name,
+        clientAmount: order.amount,
+        providerAmount: order.providerAmount,
+        activatedAt: order.activeSubscription?.startedAt ?? order.updatedAt,
+        payout: describePayout(order.payout),
+      })),
+      total,
+      page,
+      limit,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    };
   }
 
   async reconcilePendingPayouts(limit = 50) {
