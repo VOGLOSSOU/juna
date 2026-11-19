@@ -275,3 +275,129 @@ test('only a duplicate idempotency response counts as an already accepted email'
   });
   await expect(sendPayoutSuccessEmail('test@example.invalid', 'Test', email)).rejects.toBeDefined();
 });
+
+describe('administrative payout actions', () => {
+  test.each([false, true])(
+    'an uncertain PROCESSING payout cannot be triggered or confirmed manually (review=%s)',
+    async (needsReview) => {
+      const payout = await intent();
+      await prisma.payout.update({
+        where: { id: payout.id },
+        data: {
+          status: 'PROCESSING',
+          needsReview,
+          reviewReason: 'INITIATION_OUTCOME_UNKNOWN',
+        },
+      });
+      await expect(service.adminTriggerPayout(orderId)).rejects.toThrow();
+      await expect(service.adminConfirmManual(orderId, 1000)).rejects.toThrow();
+      const rows = await service.listForAdmin();
+      const row = rows.items.find((item) => item.orderId === orderId)!;
+      expect(row.payout.canTrigger).toBe(false);
+      expect(row.payout.canConfirmManual).toBe(false);
+      expect((await stored()).status).toBe('PROCESSING');
+      expect(gateway.initiatePayout).not.toHaveBeenCalled();
+      expect(mockMail).not.toHaveBeenCalled();
+    }
+  );
+
+  test('two admin triggers after a local rejection send at most one transfer', async () => {
+    const payout = await intent();
+    await prisma.payout.update({
+      where: { id: payout.id },
+      data: {
+        status: 'FAILED',
+        needsReview: true,
+        reviewReason: 'PROVIDER_PAYOUT_NOT_CONFIGURED',
+      },
+    });
+    await Promise.allSettled([
+      service.adminTriggerPayout(orderId),
+      new PayoutService().adminTriggerPayout(orderId),
+    ]);
+    expect(gateway.initiatePayout).toHaveBeenCalledTimes(1);
+    expect((await stored()).status).toBe('SUCCESS');
+    expect((await stored()).mode).toBe('TRIGGERED');
+    expect(mockMail).toHaveBeenCalledTimes(1);
+  });
+
+  test('two admin triggers for an unclaimed intent never reset an in-flight attempt', async () => {
+    await intent();
+    await Promise.allSettled([
+      service.adminTriggerPayout(orderId),
+      new PayoutService().adminTriggerPayout(orderId),
+    ]);
+    expect(gateway.initiatePayout).toHaveBeenCalledTimes(1);
+    expect((await stored()).status).toBe('SUCCESS');
+    expect((await stored()).mode).toBe('TRIGGERED');
+  });
+
+  test('manual confirmation and automatic claim are serialized on the same order', async () => {
+    const payout = await intent();
+    await Promise.allSettled([
+      service.adminConfirmManual(orderId, 1000),
+      new PayoutService().attemptPayout(payout.id),
+    ]);
+    const after = await stored();
+    expect(after.status).toBe('SUCCESS');
+    if (after.mode === 'MANUAL') expect(gateway.initiatePayout).not.toHaveBeenCalled();
+    else expect(gateway.initiatePayout).toHaveBeenCalledTimes(1);
+    expect(mockMail).toHaveBeenCalledTimes(1);
+  });
+
+  test('two manual confirmations have one winner and only one manual email', async () => {
+    await intent();
+    const results = await Promise.allSettled([
+      service.adminConfirmManual(orderId, 1000),
+      new PayoutService().adminConfirmManual(orderId, 1000),
+    ]);
+    expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+    await service.sendPendingSuccessEmails();
+    expect(mockMail).toHaveBeenCalledTimes(1);
+    expect(mockMail.mock.calls[0][0].tags).toEqual(['payout-manual']);
+    expect(gateway.initiatePayout).not.toHaveBeenCalled();
+    const rows = await service.listForProvider(providerId);
+    const summary = rows.items.find((item) => item.orderId === orderId)!.payout;
+    expect(summary.automatic).toBe(false);
+    expect(summary.label).toContain('manuel');
+    expect(summary.status).toBe('SUCCESS');
+  });
+
+  test('manual email failures are retried as manual emails, never as automatic-transfer notifications', async () => {
+    await intent();
+    mockMail.mockRejectedValueOnce(new Error('Brevo unavailable'));
+    await service.adminConfirmManual(orderId, 900);
+    const after = await stored();
+    expect(after.status).toBe('SUCCESS');
+    expect(after.amount).toBe(900);
+    expect(after.successEmailSentAt).toBeNull();
+    await prisma.payout.update({
+      where: { id: after.id },
+      data: { successEmailNextAttemptAt: new Date(0) },
+    });
+    await service.sendPendingSuccessEmails();
+    expect(mockMail).toHaveBeenCalledTimes(2);
+    for (const [payload] of mockMail.mock.calls) expect(payload.tags).toEqual(['payout-manual']);
+    expect((await stored()).successEmailSentAt).not.toBeNull();
+    expect(gateway.initiatePayout).not.toHaveBeenCalled();
+  });
+
+  test.each([0, -1, 1.2, NaN, Infinity])(
+    'invalid manual amount %s cannot settle a payout',
+    async (amount) => {
+      const payout = await intent();
+      await expect(service.adminConfirmManual(orderId, amount)).rejects.toThrow();
+      expect((await stored()).status).toBe('PENDING');
+      expect((await stored()).id).toBe(payout.id);
+      expect(mockMail).not.toHaveBeenCalled();
+    }
+  );
+
+  test('a triggered success is described as triggered through FeexPay', async () => {
+    await service.adminTriggerPayout(orderId);
+    const rows = await service.listForProvider(providerId);
+    expect(rows.items.find((item) => item.orderId === orderId)!.payout.label).toContain(
+      'déclenché par Juna'
+    );
+  });
+});

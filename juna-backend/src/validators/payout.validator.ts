@@ -23,7 +23,13 @@ export const orderIdParamSchema = z.object({
 // versé en dehors du système diffère du montant actuellement enregistré.
 export const confirmManualPayoutSchema = z
   .object({
-    amount: z.coerce.number().positive('Le montant doit être positif').optional(),
+    amount: z
+      .number()
+      .finite()
+      .int()
+      .positive('Le montant doit être positif')
+      .max(Number.MAX_SAFE_INTEGER)
+      .optional(),
   })
   .strict();
 

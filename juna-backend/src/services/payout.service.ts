@@ -10,6 +10,7 @@ import feexPayService, {
 } from './feexpay.service';
 import { sendPayoutSuccessEmail, sendManualPayoutConfirmedEmail } from './email.service';
 import { ValidationError } from '@/utils/errors.util';
+import { lockPaymentOrder } from '@/utils/payment-lock.util';
 
 const PENDING_STATUSES: PayoutStatus[] = ['PENDING', 'PROCESSING'];
 const EMAIL_RETRY_MS = 5 * 60 * 1000;
@@ -33,6 +34,39 @@ const REVIEW_REASON_LABELS: Record<string, string> = {
   INITIATION_OUTCOME_UNKNOWN: 'Statut du versement incertain — vérification en cours',
 };
 
+// A missing reference never proves that an outbound request did not happen.
+const LOCAL_REJECTIONS = [
+  'PROVIDER_PAYOUT_NOT_CONFIGURED',
+  'INVALID_PAYOUT_AMOUNT',
+  'PAYOUT_REJECTED',
+];
+function isUnsentIntent(payout: Payout) {
+  return (
+    payout.status === 'PENDING' &&
+    !payout.reference &&
+    !payout.gatewayResponse &&
+    !payout.needsReview
+  );
+}
+function canTriggerPayout(payout: Payout | null) {
+  return (
+    !payout ||
+    isUnsentIntent(payout) ||
+    (payout.status === 'FAILED' &&
+      !payout.reference &&
+      LOCAL_REJECTIONS.includes(payout.reviewReason ?? ''))
+  );
+}
+function canConfirmManualPayout(payout: Payout | null) {
+  return (
+    !payout ||
+    isUnsentIntent(payout) ||
+    (payout.status === 'FAILED' &&
+      (payout.reviewReason === 'PAYOUT_REJECTED' ||
+        (!payout.reference && LOCAL_REJECTIONS.includes(payout.reviewReason ?? ''))))
+  );
+}
+
 export type PayoutSummaryStatus = 'MANUAL' | 'PROCESSING' | 'SUCCESS' | 'NEEDS_REVIEW';
 
 export interface PayoutSummary {
@@ -51,12 +85,13 @@ function describePayout(payout: Payout | null): PayoutSummary {
       paidAt: null,
     };
   }
+  const automatic = payout.mode !== 'MANUAL';
   // Une anomalie détectée pendant la vérification (needsReview) prime toujours
   // sur le statut brut : un versement encore PROCESSING avec needsReview=true
   // (ex. AMOUNT_MISMATCH) ne doit jamais s'afficher comme "en cours" au prestataire.
   if (payout.needsReview) {
     return {
-      automatic: true,
+      automatic,
       status: 'NEEDS_REVIEW',
       label:
         REVIEW_REASON_LABELS[payout.reviewReason ?? ''] ??
@@ -65,10 +100,24 @@ function describePayout(payout: Payout | null): PayoutSummary {
     };
   }
   if (payout.status === 'SUCCESS') {
-    return { automatic: true, status: 'SUCCESS', label: 'Versé automatiquement', paidAt: payout.paidAt };
+    const label =
+      payout.mode === 'MANUAL'
+        ? 'Versement manuel confirmé par Juna'
+        : payout.mode === 'TRIGGERED'
+          ? 'Versé via FeexPay, déclenché par Juna'
+          : 'Versé automatiquement';
+    return { automatic, status: 'SUCCESS', label, paidAt: payout.paidAt };
   }
   if (payout.status === 'PENDING' || payout.status === 'PROCESSING') {
-    return { automatic: true, status: 'PROCESSING', label: 'Versement automatique en cours', paidAt: null };
+    return {
+      automatic,
+      status: 'PROCESSING',
+      label:
+        payout.mode === 'TRIGGERED'
+          ? 'Versement déclenché par Juna en cours'
+          : 'Versement automatique en cours',
+      paidAt: null,
+    };
   }
   // FAILED sans needsReview ne devrait jamais arriver dans ce code : tous les
   // chemins qui posent status=FAILED posent aussi needsReview=true. Filet de
@@ -138,14 +187,18 @@ export class PayoutService {
   // activation + un passage du cron sur la même ligne) : seule l'exécution qui
   // réclame atomiquement le Payout appelle réellement FeexPay.
   async attemptPayout(payoutId: string) {
-    const claimed = await prisma.payout.updateMany({
-      where: {
-        id: payoutId,
-        status: 'PENDING',
-        reference: null,
-        gatewayResponse: { equals: Prisma.DbNull },
-      },
-      data: { status: 'PROCESSING' },
+    const claimed = await prisma.$transaction(async (tx) => {
+      const intent = await tx.payout.findUniqueOrThrow({ where: { id: payoutId } });
+      await lockPaymentOrder(tx, intent.orderId);
+      return tx.payout.updateMany({
+        where: {
+          id: payoutId,
+          status: 'PENDING',
+          reference: null,
+          gatewayResponse: { equals: Prisma.DbNull },
+        },
+        data: { status: 'PROCESSING' },
+      });
     });
     if (claimed.count === 0) return;
 
@@ -309,7 +362,9 @@ export class PayoutService {
         where: { id: payoutId },
         include: { order: true, provider: { include: { user: true } } },
       });
-      await sendPayoutSuccessEmail(payout.provider.user.email, payout.provider.user.name, {
+      const sendEmail =
+        payout.mode === 'MANUAL' ? sendManualPayoutConfirmedEmail : sendPayoutSuccessEmail;
+      await sendEmail(payout.provider.user.email, payout.provider.user.name, {
         orderNumber: payout.order.orderNumber,
         amount: payout.amount,
         payoutId: payout.id,
@@ -469,7 +524,12 @@ export class PayoutService {
             select: {
               name: true,
               provider: {
-                select: { id: true, businessName: true, payoutPhoneNumber: true, payoutNetwork: true },
+                select: {
+                  id: true,
+                  businessName: true,
+                  payoutPhoneNumber: true,
+                  payoutNetwork: true,
+                },
               },
             },
           },
@@ -506,8 +566,15 @@ export class PayoutService {
           reviewReason: order.payout?.reviewReason ?? null,
           // Déclencher n'est sûr que si aucune tentative réelle n'a encore eu lieu :
           // une référence FeexPay déjà liée signifie qu'un virement a pu partir.
-          canTrigger: !order.payout || (order.payout.status !== 'SUCCESS' && !order.payout.reference),
-          canConfirmManual: order.payout?.status !== 'SUCCESS',
+          canTrigger:
+            canTriggerPayout(order.payout) &&
+            order.providerAmount >= 50 &&
+            Number.isSafeInteger(order.providerAmount) &&
+            !!(
+              order.subscription.provider.payoutPhoneNumber &&
+              order.subscription.provider.payoutNetwork
+            ),
+          canConfirmManual: canConfirmManualPayout(order.payout),
         },
       })),
       total,
@@ -517,143 +584,109 @@ export class PayoutService {
     };
   }
 
-  // L'admin confirme avoir déjà payé ce prestataire en dehors du système
-  // (ancien PawaPay, cash, etc.) : aucun argent ne bouge ici, c'est une
-  // simple prise en compte de la réalité.
+  // Serialize every administrative transition with activation and outbound claims.
+  // Network calls are outside the transaction. An uncertain request is never reset.
   async adminConfirmManual(orderId: string, amount?: number) {
-    const order = await prisma.order.findUniqueOrThrow({
-      where: { id: orderId },
-      include: { subscription: { select: { providerId: true } } },
+    const payout = await prisma.$transaction(async (tx) => {
+      await lockPaymentOrder(tx, orderId);
+      const order = await tx.order.findUniqueOrThrow({
+        where: { id: orderId },
+        include: { subscription: { select: { providerId: true } } },
+      });
+      if (!['ACTIVE', 'COMPLETED'].includes(order.status)) {
+        throw new ValidationError(
+          "Cette commande n'est pas éligible à un versement.",
+          'ORDER_NOT_ELIGIBLE'
+        );
+      }
+      const finalAmount = amount ?? order.providerAmount;
+      if (!Number.isSafeInteger(finalAmount) || finalAmount <= 0) {
+        throw new ValidationError(
+          'Précisez un montant entier strictement positif réellement versé.',
+          'INVALID_PAYOUT_AMOUNT'
+        );
+      }
+      const existing = await tx.payout.findUnique({ where: { orderId } });
+      if (!canConfirmManualPayout(existing)) {
+        throw new ValidationError(
+          'Un versement est déjà payé, en cours ou incertain. Vérifiez sa situation avant toute confirmation manuelle.',
+          'PAYOUT_ATTEMPT_IN_PROGRESS'
+        );
+      }
+      const data = {
+        status: 'SUCCESS' as const,
+        mode: 'MANUAL' as const,
+        amount: finalAmount,
+        paidAt: new Date(),
+        needsReview: false,
+        reviewReason: null,
+      };
+      return existing
+        ? tx.payout.update({ where: { id: existing.id }, data })
+        : tx.payout.create({
+            data: { orderId, providerId: order.subscription.providerId, ...data },
+          });
     });
-    if (!['ACTIVE', 'COMPLETED'].includes(order.status)) {
-      throw new ValidationError("Cette commande n'est pas éligible à un versement.", 'ORDER_NOT_ELIGIBLE');
-    }
-    const finalAmount = Math.round(amount ?? order.providerAmount);
-    if (!(finalAmount > 0)) {
-      throw new ValidationError(
-        'Montant invalide : précisez le montant réellement versé.',
-        'INVALID_PAYOUT_AMOUNT'
-      );
-    }
-
-    const existing = await prisma.payout.findUnique({ where: { orderId } });
-    if (existing?.status === 'SUCCESS') {
-      throw new ValidationError('Ce versement est déjà marqué comme payé.', 'ALREADY_PAID');
-    }
-    if (existing?.reference && existing.status !== 'FAILED') {
-      throw new ValidationError(
-        'Une tentative automatique est en cours pour ce versement : vérifiez son statut avant de confirmer un paiement manuel.',
-        'PAYOUT_ATTEMPT_IN_PROGRESS'
-      );
-    }
-
-    const payout = existing
-      ? await prisma.payout.update({
-          where: { id: existing.id },
-          data: {
-            status: 'SUCCESS',
-            mode: 'MANUAL',
-            amount: finalAmount,
-            paidAt: new Date(),
-            needsReview: false,
-            reviewReason: null,
-          },
-        })
-      : await prisma.payout.create({
-          data: {
-            orderId,
-            providerId: order.subscription.providerId,
-            amount: finalAmount,
-            status: 'SUCCESS',
-            mode: 'MANUAL',
-            paidAt: new Date(),
-          },
-        });
-
-    await this.notifyManualPayout(payout.id).catch((error) =>
-      console.error('[Payout] Manual confirmation email failed for payout %s: %s', payout.id, errorMessage(error))
-    );
+    // Same durable lease and retry path for manual and FeexPay confirmation emails.
+    await this.deliverSuccessEmail(payout.id).catch((error) => {
+      console.error('[Payout] Manual confirmation email deferred: %s', errorMessage(error));
+    });
     return payout;
   }
 
-  private async notifyManualPayout(payoutId: string) {
-    const payout = await prisma.payout.findUniqueOrThrow({
-      where: { id: payoutId },
-      include: { order: true, provider: { include: { user: true } } },
-    });
-    await sendManualPayoutConfirmedEmail(payout.provider.user.email, payout.provider.user.name, {
-      orderNumber: payout.order.orderNumber,
-      amount: payout.amount,
-    });
-  }
-
-  // L'admin relance réellement le versement via FeexPay (après correction d'un
-  // souci : numéro configuré depuis, montant corrigé...). Refusé si une
-  // tentative réelle existe déjà (reference liée) : dans ce cas il faut
-  // vérifier son statut, jamais la redéclencher à l'aveugle.
   async adminTriggerPayout(orderId: string) {
-    const order = await prisma.order.findUniqueOrThrow({
-      where: { id: orderId },
-      include: { subscription: { select: { providerId: true } } },
-    });
-    if (!['ACTIVE', 'COMPLETED'].includes(order.status)) {
-      throw new ValidationError("Cette commande n'est pas éligible à un versement.", 'ORDER_NOT_ELIGIBLE');
-    }
-    if (!(order.providerAmount > 0)) {
-      throw new ValidationError(
-        'Le montant dû au prestataire est invalide pour cette commande.',
-        'INVALID_PAYOUT_AMOUNT'
-      );
-    }
-    const provider = await prisma.provider.findUniqueOrThrow({ where: { id: order.subscription.providerId } });
-    if (!provider.payoutPhoneNumber || !provider.payoutNetwork) {
-      throw new ValidationError(
-        "Le prestataire n'a pas configuré de numéro de réception.",
-        'PROVIDER_PAYOUT_NOT_CONFIGURED'
-      );
-    }
-
-    const existing = await prisma.payout.findUnique({ where: { orderId } });
-    if (existing) {
-      if (existing.status === 'SUCCESS') {
-        throw new ValidationError('Ce versement a déjà été confirmé payé.', 'ALREADY_PAID');
-      }
-      if (existing.reference) {
+    const payout = await prisma.$transaction(async (tx) => {
+      await lockPaymentOrder(tx, orderId);
+      const order = await tx.order.findUniqueOrThrow({
+        where: { id: orderId },
+        include: { subscription: { select: { providerId: true } } },
+      });
+      if (!['ACTIVE', 'COMPLETED'].includes(order.status)) {
         throw new ValidationError(
-          'Une tentative réelle existe déjà pour ce versement (référence FeexPay associée) : vérifiez son statut avant de relancer.',
+          "Cette commande n'est pas éligible à un versement.",
+          'ORDER_NOT_ELIGIBLE'
+        );
+      }
+      if (!Number.isSafeInteger(order.providerAmount) || order.providerAmount < 50) {
+        throw new ValidationError(
+          'Le montant à envoyer doit être entier et au moins égal à 50 FCFA.',
+          'INVALID_PAYOUT_AMOUNT'
+        );
+      }
+      const existing = await tx.payout.findUnique({ where: { orderId } });
+      if (!canTriggerPayout(existing)) {
+        throw new ValidationError(
+          'Une tentative est déjà payée, en cours ou incertaine. Aucun nouveau virement ne sera envoyé.',
           'PAYOUT_ALREADY_ATTEMPTED'
         );
       }
-      if (existing.status === 'PROCESSING' && !existing.needsReview) {
-        throw new ValidationError('Ce versement est déjà en cours de traitement.', 'PAYOUT_IN_PROGRESS');
+      // An unclaimed PENDING intent is already safe to attempt. Never reset it:
+      // another admin or the cron may claim it immediately after this commit.
+      if (existing && isUnsentIntent(existing)) {
+        return tx.payout.update({ where: { id: existing.id }, data: { mode: 'TRIGGERED' } });
       }
-      await prisma.payout.update({
-        where: { id: existing.id },
-        data: {
-          status: 'PENDING',
-          mode: 'TRIGGERED',
-          needsReview: false,
-          reviewReason: null,
-          amount: Math.round(order.providerAmount),
-          phoneNumber: provider.payoutPhoneNumber,
-          network: provider.payoutNetwork,
-          gatewayResponse: Prisma.DbNull,
-        },
+      const provider = await tx.provider.findUniqueOrThrow({
+        where: { id: order.subscription.providerId },
       });
-      await this.attemptPayout(existing.id);
-      return;
-    }
-
-    const payout = await prisma.payout.create({
-      data: {
-        orderId,
-        providerId: provider.id,
-        amount: Math.round(order.providerAmount),
+      if (!provider.payoutPhoneNumber || !provider.payoutNetwork) {
+        throw new ValidationError(
+          "Le prestataire n'a pas configuré de numéro de réception.",
+          'PROVIDER_PAYOUT_NOT_CONFIGURED'
+        );
+      }
+      const data = {
+        status: 'PENDING' as const,
+        mode: 'TRIGGERED' as const,
+        needsReview: false,
+        reviewReason: null,
+        amount: order.providerAmount,
         phoneNumber: provider.payoutPhoneNumber,
         network: provider.payoutNetwork,
-        status: 'PENDING',
-        mode: 'TRIGGERED',
-      },
+        gatewayResponse: Prisma.DbNull,
+      };
+      return existing
+        ? tx.payout.update({ where: { id: existing.id }, data })
+        : tx.payout.create({ data: { orderId, providerId: provider.id, ...data } });
     });
     await this.attemptPayout(payout.id);
   }

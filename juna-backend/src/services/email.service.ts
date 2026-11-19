@@ -352,7 +352,7 @@ export async function sendPayoutSuccessEmail(
 export async function sendManualPayoutConfirmedEmail(
   email: string,
   name: string,
-  data: { orderNumber: string; amount: number }
+  data: { orderNumber: string; amount: number; payoutId: string }
 ) {
   const html = layout('Versement confirmé - Juna Eats', `
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
@@ -370,7 +370,18 @@ export async function sendManualPayoutConfirmedEmail(
     )}
     ${paragraph('Merci de votre confiance et bonnes ventes avec Juna Eats !')}
   `);
-  await send({ email, name }, `Versement confirmé pour la commande #${data.orderNumber} - Juna Eats`, html);
+  if (!process.env.BREVO_API_KEY?.trim()) throw new Error('BREVO_API_KEY is required');
+  try {
+    await brevo.transactionalEmails.sendTransacEmail({
+      sender: SENDER, to: [{ email, name }],
+      subject: `Versement confirmé pour la commande #${data.orderNumber} - Juna Eats`,
+      htmlContent: html, headers: { idempotencyKey: data.payoutId }, tags: ['payout-manual'],
+    }, { timeoutInSeconds: 20, maxRetries: 0 });
+  } catch (error) {
+    const body = (error as { body?: { code?: string; message?: string } }).body;
+    if (body?.code === 'duplicate_parameter' && /idempotency/i.test(body.message ?? '')) return;
+    throw error;
+  }
 }
 
 export async function sendPasswordChangedEmail(email: string, name: string) {
