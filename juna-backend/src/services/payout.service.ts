@@ -1,7 +1,13 @@
 import { randomUUID } from 'crypto';
 import prisma from '@/config/database';
 import { Prisma, PayoutStatus } from '@prisma/client';
-import feexPayService, { FeexPayRequestError, sanitizeMotif, PayoutStatusResponse } from './feexpay.service';
+import feexPayService, {
+  callbackValue,
+  normalizePaymentPhone,
+  FeexPayRequestError,
+  sanitizeMotif,
+  PayoutStatusResponse,
+} from './feexpay.service';
 import { sendPayoutSuccessEmail } from './email.service';
 
 const PENDING_STATUSES: PayoutStatus[] = ['PENDING', 'PROCESSING'];
@@ -70,7 +76,12 @@ export class PayoutService {
   // réclame atomiquement le Payout appelle réellement FeexPay.
   async attemptPayout(payoutId: string) {
     const claimed = await prisma.payout.updateMany({
-      where: { id: payoutId, status: 'PENDING', reference: null, gatewayResponse: { equals: Prisma.DbNull } },
+      where: {
+        id: payoutId,
+        status: 'PENDING',
+        reference: null,
+        gatewayResponse: { equals: Prisma.DbNull },
+      },
       data: { status: 'PROCESSING' },
     });
     if (claimed.count === 0) return;
@@ -94,9 +105,13 @@ export class PayoutService {
       // repasser par l'endpoint de statut avant d'acter un virement.
       try {
         const verified = await feexPayService.getPayoutStatus(initiation.reference);
-        await this.applyVerified(payout.id, verified);
+        await this.applyVerified(payout.id, verified, initiation.reference);
       } catch (error) {
-        console.warn('[Payout] Verification deferred for payout %s: %s', payout.id, errorMessage(error));
+        console.warn(
+          '[Payout] Verification deferred for payout %s: %s',
+          payout.id,
+          errorMessage(error)
+        );
       }
     } catch (error) {
       if (error instanceof FeexPayRequestError && error.definitelyRejected) {
@@ -118,36 +133,77 @@ export class PayoutService {
     });
   }
 
-  private async applyVerified(payoutId: string, remote: PayoutStatusResponse) {
+  private async applyVerified(
+    payoutId: string,
+    remote: PayoutStatusResponse,
+    expectedReference: string
+  ) {
     const payout = await prisma.payout.findUniqueOrThrow({ where: { id: payoutId } });
     if (!isPending(payout.status)) return;
 
-    if (payout.reference && remote.reference !== payout.reference) {
-      await prisma.payout.update({
-        where: { id: payoutId },
-        data: { needsReview: true, reviewReason: 'GATEWAY_DATA_MISMATCH', lastCheckedAt: new Date() },
-      });
-      return;
-    }
-    if (remote.amount !== undefined && Math.round(remote.amount) !== Math.round(payout.amount)) {
-      await prisma.payout.update({
-        where: { id: payoutId },
-        data: { needsReview: true, reviewReason: 'AMOUNT_MISMATCH', lastCheckedAt: new Date() },
-      });
-      return;
-    }
-
     const finalStatus: PayoutStatus | null =
       remote.status === 'SUCCESSFUL' ? 'SUCCESS' : remote.status === 'FAILED' ? 'FAILED' : null;
+    let reviewReason: string | null = null;
+    if (
+      remote.reference !== expectedReference ||
+      (payout.reference && remote.reference !== payout.reference)
+    ) {
+      reviewReason = 'GATEWAY_DATA_MISMATCH';
+    } else if (
+      (finalStatus && remote.amount === undefined) ||
+      (remote.amount !== undefined &&
+        (!Number.isSafeInteger(remote.amount) || remote.amount !== payout.amount))
+    ) {
+      reviewReason = 'AMOUNT_MISMATCH';
+    } else {
+      const phone = remote.phoneNumber ?? remote.phone_number;
+      if (finalStatus && !phone) reviewReason = 'RECIPIENT_MISMATCH';
+      else if (phone) {
+        try {
+          if (
+            !payout.phoneNumber ||
+            normalizePaymentPhone(phone) !== normalizePaymentPhone(payout.phoneNumber)
+          ) {
+            reviewReason = 'RECIPIENT_MISMATCH';
+          }
+        } catch {
+          reviewReason = 'RECIPIENT_MISMATCH';
+        }
+      }
+      // FeexPay may omit this field or return null for an already identified
+      // reference. A supplied callback must nevertheless match the exact order.
+      if (
+        remote.callback_info !== undefined &&
+        remote.callback_info !== null &&
+        remote.callback_info !== '' &&
+        callbackValue(remote.callback_info) !== payout.orderId
+      )
+        reviewReason = 'CALLBACK_MISMATCH';
+    }
+    if (reviewReason) {
+      await prisma.payout.updateMany({
+        where: { id: payoutId, status: { in: PENDING_STATUSES } },
+        data: {
+          needsReview: true,
+          reviewReason,
+          lastCheckedAt: new Date(),
+          gatewayResponse: json(remote),
+        },
+      });
+      return;
+    }
     if (!finalStatus) {
-      await prisma.payout.update({ where: { id: payoutId }, data: { lastCheckedAt: new Date() } });
+      await prisma.payout.updateMany({
+        where: { id: payoutId, status: { in: PENDING_STATUSES } },
+        data: { lastCheckedAt: new Date() },
+      });
       return;
     }
 
     // Transition conditionnelle : une seule exécution concurrente peut faire
     // gagner ce updateMany, donc un seul email de succès peut jamais partir.
     const applied = await prisma.payout.updateMany({
-      where: { id: payoutId, status: { in: PENDING_STATUSES } },
+      where: { id: payoutId, status: { in: PENDING_STATUSES }, reference: expectedReference },
       data: {
         reference: remote.reference,
         gatewayResponse: json(remote),
@@ -173,9 +229,15 @@ export class PayoutService {
         id: payoutId,
         status: 'SUCCESS',
         successEmailSentAt: null,
-        OR: [{ successEmailNextAttemptAt: null }, { successEmailNextAttemptAt: { lte: new Date() } }],
+        OR: [
+          { successEmailNextAttemptAt: null },
+          { successEmailNextAttemptAt: { lte: new Date() } },
+        ],
       },
-      data: { successEmailClaimToken: claim, successEmailNextAttemptAt: new Date(Date.now() + EMAIL_RETRY_MS) },
+      data: {
+        successEmailClaimToken: claim,
+        successEmailNextAttemptAt: new Date(Date.now() + EMAIL_RETRY_MS),
+      },
     });
     if (reserved.count !== 1) return;
 
@@ -187,13 +249,22 @@ export class PayoutService {
       await sendPayoutSuccessEmail(payout.provider.user.email, payout.provider.user.name, {
         orderNumber: payout.order.orderNumber,
         amount: payout.amount,
+        payoutId: payout.id,
       });
       await prisma.payout.updateMany({
         where: { id: payoutId, successEmailClaimToken: claim },
-        data: { successEmailSentAt: new Date(), successEmailClaimToken: null, successEmailNextAttemptAt: null },
+        data: {
+          successEmailSentAt: new Date(),
+          successEmailClaimToken: null,
+          successEmailNextAttemptAt: null,
+        },
       });
     } catch (error) {
-      console.error('[Payout] Success email deferred for payout %s: %s', payoutId, errorMessage(error));
+      console.error(
+        '[Payout] Success email deferred for payout %s: %s',
+        payoutId,
+        errorMessage(error)
+      );
       await prisma.payout.updateMany({
         where: { id: payoutId, successEmailClaimToken: claim },
         data: { successEmailClaimToken: null },
@@ -206,7 +277,10 @@ export class PayoutService {
       where: {
         status: 'SUCCESS',
         successEmailSentAt: null,
-        OR: [{ successEmailNextAttemptAt: null }, { successEmailNextAttemptAt: { lte: new Date() } }],
+        OR: [
+          { successEmailNextAttemptAt: null },
+          { successEmailNextAttemptAt: { lte: new Date() } },
+        ],
       },
       take: limit,
     });
@@ -232,7 +306,11 @@ export class PayoutService {
       try {
         reference = await feexPayService.findPayoutReference(payout.orderId, payout.createdAt);
       } catch (error) {
-        console.warn('[Payout] History lookup failed for payout %s: %s', payoutId, errorMessage(error));
+        console.warn(
+          '[Payout] History lookup failed for payout %s: %s',
+          payoutId,
+          errorMessage(error)
+        );
         return;
       }
     }
@@ -253,8 +331,9 @@ export class PayoutService {
       console.warn('[Payout] Status check failed for payout %s: %s', payoutId, errorMessage(error));
       return;
     }
-    if (!payout.reference) await this.bindReference(payoutId, reference, remote);
-    await this.applyVerified(payoutId, remote);
+    if (remote.reference === reference && !payout.reference)
+      await this.bindReference(payoutId, reference, remote);
+    await this.applyVerified(payoutId, remote, reference);
   }
 
   async reconcilePendingPayouts(limit = 50) {
@@ -272,11 +351,17 @@ export class PayoutService {
       });
       for (let i = 0; i < payouts.length; i += 5) {
         await Promise.all(
-          payouts.slice(i, i + 5).map((payout) =>
-            this.synchronize(payout.id).catch((error) =>
-              console.warn('[Payout] Reconciliation deferred for payout %s: %s', payout.id, errorMessage(error))
+          payouts
+            .slice(i, i + 5)
+            .map((payout) =>
+              this.synchronize(payout.id).catch((error) =>
+                console.warn(
+                  '[Payout] Reconciliation deferred for payout %s: %s',
+                  payout.id,
+                  errorMessage(error)
+                )
+              )
             )
-          )
         );
       }
       await this.sendPendingSuccessEmails();

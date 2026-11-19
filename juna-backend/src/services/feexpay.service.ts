@@ -33,6 +33,9 @@ const payoutInitiationSchema = z
   .passthrough();
 const payoutStatusSchema = payoutInitiationSchema.extend({
   amount: z.coerce.number().finite().positive().optional(),
+  phoneNumber: z.union([z.string(), z.number()]).transform(String).optional(),
+  phone_number: z.union([z.string(), z.number()]).transform(String).optional(),
+  callback_info: callbackSchema,
 });
 export type PayoutStatusResponse = z.infer<typeof payoutStatusSchema>;
 
