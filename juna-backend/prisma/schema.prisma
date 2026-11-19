@@ -493,6 +493,11 @@ model Payout {
   reviewReason String?
   lastCheckedAt DateTime?
   paidAt      DateTime?
+  // Reprise de l'email de succès en cas de panne, même mécanisme que
+  // Payment.adminEmail* (bail atomique + nouvelle tentative différée).
+  successEmailSentAt        DateTime?
+  successEmailClaimToken    String?    @db.Uuid
+  successEmailNextAttemptAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -502,6 +507,7 @@ model Payout {
 
   @@index([providerId])
   @@index([status, lastCheckedAt])
+  @@index([status, successEmailSentAt, successEmailNextAttemptAt], map: "payouts_success_email_pending_idx")
   @@map("payouts")
 }
 

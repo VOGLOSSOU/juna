@@ -230,7 +230,7 @@ export class OrderService {
    * Activer la commande (user)
    */
   async activate(id: string, userId: string) {
-    await prisma.$transaction(async (tx) => {
+    const payout = await prisma.$transaction(async (tx) => {
       await lockPaymentOrder(tx, id);
 
       const order = await tx.order.findUnique({ where: { id } });
@@ -279,13 +279,24 @@ export class OrderService {
           duration: subscription.duration,
         }
       });
+
+      // L'intention de versement est créée DANS cette même transaction : même si
+      // le process s'arrête juste après le commit, la ligne existe déjà et la
+      // réconciliation la reprendra — rien n'est perdu.
+      return payoutService.createIntent(tx, order.id, subscription.providerId, order.providerAmount);
     });
 
-    // Déclenché après coup, hors transaction : un appel FeexPay lent ou en
-    // échec ne doit jamais remettre en cause l'activation déjà actée.
-    payoutService.initiateForOrder(id).catch((error) => {
-      console.error('[Order] Payout initiation failed for order %s', id, error);
-    });
+    if (payout.status === 'PENDING') {
+      // Hors transaction : un appel FeexPay lent ou en échec ne doit jamais
+      // remettre en cause l'activation déjà actée.
+      payoutService.attemptPayout(payout.id).catch((error) => {
+        console.error(
+          '[Order] Payout attempt failed for order %s: %s',
+          id,
+          error instanceof Error ? error.message : 'unknown error'
+        );
+      });
+    }
 
     return { message: 'Commande activée avec succès' };
   }
