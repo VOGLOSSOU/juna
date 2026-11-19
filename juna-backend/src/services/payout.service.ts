@@ -234,7 +234,14 @@ export class PayoutService {
       if (error instanceof FeexPayRequestError && error.definitelyRejected) {
         await prisma.payout.updateMany({
           where: { id: payout.id, status: 'PROCESSING', reference: null },
-          data: { status: 'FAILED', needsReview: true, reviewReason: 'PAYOUT_REJECTED' },
+          data: {
+            status: 'FAILED',
+            needsReview: true,
+            reviewReason: 'PAYOUT_REJECTED',
+            // Garde le motif réel du rejet (jamais la requête, jamais le token) :
+            // sans ça, "refusé" ne dit pas pourquoi, ni à l'admin ni à nous.
+            gatewayResponse: error.details ? json(error.details) : undefined,
+          },
         });
       }
       // Échec ambigu (timeout/5xx) : on reste en PROCESSING sans reference. La
@@ -575,6 +582,7 @@ export class PayoutService {
           mode: order.payout?.mode ?? null,
           reference: order.payout?.reference ?? null,
           reviewReason: order.payout?.reviewReason ?? null,
+          gatewayResponse: order.payout?.gatewayResponse ?? null,
           // Déclencher n'est sûr que si aucune tentative réelle n'a encore eu lieu :
           // une référence FeexPay déjà liée signifie qu'un virement a pu partir.
           canTrigger:

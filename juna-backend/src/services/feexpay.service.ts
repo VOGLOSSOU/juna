@@ -100,7 +100,14 @@ export function callbackValue(value: unknown): string | null {
 }
 
 export class FeexPayRequestError extends AppError {
-  constructor(public readonly definitelyRejected: boolean) {
+  // Réponse brute de FeexPay (status + corps JSON), jamais la requête :
+  // aucun risque d'y retrouver le token Bearer. Permet de comprendre le motif
+  // réel d'un rejet (solde insuffisant, payout non activé, numéro invalide...)
+  // au lieu de se contenter de "rejeté".
+  constructor(
+    public readonly definitelyRejected: boolean,
+    public readonly details?: { status?: number; body?: unknown }
+  ) {
     super(
       definitelyRejected
         ? 'La demande de paiement a été refusée par FeexPay.'
@@ -272,7 +279,8 @@ export class FeexPayService {
       // Same rule as for collections: an ambiguous failure (timeout, 5xx) must
       // never be treated as a clean rejection — money may already be in transit.
       throw new FeexPayRequestError(
-        status !== undefined && [400, 401, 403, 404, 422].includes(status)
+        status !== undefined && [400, 401, 403, 404, 422].includes(status),
+        axios.isAxiosError(error) ? { status, body: error.response?.data } : undefined
       );
     }
   }
