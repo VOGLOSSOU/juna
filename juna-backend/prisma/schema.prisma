@@ -60,6 +60,16 @@ enum PayoutStatus {
   FAILED
 }
 
+// Trace l'origine du versement, pour l'audit admin :
+// - AUTOMATIC : déclenché par le système à l'activation de la commande
+// - MANUAL : confirmé par l'admin comme déjà payé en dehors du système (ex. ancien PawaPay, cash)
+// - TRIGGERED : renvoyé manuellement par l'admin via FeexPay après un souci sur la tentative automatique
+enum PayoutMode {
+  AUTOMATIC
+  MANUAL
+  TRIGGERED
+}
+
 enum DeliveryMethod {
   DELIVERY
   PICKUP
@@ -491,6 +501,7 @@ model Payout {
   phoneNumber String?
   network     PayoutNetwork?
   status      PayoutStatus @default(PENDING)
+  mode        PayoutMode   @default(AUTOMATIC)
   reference   String?      @unique
   gatewayResponse Json?
   needsReview Boolean      @default(false)

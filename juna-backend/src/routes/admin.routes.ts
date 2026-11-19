@@ -1,14 +1,20 @@
 import { Router } from 'express';
 import adminService from '@/services/admin.service';
 import providerService from '@/services/provider.service';
+import payoutService from '@/services/payout.service';
 import subscriptionController from '@/controllers/subscription.controller';
-import { validate } from '@/middlewares/validation.middleware';
+import { validate, validateQuery, validateParams } from '@/middlewares/validation.middleware';
 import { authenticate, requireRole } from '@/middlewares/auth.middleware';
 import { UserRole } from '@prisma/client';
 import {
   approveProviderSchema,
   rejectProviderSchema,
 } from '@/validators/provider.validator';
+import {
+  adminListPayoutsQuerySchema,
+  orderIdParamSchema,
+  confirmManualPayoutSchema,
+} from '@/validators/payout.validator';
 
 const router = Router();
 
@@ -296,6 +302,73 @@ router.get(
   authenticate,
   requireRole(UserRole.ADMIN),
   subscriptionController.getAll.bind(subscriptionController)
+);
+
+/**
+ * GET /api/v1/admin/payouts
+ * Lister les versements (commandes actives/terminées) avec leur statut
+ * Accès: ADMIN uniquement
+ */
+router.get(
+  '/payouts',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validateQuery(adminListPayoutsQuerySchema),
+  async (req: any, res: any, next: any) => {
+    try {
+      const { page, limit, needsAction } = req.query;
+      const result = await payoutService.listForAdmin({ page, limit, needsAction });
+      res.json({ success: true, message: 'Versements récupérés avec succès', data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /api/v1/admin/payouts/:orderId/confirm-manual
+ * Confirmer un versement déjà effectué en dehors du système (cash, ancien PawaPay...)
+ * N'envoie aucun argent — prend acte d'un paiement déjà réalisé.
+ * Accès: ADMIN uniquement
+ */
+router.post(
+  '/payouts/:orderId/confirm-manual',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validateParams(orderIdParamSchema),
+  validate(confirmManualPayoutSchema),
+  async (req: any, res: any, next: any) => {
+    try {
+      const { orderId } = req.params;
+      const { amount } = req.body;
+      const result = await payoutService.adminConfirmManual(orderId, amount);
+      res.json({ success: true, message: 'Versement manuel confirmé', data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * POST /api/v1/admin/payouts/:orderId/trigger
+ * Déclencher réellement le versement via FeexPay (après correction d'un souci)
+ * Refusé si une tentative réelle existe déjà pour ce versement.
+ * Accès: ADMIN uniquement
+ */
+router.post(
+  '/payouts/:orderId/trigger',
+  authenticate,
+  requireRole(UserRole.ADMIN),
+  validateParams(orderIdParamSchema),
+  async (req: any, res: any, next: any) => {
+    try {
+      const { orderId } = req.params;
+      await payoutService.adminTriggerPayout(orderId);
+      res.json({ success: true, message: 'Versement déclenché', data: null });
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 export default router;

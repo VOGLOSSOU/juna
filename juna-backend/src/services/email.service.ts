@@ -349,6 +349,30 @@ export async function sendPayoutSuccessEmail(
   }
 }
 
+export async function sendManualPayoutConfirmedEmail(
+  email: string,
+  name: string,
+  data: { orderNumber: string; amount: number }
+) {
+  const html = layout('Versement confirmé - Juna Eats', `
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+      <tr>
+        <td align="center" style="background-color:#F0FDF4;border-radius:50%;width:56px;height:56px;padding:0;">
+          <div style="width:56px;height:56px;background-color:#DCFCE7;border-radius:50%;text-align:center;line-height:56px;font-size:28px;">✅</div>
+        </td>
+      </tr>
+    </table>
+    ${heading('Votre versement a été confirmé')}
+    ${paragraph(`Bonjour <strong>${name}</strong>, votre versement pour la commande <strong>#${data.orderNumber}</strong> a été confirmé par notre équipe.`)}
+    ${infoTable(
+      infoRow('Commande', `#${data.orderNumber}`) +
+      infoRow('Montant', `${data.amount.toLocaleString('fr-FR')} FCFA`, true)
+    )}
+    ${paragraph('Merci de votre confiance et bonnes ventes avec Juna Eats !')}
+  `);
+  await send({ email, name }, `Versement confirmé pour la commande #${data.orderNumber} - Juna Eats`, html);
+}
+
 export async function sendPasswordChangedEmail(email: string, name: string) {
   const html = layout('Mot de passe modifié - Juna Eats', `
     ${heading('Votre mot de passe a été modifié')}
