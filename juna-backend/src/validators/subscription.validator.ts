@@ -4,6 +4,18 @@ import { SubscriptionType, SubscriptionCategory, SubscriptionDuration } from '@p
 // Texte libre du prestataire ; null permet d'effacer les instructions.
 export const subscriptionInstructionsSchema = z.string().trim().max(2000, 'Maximum 2000 caractères').nullable().optional();
 
+export const subscriptionServiceDaysSchema = z.number().int('Le nombre de jours doit être entier').min(1, 'Au moins un jour de repas').max(30, 'Maximum 30 jours de repas').nullable().optional();
+
+// Même capacité calendaire que le calcul d'expiration existant.
+export const SERVICE_DAYS_LIMIT = {
+  DAY: 1, THREE_DAYS: 3, WEEK: 7, TWO_WEEKS: 14, MONTH: 30,
+  WORK_WEEK: 5, WORK_WEEK_2: 10, WORK_MONTH: 20, WEEKEND: 2,
+} as const;
+
+export function validServiceDays(duration: keyof typeof SERVICE_DAYS_LIMIT, count?: number | null): boolean {
+  return count == null || (Number.isInteger(count) && count >= 1 && count <= SERVICE_DAYS_LIMIT[duration]);
+}
+
 // Validation pour SubscriptionType
 const subscriptionTypeEnum = z.enum([
   'BREAKFAST',
@@ -58,6 +70,7 @@ export const createSubscriptionSchema = z.object({
     .max(1000, 'Maximum 1000 caractères')
     .trim(),
   instructions: subscriptionInstructionsSchema,
+  serviceDaysCount: subscriptionServiceDaysSchema,
   // Prix que le prestataire veut recevoir — le backend calcule et fige le prix
   // client à partir de ça, en appliquant la commission Juna en vigueur.
   providerPrice: z
@@ -99,6 +112,7 @@ export const updateSubscriptionSchema = z.object({
     .trim()
     .optional(),
   instructions: subscriptionInstructionsSchema,
+  serviceDaysCount: subscriptionServiceDaysSchema,
   providerPrice: z
     .number()
     .positive('Le prix doit être positif')

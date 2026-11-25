@@ -57,6 +57,7 @@ export class FavoriteRepository {
                 name: true,
                 description: true,
                 instructions: true,
+                serviceDaysCount: true,
                 price: true,
                 type: true,
                 category: true,

@@ -30,6 +30,7 @@ export class OrderRepository {
           id: string;
           name: string;
           instructions: string | null;
+          serviceDaysCount: number | null;
           price: number;
           providerPrice: number;
           provider: {
@@ -58,6 +59,7 @@ export class OrderRepository {
             id: true,
             name: true,
             instructions: true,
+            serviceDaysCount: true,
             price: true,
             providerPrice: true,
             provider: {
@@ -111,6 +113,7 @@ export class OrderRepository {
             id: true,
             name: true,
             instructions: true,
+            serviceDaysCount: true,
             price: true,
             providerPrice: true,
             provider: {
@@ -155,6 +158,7 @@ export class OrderRepository {
             id: true,
             name: true,
             instructions: true,
+            serviceDaysCount: true,
             price: true,
             providerPrice: true,
             provider: {
@@ -230,6 +234,7 @@ export class OrderRepository {
               id: true,
               name: true,
               instructions: true,
+              serviceDaysCount: true,
               provider: { select: { businessName: true } },
             },
           },

@@ -51,6 +51,7 @@ export class FavoriteService {
         name: sub.name,
         description: sub.description,
         instructions: sub.instructions,
+        serviceDaysCount: sub.serviceDaysCount,
         price: sub.price,
         currency: 'XOF',
         type: sub.type,

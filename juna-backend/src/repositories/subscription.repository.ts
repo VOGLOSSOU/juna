@@ -10,6 +10,7 @@ export class SubscriptionRepository {
     name: string;
     description: string;
     instructions?: string | null;
+    serviceDaysCount?: number | null;
     price: number;
     providerPrice: number;
     junaCommissionPercent?: number;
@@ -147,6 +148,7 @@ export class SubscriptionRepository {
         id: true,
         name: true,
         instructions: true,
+        serviceDaysCount: true,
         price: true,
         providerPrice: true,
         type: true,
@@ -202,6 +204,7 @@ export class SubscriptionRepository {
     name?: string;
     description?: string;
     instructions?: string | null;
+    serviceDaysCount?: number | null;
     price?: number;
     providerPrice?: number;
     junaCommissionPercent?: number;
@@ -323,6 +326,7 @@ export class SubscriptionRepository {
       id: true,
       name: true,
       instructions: true,
+      serviceDaysCount: true,
       description: true,
       price: true,
       providerPrice: true,

@@ -334,6 +334,7 @@ model MealPricing {
 }
 
 model Subscription {
+  serviceDaysCount      Int? // Nombre de jours de repas inclus ; sans effet sur expiration
   instructions          String?              @db.Text
   id                    String               @id @default(uuid()) @db.Uuid
   providerId            String               @db.Uuid

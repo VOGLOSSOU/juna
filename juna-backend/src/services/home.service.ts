@@ -24,6 +24,7 @@ function formatSubscription(sub: any) {
     name: sub.name,
     description: sub.description,
     instructions: sub.instructions ?? null,
+    serviceDaysCount: sub.serviceDaysCount ?? null,
     price: sub.price,
     currency: 'XOF',
     category: sub.category,

@@ -2,12 +2,13 @@ import subscriptionRepository from '@/repositories/subscription.repository';
 import providerRepository from '@/repositories/provider.repository';
 import mealService from './meal.service';
 import {
+  ValidationError,
   ConflictError,
   NotFoundError,
   ForbiddenError,
 } from '@/utils/errors.util';
 import { ERROR_CODES } from '@/constants/errors';
-import { CreateSubscriptionInput, UpdateSubscriptionInput, SubscriptionFiltersInput } from '@/validators/subscription.validator';
+import { validServiceDays, CreateSubscriptionInput, UpdateSubscriptionInput, SubscriptionFiltersInput } from '@/validators/subscription.validator';
 import { Subscription } from '@prisma/client';
 
 // Commission Juna fixe, appliquée à tous les abonnements. Les prestataires ne
@@ -73,11 +74,16 @@ export class SubscriptionService {
       }
     }
 
+    if (!validServiceDays(data.duration, data.serviceDaysCount)) {
+      throw new ValidationError('Le nombre de jours de repas dépasse la durée de validité', ERROR_CODES.INVALID_INPUT);
+    }
+
     return subscriptionRepository.create({
       providerId,
       name: data.name,
       description: data.description,
       instructions: data.instructions,
+      serviceDaysCount: data.serviceDaysCount,
       price: computeClientPrice(data.providerPrice),
       providerPrice: data.providerPrice,
       junaCommissionPercent: JUNA_COMMISSION_PERCENT,
@@ -149,6 +155,7 @@ export class SubscriptionService {
       id: s.id,
       name: s.name,
       instructions: s.instructions ?? null,
+      serviceDaysCount: s.serviceDaysCount ?? null,
       price: s.price,
       providerPrice: s.providerPrice,
       currency: 'XOF',
@@ -166,6 +173,7 @@ export class SubscriptionService {
       name: raw.name,
       description: raw.description,
       instructions: raw.instructions ?? null,
+      serviceDaysCount: raw.serviceDaysCount ?? null,
       price: raw.price,
       providerPrice: raw.providerPrice,
       currency: 'XOF',
@@ -246,6 +254,7 @@ export class SubscriptionService {
       id: s.id,
       name: s.name,
       instructions: s.instructions ?? null,
+      serviceDaysCount: s.serviceDaysCount ?? null,
       description: s.description,
       price: s.price,
       providerPrice: s.providerPrice,
@@ -314,10 +323,16 @@ export class SubscriptionService {
       }
     }
 
+    const effectiveCount = data.serviceDaysCount === undefined ? subscription.serviceDaysCount : data.serviceDaysCount;
+    if (!validServiceDays(data.duration ?? subscription.duration, effectiveCount)) {
+      throw new ValidationError('Le nombre de jours de repas dépasse la durée de validité', ERROR_CODES.INVALID_INPUT);
+    }
+
     return subscriptionRepository.updateWithMeals(id, {
       name: data.name,
       description: data.description,
       instructions: data.instructions,
+      serviceDaysCount: data.serviceDaysCount,
       ...(data.providerPrice !== undefined && {
         price: computeClientPrice(data.providerPrice),
         providerPrice: data.providerPrice,

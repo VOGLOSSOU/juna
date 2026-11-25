@@ -4,6 +4,7 @@ export interface CreateSubscriptionDTO {
   name: string;
   description: string;
   instructions?: string | null;
+  serviceDaysCount?: number | null;
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;
@@ -17,6 +18,7 @@ export interface UpdateSubscriptionDTO {
   name?: string;
   description?: string;
   instructions?: string | null;
+  serviceDaysCount?: number | null;
   price?: number;
   type?: SubscriptionType;
   category?: SubscriptionCategory;
@@ -51,6 +53,7 @@ export interface SubscriptionWithMeals {
   name: string;
   description: string;
   instructions: string | null;
+  serviceDaysCount: number | null;
   price: number;
   type: SubscriptionType;
   category: SubscriptionCategory;

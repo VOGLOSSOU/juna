@@ -145,6 +145,7 @@ export class SubscriptionProposalRepository {
       name: string;
       description: string;
       instructions?: string | null;
+      serviceDaysCount?: number | null;
       price: number;
       providerPrice: number;
       junaCommissionPercent: number;
@@ -173,6 +174,7 @@ export class SubscriptionProposalRepository {
           name: subscriptionData.name,
           description: subscriptionData.description,
           instructions: subscriptionData.instructions,
+          serviceDaysCount: subscriptionData.serviceDaysCount,
           price: subscriptionData.price,
           providerPrice: subscriptionData.providerPrice,
           junaCommissionPercent: subscriptionData.junaCommissionPercent,

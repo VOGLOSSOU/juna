@@ -1,3 +1,4 @@
+import { validServiceDays } from '@/validators/subscription.validator';
 import mealRepository from '@/repositories/meal.repository';
 import mealService from '@/services/meal.service';
 import providerRepository from '@/repositories/provider.repository';
@@ -191,6 +192,10 @@ export class SubscriptionProposalService {
       );
     }
 
+    if (!validServiceDays(data.duration ?? proposal.duration, data.serviceDaysCount)) {
+      throw new ConflictError('Le nombre de jours de repas dépasse la durée de validité', ERROR_CODES.INVALID_INPUT);
+    }
+
     const subscription = await subscriptionProposalRepository.approveInTransaction(
       id,
       providerId,
@@ -198,6 +203,7 @@ export class SubscriptionProposalService {
         name: data.name,
         description: data.description,
         instructions: data.instructions,
+        serviceDaysCount: data.serviceDaysCount,
         price: computeClientPrice(data.providerPrice),
         providerPrice: data.providerPrice,
         junaCommissionPercent: JUNA_COMMISSION_PERCENT,

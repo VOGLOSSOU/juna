@@ -404,6 +404,7 @@ export class ProviderService {
       name: sub.name,
       description: sub.description,
       instructions: sub.instructions ?? null,
+      serviceDaysCount: sub.serviceDaysCount ?? null,
       price: sub.price,
       type: sub.type,
       category: sub.category,

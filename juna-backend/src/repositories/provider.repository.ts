@@ -210,6 +210,7 @@ export class ProviderRepository {
             name: true,
             description: true,
             instructions: true,
+            serviceDaysCount: true,
             price: true,
             type: true,
             category: true,
